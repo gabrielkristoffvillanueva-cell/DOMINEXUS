@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Staff Portal | DOMINEXUS</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7f101b,
+                    #cb2531 45%,
+                    #080808
+                );
+
+            color: #222;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 24px;
+
+        }
+
+
+        /* =========================================
+           PORTAL CARD
+        ========================================= */
+
+        .portal-card {
+
+            width: 100%;
+
+            max-width: 760px;
+
+            background:
+                rgba(255, 255, 255, 0.96);
+
+            border-radius: 24px;
+
+            padding: 45px;
+
+            text-align: center;
+
+            box-shadow:
+                0 25px 70px
+                rgba(0, 0, 0, 0.30);
+
+            backdrop-filter:
+                blur(10px);
+
+        }
+
+
+        /* =========================================
+           LOGO
+        ========================================= */
+
+        .logo {
+
+            width: 72px;
+
+            height: 72px;
+
+            margin:
+                0 auto 20px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                #7b1113;
+
+            color: #ffffff;
+
+            font-size: 30px;
+
+            font-weight: bold;
+
+            box-shadow:
+                0 8px 20px
+                rgba(123,17,19,.20);
+
+        }
+
+
+        /* =========================================
+           TEXT
+        ========================================= */
+
+        .eyebrow {
+
+            margin:
+                0 0 8px;
+
+            font-size: 11px;
+
+            letter-spacing: 2px;
+
+            font-weight: bold;
+
+            color: #9a7b28;
+
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            font-size: 32px;
+
+            color: #7b1113;
+
+        }
+
+
+        .description {
+
+            margin:
+                12px auto 35px;
+
+            max-width: 520px;
+
+            line-height: 1.6;
+
+            color: #666;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =========================================
+           ACCESS OPTIONS
+        ========================================= */
+
+        .access-options {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+
+        }
+
+
+        .access-card {
+
+            border:
+                1px solid #e3e0da;
+
+            border-radius: 16px;
+
+            padding: 30px 20px;
+
+            text-decoration: none;
+
+            color: inherit;
+
+            background:
+                rgba(255,255,255,.75);
+
+            transition:
+                transform .2s ease,
+                box-shadow .2s ease,
+                border-color .2s ease,
+                background .2s ease;
+
+        }
+
+
+        .access-card:hover {
+
+            transform:
+                translateY(-5px);
+
+            box-shadow:
+                0 15px 30px
+                rgba(123,17,19,.12);
+
+            border-color:
+                #9a7b28;
+
+            background:
+                #ffffff;
+
+        }
+
+
+        /* =========================================
+           ACCESS ICON
+        ========================================= */
+
+        .access-icon {
+
+            width: 58px;
+
+            height: 58px;
+
+            margin:
+                0 auto 17px;
+
+            border-radius: 50%;
+
+            background:
+                #f2ece0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 24px;
+
+        }
+
+
+        /* =========================================
+           ACCESS TEXT
+        ========================================= */
+
+        .access-card h2 {
+
+            margin:
+                0 0 8px;
+
+            color:
+                #7b1113;
+
+            font-size:
+                20px;
+
+        }
+
+
+        .access-card p {
+
+            margin: 0;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            color: #777;
+
+        }
+
+
+        /* =========================================
+           BACK LINK
+        ========================================= */
+
+        .back-link {
+
+            display:
+                inline-block;
+
+            margin-top:
+                30px;
+
+            color:
+                #7b1113;
+
+            text-decoration:
+                none;
+
+            font-size:
+                13px;
+
+            font-weight:
+                600;
+
+            transition:
+                .2s ease;
+
+        }
+
+
+        .back-link:hover {
+
+            color:
+                #cb2531;
+
+            text-decoration:
+                underline;
+
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 600px) {
+
+            body {
+
+                padding:
+                    15px;
+
+            }
+
+
+            .portal-card {
+
+                padding:
+                    30px 20px;
+
+                border-radius:
+                    20px;
+
+            }
+
+
+            .access-options {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            h1 {
+
+                font-size:
+                    27px;
+
+            }
+
+
+            .description {
+
+                font-size:
+                    13px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <main class="portal-card">
+
+
+        <!-- LOGO -->
+
+        <div class="logo">
+            D
+        </div>
+
+
+        <!-- TITLE -->
+
+        <p class="eyebrow">
+            AUTHORIZED ACCESS
+        </p>
+
+
+        <h1>
+            DOMINEXUS Staff Portal
+        </h1>
+
+
+        <p class="description">
+
+            Select your account type to access
+            the appropriate DOMINEXUS management portal.
+
+        </p>
+
+
+        <!-- ACCESS OPTIONS -->
+
+        <div class="access-options">
+
+
+            <!-- OFFICER -->
+
+            <a
+                href="officer/officer-login.html"
+                class="access-card"
+            >
+
+                <div class="access-icon">
+                    👤
+                </div>
+
+                <h2>
+                    Officer
+                </h2>
+
+                <p>
+                    Manage organization meetings,
+                    members, requests, and attendance.
+                </p>
+
+            </a>
+
+
+            <!-- MODERATOR -->
+
+            <a
+                href="moderator/moderator-login.html"
+                class="access-card"
+            >
+
+                <div class="access-icon">
+                    🛡
+                </div>
+
+                <h2>
+                    Moderator
+                </h2>
+
+                <p>
+                    Access authorized administrative
+                    functions for DOMINEXUS.
+                </p>
+
+            </a>
+
+
+        </div>
+
+
+        <!-- BACK -->
+
+        <a
+            href="index.html"
+            class="back-link"
+        >
+            ← Back to Homepage
+        </a>
+
+
+    </main>
+
+
+</body>
+
+</html>

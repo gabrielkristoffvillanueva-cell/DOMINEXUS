@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Members | Officer | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="officer-members.css">
+</head>
+
+<body>
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Officer Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="officer-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="officer-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="officer-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="officer-members.html" class="nav-item active">
+                <span class="nav-icon">●</span>
+                <span>Members</span>
+            </a>
+
+            <a href="officer-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="officer-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+                <span>↪</span>
+                Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <main class="main-content">
+
+
+        <header class="topbar">
+
+            <button id="menuButton" class="menu-button">
+                ☰
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Members</h1>
+
+                <p>
+                    View organization members
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+                    OF
+                </div>
+
+                <div class="top-profile-info">
+
+                    <strong id="topOfficerName">
+                        Officer
+                    </strong>
+
+                    <span id="topOfficerId">
+                        Officer ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <div class="page-container">
+
+
+            <section class="page-header">
+
+                <span class="page-label">
+                    ORGANIZATION
+                </span>
+
+                <h2>
+                    Organization Members
+                </h2>
+
+                <p>
+                    View and monitor members registered in your organization.
+                </p>
+
+            </section>
+
+
+            <!-- SUMMARY -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ●
+                    </div>
+
+                    <div>
+
+                        <span>Total Members</span>
+
+                        <strong id="totalMembers">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon active-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>Active Members</span>
+
+                        <strong id="activeMembers">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon officer-icon">
+                        ★
+                    </div>
+
+                    <div>
+
+                        <span>Officers</span>
+
+                        <strong id="totalOfficers">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- MEMBERS -->
+
+            <section class="members-card">
+
+
+                <div class="members-toolbar">
+
+                    <div class="search-box">
+
+                        <span>⌕</span>
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search member...">
+
+                    </div>
+
+
+                    <select id="roleFilter">
+
+                        <option value="all">
+                            All Roles
+                        </option>
+
+                        <option value="Member">
+                            Member
+                        </option>
+
+                        <option value="Officer">
+                            Officer
+                        </option>
+
+                        <option value="Moderator">
+                            Moderator
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    MEMBER
+                                </th>
+
+                                <th>
+                                    STUDENT ID
+                                </th>
+
+                                <th>
+                                    SECTION
+                                </th>
+
+                                <th>
+                                    ROLE
+                                </th>
+
+                                <th>
+                                    STATUS
+                                </th>
+
+                                <th>
+                                    ACTION
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="membersTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="emptyState">
+
+                    <div class="empty-icon">
+                        ●
+                    </div>
+
+                    <h3>
+                        No members found
+                    </h3>
+
+                    <p>
+                        No members match your current search or filter.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- MEMBER MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="memberModal">
+
+        <div class="member-modal">
+
+            <button
+                class="modal-close"
+                id="closeModal">
+                ×
+            </button>
+
+
+            <span class="modal-label">
+                MEMBER PROFILE
+            </span>
+
+
+            <div class="modal-profile">
+
+                <div
+                    class="modal-avatar"
+                    id="modalAvatar">
+                    JD
+                </div>
+
+                <div>
+
+                    <h2 id="modalName">
+                        Student
+                    </h2>
+
+                    <p id="modalStudentId">
+                        Student ID
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-details">
+
+                <div class="detail-row">
+
+                    <span>Section</span>
+
+                    <strong id="modalSection">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>Role</span>
+
+                    <strong id="modalRole">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>Status</span>
+
+                    <strong id="modalStatus">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>Attendance</span>
+
+                    <strong id="modalAttendance">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="close-profile-button"
+                id="closeProfileButton">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script src="officer-members.js"></script>
+
+</body>
+
+</html>

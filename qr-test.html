@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>DOMINEXUS QR Test</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            background: #f5f5f5;
+
+            font-family: Arial, sans-serif;
+
+            padding: 30px 20px;
+        }
+
+        h1 {
+            color: #8b0000;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #666;
+        }
+
+        #reader {
+            position: relative;
+
+            width: 100%;
+            max-width: 500px;
+
+            min-height: 350px;
+
+            margin-top: 20px;
+
+            background: #111;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+        }
+
+        #reader video {
+            width: 100% !important;
+            height: 350px !important;
+
+            object-fit: cover !important;
+
+            display: block !important;
+
+            transform: none !important;
+        }
+
+        .scan-frame {
+            position: absolute;
+
+            z-index: 20;
+
+            width: 280px;
+            height: 280px;
+
+            top: 50%;
+            left: 50%;
+
+            transform:
+                translate(-50%, -50%);
+
+            border: 3px solid white;
+
+            pointer-events: none;
+        }
+
+        .scan-line {
+            position: absolute;
+
+            left: 0;
+            right: 0;
+
+            top: 0;
+
+            height: 3px;
+
+            background: #d4af37;
+
+            box-shadow:
+                0 0 12px #d4af37;
+
+            animation:
+                scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+
+            0% {
+                top: 0;
+            }
+
+            50% {
+                top: 277px;
+            }
+
+            100% {
+                top: 0;
+            }
+
+        }
+
+        #status {
+
+            margin-top: 15px;
+
+            padding: 10px 18px;
+
+            background: white;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+
+            color: #555;
+        }
+
+        #result {
+
+            margin-top: 20px;
+
+            padding: 20px;
+
+            width: 100%;
+
+            max-width: 500px;
+
+            background: white;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            word-break: break-all;
+        }
+
+        button {
+
+            margin-top: 15px;
+
+            padding: 10px 20px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: #8b0000;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <h1>
+        DOMINEXUS QR TEST
+    </h1>
+
+
+    <p>
+        Point the camera directly at the Student QR.
+    </p>
+
+
+    <div id="reader">
+
+        <div class="scan-frame">
+
+            <div class="scan-line"></div>
+
+        </div>
+
+    </div>
+
+
+    <div id="status">
+        Starting...
+    </div>
+
+
+    <div id="result">
+        Waiting for QR code...
+    </div>
+
+
+    <button
+        id="stopButton"
+        type="button"
+    >
+        Stop Camera
+    </button>
+
+
+    <script
+        src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
+    </script>
+
+
+    <script>
+
+        let scanner = null;
+
+        let running = false;
+
+
+        async function startTest() {
+
+            const status =
+                document.getElementById(
+                    "status"
+                );
+
+
+            const result =
+                document.getElementById(
+                    "result"
+                );
+
+
+            console.log(
+                "================================"
+            );
+
+            console.log(
+                "DOMINEXUS QR TEST"
+            );
+
+            console.log(
+                "Html5Qrcode:",
+                typeof Html5Qrcode
+            );
+
+            console.log(
+                "================================"
+            );
+
+
+            if (
+                typeof Html5Qrcode ===
+                "undefined"
+            ) {
+
+                status.textContent =
+                    "ERROR: QR library did not load.";
+
+                return;
+
+            }
+
+
+            try {
+
+                scanner =
+                    new Html5Qrcode(
+                        "reader"
+                    );
+
+
+                status.textContent =
+                    "Requesting camera...";
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * We are NOT using a camera ID.
+                 *
+                 * We are telling the browser to
+                 * use the normal/user-facing camera.
+                 *
+                 * This avoids the cameraIdOrConfig
+                 * problem completely.
+                 */
+
+                const cameraConfig = {
+
+                    facingMode: "user"
+
+                };
+
+
+                const scanConfig = {
+
+                    fps: 10,
+
+                    qrbox: {
+                        width: 280,
+                        height: 280
+                    },
+
+                    disableFlip: false
+
+                };
+
+
+                console.log(
+                    "Starting with:",
+                    cameraConfig
+                );
+
+
+                await scanner.start(
+
+                    cameraConfig,
+
+                    scanConfig,
+
+                    function(
+                        decodedText,
+                        decodedResult
+                    ) {
+
+                        console.log(
+                            "================================"
+                        );
+
+                        console.log(
+                            "QR CODE DETECTED!"
+                        );
+
+                        console.log(
+                            "VALUE:",
+                            decodedText
+                        );
+
+                        console.log(
+                            "RESULT:",
+                            decodedResult
+                        );
+
+                        console.log(
+                            "================================"
+                        );
+
+
+                        status.textContent =
+                            "✓ QR CODE DETECTED";
+
+
+                        result.innerHTML = `
+
+                            <strong
+                                style="
+                                    color:#198754;
+                                    font-size:18px;
+                                "
+                            >
+                                QR CODE DETECTED
+                            </strong>
+
+                            <br><br>
+
+                            Decoded Value:
+
+                            <br><br>
+
+                            <strong
+                                style="
+                                    color:#8b0000;
+                                    font-size:24px;
+                                "
+                            >
+                                ${decodedText}
+                            </strong>
+
+                        `;
+
+                    },
+
+
+                    function(errorMessage) {
+
+                        /*
+                         * Normal while scanning.
+                         *
+                         * Do nothing here.
+                         */
+
+                    }
+
+                );
+
+
+                running =
+                    true;
+
+
+                status.textContent =
+                    "● SCANNER ACTIVE — LOOKING FOR QR";
+
+
+                console.log(
+                    "SCANNER STARTED!"
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "================================"
+                );
+
+                console.error(
+                    "SCANNER ERROR"
+                );
+
+                console.error(
+                    error
+                );
+
+                console.error(
+                    "MESSAGE:",
+                    error?.message
+                );
+
+                console.error(
+                    "STACK:",
+                    error?.stack
+                );
+
+                console.error(
+                    "================================"
+                );
+
+
+                running =
+                    false;
+
+
+                status.textContent =
+                    "ERROR: " +
+                    (
+                        error?.message ||
+                        String(error)
+                    );
+
+
+                result.innerHTML = `
+
+                    <strong
+                        style="color:#8b0000;"
+                    >
+                        Scanner Error
+                    </strong>
+
+                    <br><br>
+
+                    ${
+                        error?.message ||
+                        String(error)
+                    }
+
+                `;
+
+            }
+
+        }
+
+
+        document
+            .getElementById(
+                "stopButton"
+            )
+            .addEventListener(
+                "click",
+                async function() {
+
+                    running =
+                        false;
+
+
+                    if (scanner) {
+
+                        try {
+
+                            await scanner.stop();
+
+                        } catch (error) {
+
+                            console.log(
+                                "Stop:",
+                                error
+                            );
+
+                        }
+
+
+                        try {
+
+                            await scanner.clear();
+
+                        } catch (error) {
+
+                            console.log(
+                                "Clear:",
+                                error
+                            );
+
+                        }
+
+                    }
+
+
+                    scanner =
+                        null;
+
+
+                    document
+                        .getElementById(
+                            "status"
+                        )
+                        .textContent =
+                        "Camera stopped.";
+
+                }
+            );
+
+
+        startTest();
+
+    </script>
+
+
+</body>
+
+</html>

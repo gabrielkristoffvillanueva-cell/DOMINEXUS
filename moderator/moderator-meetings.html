@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Meeting Management | DOMINEXUS</title>
+
+        <link rel="stylesheet" href="moderator-meetings.css"></link>
+
+</head>
+
+
+<body>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                D
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    DOMINEXUS
+                </div>
+
+                <span class="brand-role">
+                    MODERATOR PORTAL
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <div class="nav-title">
+                MODERATOR
+            </div>
+
+
+            <a href="moderator-dashboard.html"
+               class="nav-item">
+
+                <span class="nav-icon">▦</span>
+
+                Dashboard
+
+            </a>
+
+
+            <a href="moderator-meetings.html"
+               class="nav-item active">
+
+                <span class="nav-icon">◫</span>
+
+                Meeting Management
+
+            </a>
+
+
+            <a href="moderator-scanner.html"
+               class="nav-item">
+
+                <span class="nav-icon">▣</span>
+
+                QR Scanner
+
+            </a>
+
+
+            <a href="moderator-live-attendance.html"
+               class="nav-item">
+
+                <span class="nav-icon">●</span>
+
+                Live Attendance
+
+            </a>
+
+
+            <a href="moderator-students.html"
+               class="nav-item">
+
+                <span class="nav-icon">♙</span>
+
+                Student Records
+
+            </a>
+
+
+            <a href="moderator-history.html"
+               class="nav-item">
+
+                <span class="nav-icon">▤</span>
+
+                Attendance History
+
+            </a>
+
+
+            <a href="moderator-participation.html"
+               class="nav-item">
+
+                <span class="nav-icon">◔</span>
+
+                Participation
+
+            </a>
+
+
+            <a href="moderator-alerts.html"
+               class="nav-item">
+
+                <span class="nav-icon">!</span>
+
+                Notifications
+
+            </a>
+
+
+            <a href="moderator-reports.html"
+               class="nav-item">
+
+                <span class="nav-icon">▥</span>
+
+                Reports
+
+            </a>
+
+        </nav>
+
+
+        <button
+            class="logout-button"
+            id="logoutButton">
+
+            Log Out
+
+        </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+            <div class="page-title">
+                Meeting Management
+            </div>
+
+
+            <div class="profile">
+
+                <div
+                    class="avatar"
+                    id="moderatorAvatar">
+
+                    M
+
+                </div>
+
+
+                <div>
+
+                    <div
+                        class="profile-name"
+                        id="moderatorName">
+
+                        System Moderator
+
+                    </div>
+
+                    <span class="profile-role">
+                        Moderator
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+
+            <div class="page-heading">
+
+                <h1>
+                    General Meetings
+                </h1>
+
+                <p>
+                    Create, start, end, and manage
+                    DOMINEXUS general meetings.
+                </p>
+
+            </div>
+
+
+            <!-- CREATE -->
+
+            <div class="create-card">
+
+                <h2 class="card-title">
+                    Create General Meeting
+                </h2>
+
+                <p class="card-description">
+                    Create a meeting that can later
+                    be used for attendance recording.
+                </p>
+
+
+                <form id="meetingForm">
+
+
+                    <div class="form-grid">
+
+
+                        <div class="form-group">
+
+                            <label for="meetingTitle">
+                                MEETING TITLE
+                            </label>
+
+                            <input
+                                type="text"
+                                id="meetingTitle"
+                                placeholder="e.g. General Assembly"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="meetingDate">
+                                DATE
+                            </label>
+
+                            <input
+                                type="date"
+                                id="meetingDate"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="meetingTime">
+                                TIME
+                            </label>
+
+                            <input
+                                type="time"
+                                id="meetingTime"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label for="meetingDescription">
+                                DESCRIPTION
+                            </label>
+
+                            <textarea
+                                id="meetingDescription"
+                                placeholder="Optional meeting description">
+                            </textarea>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="create-button">
+
+                        + Create Meeting
+
+                    </button>
+
+
+                </form>
+
+            </div>
+
+
+            <!-- MEETING LIST -->
+
+            <div class="meetings-card">
+
+                <h2 class="card-title">
+                    Meetings
+                </h2>
+
+                <p class="card-description">
+                    Meetings currently stored in
+                    the DOMINEXUS system.
+                </p>
+
+
+                <div
+                    id="meetingList"
+                    class="meeting-list">
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+        <script src="moderator-meetings.js"></script>
+
+</body>
+
+</html>

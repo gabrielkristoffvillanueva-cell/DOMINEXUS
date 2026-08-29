@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Sign Up | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-signup.css">
+</head>
+
+<body>
+
+    <!-- ==============================
+         HEADER
+    =============================== -->
+
+    <header class="header">
+
+        <div class="header-container">
+
+            <a href="../index.html" class="brand">
+
+                <div class="brand-logo">
+                    D
+                </div>
+
+                <div class="brand-text">
+
+                    <h1>DOMINEXUS</h1>
+
+                    <p>
+                        Attendance Management System
+                    </p>
+
+                </div>
+
+            </a>
+
+            <div class="offline-status">
+
+                <span class="status-dot"></span>
+
+                Offline Ready
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ==============================
+         MAIN
+    =============================== -->
+
+    <main class="signup-page">
+
+        <div class="signup-container">
+
+
+            <!-- BACK -->
+
+            <a href="../index.html" class="back-link">
+                ← Back to Home
+            </a>
+
+
+            <!-- SIGN UP CARD -->
+
+            <section class="signup-card">
+
+
+                <!-- TITLE -->
+
+                <div class="signup-header">
+
+                    <div class="signup-icon">
+                        D
+                    </div>
+
+                    <p class="eyebrow">
+                        STUDENT ACCESS
+                    </p>
+
+                    <h2>
+                        Create Your Account
+                    </h2>
+
+                    <p>
+                        Register your student account to access
+                        the DOMINEXUS attendance system.
+                    </p>
+
+                </div>
+
+
+                <!-- FORM -->
+
+                <form id="signupForm" novalidate>
+
+
+                    <!-- FULL NAME -->
+
+                    <div class="form-group">
+
+                        <label for="fullName">
+                            Full Name
+                        </label>
+
+                        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name"
+                            autocomplete="name" required>
+
+                        <small class="error-message" id="fullNameError"></small>
+
+                    </div>
+
+
+                    <!-- STUDENT ID -->
+
+                    <div class="form-group">
+
+                        <label for="studentId">
+                            Student ID
+                        </label>
+
+                        <input type="text" id="studentId" name="studentId" placeholder="Example: 2026-001" required>
+
+                        <small class="error-message" id="studentIdError"></small>
+
+                    </div>
+
+
+                    <!-- SECTION -->
+
+                    <div class="form-group">
+
+                        <label for="section">
+                            Section
+                        </label>
+
+                        <input type="text" id="section" name="section" placeholder="Example: 12 STEM A" required>
+
+                        <small class="error-message" id="sectionError"></small>
+
+                    </div>
+
+
+                    <!-- ORGANIZATION -->
+
+                    <div class="form-group">
+
+                        <label for="organization">
+                            Organization
+                        </label>
+
+                        <input type="text" id="organization" name="organization" placeholder="Enter your organization"
+                            required>
+
+                        <small class="error-message" id="organizationError"></small>
+
+                    </div>
+
+
+                    <!-- CLUB ROLE -->
+
+                    <div class="form-group">
+
+                        <label for="clubRole">
+                            Club Role
+                        </label>
+
+                        <select id="clubRole" name="clubRole" required>
+
+                            <option value="" selected disabled>
+                                Select your role
+                            </option>
+
+                            <option value="Member">
+                                Member
+                            </option>
+
+                            <option value="Officer">
+                                Officer
+                            </option>
+
+                        </select>
+
+                        <small class="error-message" id="clubRoleError"></small>
+
+                    </div>
+
+                    <!-- DIGITAL SIGNATURE -->
+
+                    <div class="form-group signature-group">
+
+                        <label for="digitalSignature">
+                            Digital Signature <span class="required-mark">*</span>
+                        </label>
+
+                        <p class="field-description">
+                            Upload your handwritten digital signature as a
+                            <strong>PNG image</strong>.
+                        </p>
+
+                        <input type="file" id="digitalSignature" name="digitalSignature" accept="image/png,.png"
+                            required>
+
+                        <small class="file-hint">
+                            PNG only • Maximum 2 MB
+                        </small>
+
+                        <div class="signature-preview" id="signaturePreview" hidden>
+                            <img id="signaturePreviewImage" alt="Digital signature preview">
+
+                            <span id="signatureFileName"></span>
+                        </div>
+
+                        <small class="error-message" id="digitalSignatureError"></small>
+
+                    </div>
+
+
+                    <!-- PASSWORD ROW -->
+
+                    <div class="form-row">
+
+
+                        <!-- PASSWORD -->
+
+                        <div class="form-group">
+
+                            <label for="password">
+                                Create Password
+                            </label>
+
+                            <div class="password-wrapper">
+
+                                <input type="password" id="password" name="password" placeholder="Create password"
+                                    autocomplete="new-password" required>
+
+                                <button type="button" class="password-toggle" data-target="password"
+                                    aria-label="Show password">
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small class="password-hint">
+                                At least 6 characters
+                            </small>
+
+                            <small class="error-message" id="passwordError"></small>
+
+                        </div>
+
+
+                        <!-- CONFIRM PASSWORD -->
+
+                        <div class="form-group">
+
+                            <label for="confirmPassword">
+                                Confirm Password
+                            </label>
+
+                            <div class="password-wrapper">
+
+                                <input type="password" id="confirmPassword" name="confirmPassword"
+                                    placeholder="Confirm password" autocomplete="new-password" required>
+
+                                <button type="button" class="password-toggle" data-target="confirmPassword"
+                                    aria-label="Show password">
+                                    Show
+                                </button>
+
+                            </div>
+
+                            <small class="error-message" id="confirmPasswordError"></small>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- TERMS -->
+
+                    <div class="terms">
+
+                        <span class="terms-icon">
+                            ✓
+                        </span>
+
+                        <p>
+                            Your account information will be stored
+                            locally for this demo version of
+                            DOMINEXUS.
+                        </p>
+
+                    </div>
+
+                    <!-- DATA PRIVACY + TERMS -->
+
+                    <section class="agreements" aria-labelledby="agreementTitle">
+
+                        <div class="agreements-heading">
+
+                            <span class="terms-icon">✓</span>
+
+                            <div>
+                                <h3 id="agreementTitle">
+                                    Before you create your account
+                                </h3>
+
+                                <p>
+                                    Please review and accept both agreements below.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <!-- DATA PRIVACY -->
+
+                        <label class="agreement-check">
+
+                            <input type="checkbox" id="privacyAgreement" name="privacyAgreement" required>
+
+                            <span>
+                                I have read and agree to the
+                                <strong>Data Privacy Agreement</strong>.
+                            </span>
+
+                        </label>
+
+                        <small class="error-message" id="privacyAgreementError"></small>
+
+
+                        <details class="agreement-details">
+
+                            <summary>
+                                View Data Privacy Agreement
+                            </summary>
+
+                            <p>
+                                DOMINEXUS collects the information you provide,
+                                including your name, Student ID, section,
+                                organization, club role, digital signature,
+                                and account credentials for the operation
+                                and administration of the student attendance
+                                system.
+                            </p>
+
+                            <p>
+                                Your information should only be accessed for
+                                legitimate school or organization purposes.
+                                Your digital signature should only be used
+                                for authorized DOMINEXUS processes.
+                            </p>
+
+                            <p>
+                                By registering, you acknowledge the collection
+                                and use of your information for the stated
+                                purposes.
+                            </p>
+
+                        </details>
+
+
+                        <!-- TERMS -->
+
+                        <label class="agreement-check">
+
+                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
+
+                            <span>
+                                I have read and agree to the
+                                <strong>Terms and Conditions</strong>.
+                            </span>
+
+                        </label>
+
+                        <small class="error-message" id="termsAgreementError"></small>
+
+
+                        <details class="agreement-details">
+
+                            <summary>
+                                View Terms and Conditions
+                            </summary>
+
+                            <p>
+                                Students are responsible for providing accurate
+                                registration information and for keeping their
+                                login credentials and attendance QR code secure.
+                            </p>
+
+                            <p>
+                                The DOMINEXUS account is intended for the
+                                registered student only. Students must not
+                                impersonate another user, submit false
+                                information, or misuse attendance records.
+                            </p>
+
+                            <p>
+                                DOMINEXUS is currently a front-end prototype.
+                                Features, records, and authentication may
+                                change as development continues.
+                            </p>
+
+                        </details>
+
+                    </section>
+
+                    <!-- SUBMIT -->
+
+                    <button type="submit" class="signup-button" id="signupButton">
+                        Create Student Account
+                    </button>
+
+
+                    <!-- LOGIN -->
+
+                    <p class="login-link">
+
+                        Already have an account?
+
+                        <a href="student-login.html">
+                            Log in
+                        </a>
+
+                    </p>
+
+
+                </form>
+
+
+                <!-- SUCCESS MESSAGE -->
+
+                <div class="success-box" id="successBox" hidden>
+
+                    <div class="success-icon">
+                        ✓
+                    </div>
+
+                    <p class="eyebrow">
+                        ACCOUNT CREATED
+                    </p>
+
+                    <h3>
+                        Welcome to DOMINEXUS!
+                    </h3>
+
+                    <p>
+                        Your student account has been
+                        successfully created.
+                    </p>
+
+
+                    <div class="unique-id-box">
+
+                        <span>
+                            YOUR UNIQUE ID
+                        </span>
+
+                        <strong id="generatedUniqueId">
+                            SDCA-001
+                        </strong>
+
+                        <small>
+                            Keep this ID safe. It will be used
+                            for your attendance QR code.
+                        </small>
+
+                    </div>
+
+
+                    <a href="student-login.html" class="login-button">
+                        Continue to Student Login
+                    </a>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- FOOTER NOTE -->
+
+            <p class="page-note">
+                DOMINEXUS • St. Dominic College of Asia
+            </p>
+
+
+        </div>
+
+    </main>
+
+
+    <script src="student-signup.js"></script>
+
+</body>
+
+</html>

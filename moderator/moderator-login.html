@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Moderator Login | DOMINEXUS</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f7f5f1;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            padding:
+                20px;
+
+            color:
+                #222;
+                
+
+        }
+
+
+        .login-card {
+
+            width:
+                100%;
+
+            max-width:
+                430px;
+
+            background:
+                #ffffff;
+
+            border-radius:
+                18px;
+
+            padding:
+                40px;
+
+            box-shadow:
+                0 15px 40px
+                rgba(0, 0, 0, 0.10);
+
+
+                width: 100%;
+            max-width: 1000px;
+
+            min-height: 600px;
+
+             display: grid;
+            grid-template-columns: 1fr 1fr;
+
+             background: white;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            box-shadow:
+            0 15px 45px rgba(0, 0, 0, 0.10);
+            background: #8b0000;
+
+            color: white;
+
+        padding: 55px;
+
+        display: flex;
+        flex-direction: column;
+
+        justify-content: center;
+
+        }
+
+
+        .logo {
+
+            width:
+                64px;
+
+            height:
+                64px;
+
+            margin:
+                0 auto 18px;
+
+            border-radius:
+                50%;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            background:
+                #961818;
+
+
+        }
+
+
+        .heading {
+
+            text-align:
+                center;
+
+        }
+
+
+        .eyebrow {
+
+            margin:
+                0 0 7px;
+
+            color:
+                #9a7b28;
+
+            font-size:
+                11px;
+
+            font-weight:
+                bold;
+
+            letter-spacing:
+                2px;
+
+        }
+
+
+        h1 {
+
+            margin:
+                0;
+
+            color:
+                #fefcfc;
+
+            font-size:
+                29px;
+
+        }
+
+
+        .subtitle {
+
+            margin:
+                10px 0 30px;
+
+            color:
+                #fffdfd;
+
+            font-size:
+                14px;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        .form-group {
+
+            margin-bottom:
+                18px;
+
+        }
+
+
+        label {
+
+            display:
+                block;
+
+            margin-bottom:
+                7px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                600;
+
+            color:
+                #f7f7f7;
+
+        }
+
+
+        input {
+
+            width:
+                100%;
+
+            padding:
+                13px 14px;
+
+            border:
+                1px solid
+                #d8d4cc;
+
+            border-radius:
+                9px;
+
+            font-size:
+                14px;
+
+            outline:
+                none;
+
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease;
+
+        }
+
+
+        input:focus {
+
+            border-color:
+                #7b1113;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    123,
+                    17,
+                    19,
+                    .10
+                );
+
+        }
+
+
+        .login-button {
+
+            width:
+                100%;
+
+            border:
+                none;
+
+            border-radius:
+                9px;
+
+            padding:
+                13px;
+
+            margin-top:
+                5px;
+
+            background:
+                #c02b2e;
+
+            color:
+                #ffffff;
+
+            font-size:
+                14px;
+
+            font-weight:
+                700;
+
+            cursor:
+                pointer;
+
+            transition:
+                background .2s ease,
+                transform .2s ease;
+
+        }
+
+
+        .login-button:hover {
+
+            background:
+                #641012;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        .message {
+
+            min-height:
+                20px;
+
+            margin-top:
+                15px;
+
+            text-align:
+                center;
+
+            font-size:
+                13px;
+
+        }
+
+
+        .back-link {
+
+            display:
+                block;
+
+            margin-top:
+                25px;
+
+            text-align:
+                center;
+
+            color:
+                #faf8f8;
+
+            text-decoration:
+                none;
+
+            font-size:
+                13px;
+
+            font-weight:
+                600;
+
+        }
+
+
+        .back-link:hover {
+
+            text-decoration:
+                underline;
+
+        }
+
+
+        .notice {
+
+            margin-top:
+                25px;
+
+            padding:
+                12px;
+
+            border-radius:
+                8px;
+
+            background:
+                #f8f5ed;
+
+            color:
+                #777;
+
+            text-align:
+                center;
+
+            font-size:
+                11px;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        @media (
+            max-width: 500px
+        ) {
+
+            .login-card {
+
+                padding:
+                    30px 22px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <main class="login-card">
+
+
+        <div class="heading">
+
+
+        
+                <div class="logo">
+                D
+                    
+                </div>
+        
+
+            <p class="eyebrow">
+                AUTHORIZED ACCESS
+            </p>
+
+
+            <h1>
+                Moderator Login
+            </h1>
+
+
+            <p class="subtitle">
+                Sign in to access the DOMINEXUS
+                moderator portal.
+            </p>
+
+
+        </div>
+
+
+        <form
+            id="moderatorLoginForm"
+        >
+
+
+            <div class="form-group">
+
+                <label
+                    for="moderatorId"
+                >
+                    Moderator ID
+                </label>
+
+                <input
+                    type="text"
+                    id="moderatorId"
+                    placeholder="Enter Moderator ID"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label
+                    for="moderatorPassword"
+                >
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="moderatorPassword"
+                    placeholder="Enter password"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Sign In
+            </button>
+
+
+            <div
+                id="loginMessage"
+                class="message"
+            ></div>
+
+
+        </form>
+
+
+        <a
+            href="../staff-login.html"
+            class="back-link"
+        >
+            ← Back to Staff Portal
+        </a>
+
+
+        <div class="notice">
+
+            Moderator access is restricted to
+            authorized DOMINEXUS personnel.
+
+        </div>
+
+
+    </main>
+
+
+    <script src="moderator-login.js"></script>
+
+</body>
+
+</html>

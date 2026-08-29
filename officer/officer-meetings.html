@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Meetings | Officer | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="officer-meetings.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Officer Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="officer-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="officer-meetings.html" class="nav-item active">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="officer-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="officer-members.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>Members</span>
+            </a>
+
+            <a href="officer-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="officer-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+                <span>↪</span>
+                Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                id="menuButton"
+                aria-label="Open menu">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Meetings</h1>
+
+                <p>
+                    Manage organization meetings
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div
+                    class="profile-avatar"
+                    id="topAvatar">
+
+                    OF
+
+                </div>
+
+
+                <div class="top-profile-info">
+
+                    <strong id="topOfficerName">
+                        Officer
+                    </strong>
+
+                    <span id="topOfficerId">
+                        Officer ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             PAGE
+        ========================== -->
+
+        <div class="page-container">
+
+
+            <!-- PAGE HEADER -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <span class="page-label">
+                        ORGANIZATION
+                    </span>
+
+                    <h2>
+                        Meeting Management
+                    </h2>
+
+                    <p>
+                        Create and manage your organization's meetings.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="primary-button"
+                    id="openCreateButton">
+
+                    <span>＋</span>
+                    Create Meeting
+
+                </button>
+
+            </section>
+
+
+            <!-- =========================
+                 SUMMARY
+            ========================== -->
+
+            <section class="summary-grid">
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ▦
+                    </div>
+
+                    <div>
+
+                        <span>Total Meetings</span>
+
+                        <strong id="totalMeetings">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon upcoming-icon">
+                        ◷
+                    </div>
+
+                    <div>
+
+                        <span>Upcoming</span>
+
+                        <strong id="upcomingMeetings">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon past-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>Completed</span>
+
+                        <strong id="completedMeetings">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 TOOLBAR
+            ========================== -->
+
+            <section class="toolbar-card">
+
+                <div class="search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search meetings...">
+
+                </div>
+
+
+                <select id="statusFilter">
+
+                    <option value="all">
+                        All Meetings
+                    </option>
+
+                    <option value="upcoming">
+                        Upcoming
+                    </option>
+
+                    <option value="completed">
+                        Completed
+                    </option>
+
+                </select>
+
+            </section>
+
+
+            <!-- =========================
+                 MEETINGS
+            ========================== -->
+
+            <section class="meetings-card">
+
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h3>
+                            Meetings
+                        </h3>
+
+                        <p>
+                            Organization meeting records
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="meetings-grid"
+                    id="meetingsGrid">
+
+                    <!-- JavaScript -->
+
+                </div>
+
+
+                <div
+                    class="empty-state"
+                    id="emptyState">
+
+                    <div class="empty-icon">
+                        ▦
+                    </div>
+
+                    <h3>
+                        No meetings found
+                    </h3>
+
+                    <p>
+                        Create a meeting or change your search/filter.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+
+            <footer class="page-footer">
+
+                <p>
+                    © 2026 DOMINEXUS
+                </p>
+
+                <span>
+                    Student Organization Attendance Management System
+                </span>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         CREATE / EDIT MODAL
+    ========================== -->
+
+    <div
+        class="modal-overlay"
+        id="meetingModal">
+
+        <div class="meeting-modal">
+
+
+            <button
+                class="modal-close"
+                id="closeModal">
+
+                ×
+
+            </button>
+
+
+            <span class="modal-label">
+                MEETING MANAGEMENT
+            </span>
+
+
+            <h2 id="modalTitle">
+                Create Meeting
+            </h2>
+
+            <p class="modal-description">
+                Add the details of your organization meeting.
+            </p>
+
+
+            <form id="meetingForm">
+
+
+                <input
+                    type="hidden"
+                    id="editingMeetingId">
+
+
+                <div class="form-group">
+
+                    <label for="meetingTitle">
+                        Meeting Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="meetingTitle"
+                        placeholder="e.g. General Assembly"
+                        required>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="meetingDate">
+                            Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="meetingDate"
+                            required>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="meetingTime">
+                            Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="meetingTime"
+                            required>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="meetingDescription">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="meetingDescription"
+                        rows="4"
+                        placeholder="Optional meeting description..."></textarea>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-button"
+                        id="cancelButton">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="save-button">
+
+                        Save Meeting
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         CONFIRM DELETE MODAL
+    ========================== -->
+
+    <div
+        class="modal-overlay"
+        id="deleteModal">
+
+        <div class="delete-modal">
+
+            <div class="delete-icon">
+                !
+            </div>
+
+            <h2>
+                Delete Meeting?
+            </h2>
+
+            <p>
+                This will remove the meeting from your meeting list.
+            </p>
+
+
+            <div class="delete-actions">
+
+                <button
+                    class="cancel-button"
+                    id="cancelDelete">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    class="delete-button"
+                    id="confirmDelete">
+
+                    Delete
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="officer-meetings.js"></script>
+
+</body>
+
+</html>

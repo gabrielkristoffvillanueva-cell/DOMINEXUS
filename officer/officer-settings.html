@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Settings | Officer | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="officer-settings.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Officer Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="officer-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="officer-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="officer-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="officer-members.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>Members</span>
+            </a>
+
+            <a href="officer-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="officer-settings.html" class="nav-item active">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="logoutButton"
+                class="logout-button">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                id="menuButton"
+                class="menu-button">
+                ☰
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Settings</h1>
+
+                <p>
+                    Manage your officer account
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div
+                    class="profile-avatar"
+                    id="topAvatar">
+                    OF
+                </div>
+
+                <div class="top-profile-info">
+
+                    <strong id="topOfficerName">
+                        Officer
+                    </strong>
+
+                    <span id="topOfficerId">
+                        Officer ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE -->
+
+        <div class="page-container">
+
+
+            <section class="page-header">
+
+                <span class="page-label">
+                    ACCOUNT
+                </span>
+
+                <h2>
+                    Officer Settings
+                </h2>
+
+                <p>
+                    Update your account information and preferences.
+                </p>
+
+            </section>
+
+
+            <!-- PROFILE -->
+
+            <section class="settings-card">
+
+                <div class="card-heading">
+
+                    <div>
+
+                        <h3>
+                            Profile Information
+                        </h3>
+
+                        <p>
+                            Your officer account information.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-section">
+
+                    <div
+                        class="large-avatar"
+                        id="profileAvatar">
+                        OF
+                    </div>
+
+                    <div>
+
+                        <h3 id="profileName">
+                            Officer
+                        </h3>
+
+                        <p id="profileId">
+                            Officer ID
+                        </p>
+
+                        <span class="role-badge">
+                            Officer
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label>
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="officerNameInput"
+                            placeholder="Full Name">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Officer ID
+                        </label>
+
+                        <input
+                            type="text"
+                            id="officerIdInput"
+                            disabled>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Organization
+                        </label>
+
+                        <input
+                            type="text"
+                            id="organizationInput"
+                            placeholder="Organization">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Position
+                        </label>
+
+                        <input
+                            type="text"
+                            value="Officer"
+                            disabled>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-actions">
+
+                    <button
+                        id="saveProfileButton"
+                        class="primary-button">
+
+                        Save Changes
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- PASSWORD -->
+
+            <section class="settings-card">
+
+                <div class="card-heading">
+
+                    <h3>
+                        Change Password
+                    </h3>
+
+                    <p>
+                        Update your officer account password.
+                    </p>
+
+                </div>
+
+
+                <div class="form-grid password-grid">
+
+                    <div class="form-group">
+
+                        <label>
+                            Current Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="currentPassword"
+                            placeholder="Current password">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            New Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="newPassword"
+                            placeholder="New password">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Confirm New Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm new password">
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-actions">
+
+                    <button
+                        id="changePasswordButton"
+                        class="primary-button">
+
+                        Change Password
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- SYSTEM -->
+
+            <section class="settings-card">
+
+                <div class="card-heading">
+
+                    <h3>
+                        System Preferences
+                    </h3>
+
+                    <p>
+                        Manage basic dashboard preferences.
+                    </p>
+
+                </div>
+
+
+                <div class="preference-row">
+
+                    <div>
+
+                        <strong>
+                            Attendance Notifications
+                        </strong>
+
+                        <span>
+                            Show reminders for upcoming meetings.
+                        </span>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="notificationToggle"
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="preference-row">
+
+                    <div>
+
+                        <strong>
+                            Confirm Before Logout
+                        </strong>
+
+                        <span>
+                            Ask for confirmation before logging out.
+                        </span>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="logoutConfirmToggle"
+                            checked>
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+            </section>
+
+
+            <!-- DANGER -->
+
+            <section class="settings-card danger-card">
+
+                <div class="card-heading">
+
+                    <h3>
+                        Account Actions
+                    </h3>
+
+                    <p>
+                        Actions that affect your current session.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="logoutAllButton"
+                    class="danger-button">
+
+                    Log Out
+
+                </button>
+
+            </section>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- TOAST -->
+
+    <div
+        class="toast"
+        id="toast">
+        Changes saved successfully.
+    </div>
+
+
+    <script src="officer-settings.js"></script>
+
+</body>
+
+</html>

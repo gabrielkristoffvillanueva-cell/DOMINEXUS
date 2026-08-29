@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My QR Code | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-qr.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Student Portal</span>
+            </div>
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="student-qr.html" class="nav-item active">
+                <span class="nav-icon">▣</span>
+                <span>My QR Code</span>
+            </a>
+
+            <a href="student-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="student-profile.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>My Profile</span>
+            </a>
+
+            <a href="student-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="student-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="student-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+                <span>↪</span>
+                Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <button class="menu-button" id="menuButton" aria-label="Open menu">
+                ☰
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>My QR Code</h1>
+
+                <p>
+                    Your personal attendance QR code
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+                    ST
+                </div>
+
+                <div class="top-profile-info">
+
+                    <strong id="topStudentName">
+                        Student
+                    </strong>
+
+                    <span id="topStudentId">
+                        Student ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+
+        <div class="page-container">
+
+            <section class="qr-page-card">
+
+                <div class="qr-header">
+
+                    <span class="qr-label">
+                        PERSONAL ATTENDANCE QR
+                    </span>
+
+                    <h2>My QR Code</h2>
+
+                    <p>
+                        Present this QR code to the moderator
+                        when attending an organization meeting.
+                    </p>
+
+                </div>
+
+
+                <!-- QR -->
+
+                <div class="qr-wrapper">
+
+                    <div id="qrCode" class="qr-code"></div>
+
+                </div>
+
+
+                <!-- STUDENT INFORMATION -->
+
+                <div class="student-info">
+
+                    <h3 id="studentName">
+                        Student Name
+                    </h3>
+
+                    <p>
+                        Student ID:
+                        <strong id="studentId">
+                            ---
+                        </strong>
+                    </p>
+
+                    <p>
+                        Unique ID:
+                        <strong id="uniqueId">
+                            ---
+                        </strong>
+                    </p>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="qr-status">
+
+                    <span class="status-dot"></span>
+
+                    QR Code Active
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="qr-actions">
+
+                    <button id="downloadQrButton" class="primary-button">
+                        Download QR Code
+                    </button>
+
+                    <button id="printQrButton" class="secondary-button">
+                        Print QR Code
+                    </button>
+
+                </div>
+
+
+                <div class="qr-note">
+
+                    <strong>Important:</strong>
+
+                    <p>
+                        Your QR code is linked to your permanent
+                        DOMINEXUS Unique ID. Do not share your
+                        QR code with another student.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <footer class="page-footer">
+
+            <p>© 2026 DOMINEXUS</p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <script src="student-qr.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1238 @@
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #f7f5f1;
+
+    color: #292929;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 250px;
+
+    background: #7b1113;
+
+    color: white;
+
+    padding: 25px 16px;
+
+    z-index: 100;
+}
+
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        5px 10px 25px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.15);
+}
+
+
+.brand-logo {
+
+    width: 43px;
+    height: 43px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    color: #7b1113;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: 800;
+
+    font-size: 20px;
+}
+
+
+.brand-name {
+
+    font-size: 19px;
+
+    font-weight: 700;
+}
+
+
+.brand-role {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 9px;
+
+    letter-spacing: 1.5px;
+
+    opacity: .65;
+}
+
+
+/* NAVIGATION */
+
+.nav {
+
+    margin-top: 25px;
+}
+
+
+.nav-title {
+
+    padding:
+        0 12px 9px;
+
+    font-size: 9px;
+
+    letter-spacing: 1.5px;
+
+    opacity: .55;
+}
+
+
+.nav-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    width: 100%;
+
+    padding:
+        11px 12px;
+
+    margin-bottom: 4px;
+
+    border-radius: 8px;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    transition:
+        background .2s ease;
+}
+
+
+.nav-item:hover,
+.nav-item.active {
+
+    background:
+        rgba(255,255,255,.14);
+}
+
+
+.nav-icon {
+
+    width: 23px;
+
+    text-align: center;
+}
+
+
+/* LOGOUT */
+
+.logout-button {
+
+    position: absolute;
+
+    left: 16px;
+    right: 16px;
+
+    bottom: 20px;
+
+    width:
+        calc(100% - 32px);
+
+    padding: 11px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.2);
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+
+.logout-button:hover {
+
+    background:
+        rgba(255,255,255,.1);
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main {
+
+    margin-left: 250px;
+
+    min-height: 100vh;
+}
+
+
+.topbar {
+
+    height: 72px;
+
+    background: white;
+
+    border-bottom:
+        1px solid
+        #e4e0d9;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 32px;
+}
+
+
+.page-title {
+
+    color: #7b1113;
+
+    font-size: 20px;
+
+    font-weight: 700;
+}
+
+
+.profile {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.avatar {
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    background: #7b1113;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.profile-name {
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.profile-role {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color: #888;
+
+    font-size: 10px;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.content {
+
+    padding:
+        30px 32px;
+}
+
+
+.page-heading {
+
+    margin-bottom:
+        22px;
+}
+
+
+.page-heading h1 {
+
+    margin: 0;
+
+    color:
+        #7b1113;
+
+    font-size:
+        26px;
+}
+
+
+.page-heading p {
+
+    margin:
+        7px 0 0;
+
+    color:
+        #777;
+
+    font-size:
+        13px;
+}
+
+
+/* =========================================
+   CARDS
+========================================= */
+
+.card {
+
+    background:
+        white;
+
+    border:
+        1px solid
+        #e3dfd8;
+
+    border-radius:
+        12px;
+
+    padding:
+        22px;
+}
+
+
+/* =========================================
+   MEETING
+========================================= */
+
+.meeting-card {
+
+    margin-bottom:
+        20px;
+}
+
+
+.meeting-card label,
+.manual-card label {
+
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #555;
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+}
+
+
+select,
+input {
+
+    width:
+        100%;
+
+    padding:
+        12px;
+
+    border:
+        1px solid
+        #d8d4cc;
+
+    border-radius:
+        8px;
+
+    background:
+        white;
+
+    font-family:
+        inherit;
+
+    font-size:
+        13px;
+
+    outline:
+        none;
+}
+
+
+select:focus,
+input:focus {
+
+    border-color:
+        #7b1113;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(123,17,19,.08);
+}
+
+
+.meeting-status {
+
+    margin-top:
+        10px;
+
+    color:
+        #888;
+
+    font-size:
+        11px;
+}
+
+
+/* =========================================
+   SCANNER LAYOUT
+========================================= */
+
+.scanner-layout {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.5fr 1fr;
+
+    gap:
+        20px;
+
+    align-items:
+        start;
+}
+
+
+/* =========================================
+   SCANNER
+========================================= */
+
+.scanner-card {
+
+    min-width:
+        0;
+}
+
+
+.scanner-header {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    margin-bottom:
+        18px;
+}
+
+
+.scanner-header h2,
+.manual-card h2,
+.student-card h2 {
+
+    margin:
+        0;
+
+    color:
+        #7b1113;
+
+    font-size:
+        16px;
+}
+
+
+.scanner-header p,
+.manual-card p,
+.student-header p {
+
+    margin:
+        5px 0 0;
+
+    color:
+        #888;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.5;
+}
+
+
+/* =========================================
+   INDICATOR
+========================================= */
+
+.scanner-indicator {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    padding:
+        6px 9px;
+
+    border-radius:
+        20px;
+
+    background:
+        #eeeeee;
+
+    color:
+        #777;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    white-space:
+        nowrap;
+}
+
+
+.indicator-dot {
+
+    width:
+        7px;
+
+    height:
+        7px;
+
+    border-radius:
+        50%;
+
+    background:
+        #999;
+}
+
+
+/* ACTIVE */
+
+.scanner-indicator.active {
+
+    background:
+        #e6f4ec;
+
+    color:
+        #198754;
+}
+
+
+.scanner-indicator.active
+.indicator-dot {
+
+    background:
+        #198754;
+
+    animation:
+        pulse 1.2s infinite;
+}
+
+
+@keyframes pulse {
+
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: .5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================================
+   CAMERA
+========================================= */
+
+.scanner-wrapper {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    min-height:
+        390px;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        12px;
+
+    background:
+        #111;
+}
+
+
+#qr-reader {
+
+    width:
+        100%;
+
+    min-height:
+        390px;
+}
+
+
+#qr-reader video {
+
+    width:
+        100% !important;
+
+    height:
+        390px !important;
+
+    object-fit:
+        cover;
+
+    display:
+        block;
+}
+
+
+/* Hide html5-qrcode's default UI */
+
+#qr-reader__dashboard_section_csr,
+#qr-reader__dashboard_section_swaplink {
+
+    display:
+        none !important;
+}
+
+
+/* =========================================
+   SCAN FRAME
+========================================= */
+
+.scan-frame {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        230px;
+
+    height:
+        230px;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    pointer-events:
+        none;
+}
+
+
+.corner {
+
+    position:
+        absolute;
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    border-color:
+        white;
+
+    border-style:
+        solid;
+}
+
+
+.corner.top-left {
+
+    top: 0;
+    left: 0;
+
+    border-width:
+        3px 0 0 3px;
+}
+
+
+.corner.top-right {
+
+    top: 0;
+    right: 0;
+
+    border-width:
+        3px 3px 0 0;
+}
+
+
+.corner.bottom-left {
+
+    bottom: 0;
+    left: 0;
+
+    border-width:
+        0 0 3px 3px;
+}
+
+
+.corner.bottom-right {
+
+    bottom: 0;
+    right: 0;
+
+    border-width:
+        0 3px 3px 0;
+}
+
+
+.scan-line {
+
+    position:
+        absolute;
+
+    left:
+        3px;
+
+    right:
+        3px;
+
+    top:
+        5px;
+
+    height:
+        2px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .9
+        );
+
+    box-shadow:
+        0 0 8px
+        rgba(
+            255,
+            255,
+            255,
+            .8
+        );
+
+    animation:
+        scanMove 2s
+        ease-in-out
+        infinite;
+}
+
+
+@keyframes scanMove {
+
+    0% {
+        top: 5px;
+        opacity: .5;
+    }
+
+    50% {
+        top: calc(100% - 7px);
+        opacity: 1;
+    }
+
+    100% {
+        top: 5px;
+        opacity: .5;
+    }
+
+}
+
+
+/* =========================================
+   SCANNER MESSAGE
+========================================= */
+
+.scanner-message {
+
+    position:
+        absolute;
+
+    left:
+        15px;
+
+    right:
+        15px;
+
+    bottom:
+        15px;
+
+    padding:
+        9px 12px;
+
+    border-radius:
+        7px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .65
+        );
+
+    color:
+        white;
+
+    text-align:
+        center;
+
+    font-size:
+        11px;
+
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.scanner-controls {
+
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    margin-top:
+        15px;
+}
+
+
+.primary-button,
+.secondary-button,
+.confirm-button {
+
+    padding:
+        11px 16px;
+
+    border-radius:
+        8px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+}
+
+
+.primary-button {
+
+    border:
+        1px solid
+        #7b1113;
+
+    background:
+        #7b1113;
+
+    color:
+        white;
+}
+
+
+.primary-button:hover {
+
+    background:
+        #641012;
+}
+
+
+.secondary-button {
+
+    border:
+        1px solid
+        #d8d4cc;
+
+    background:
+        white;
+
+    color:
+        #555;
+}
+
+
+.secondary-button:disabled {
+
+    opacity:
+        .5;
+
+    cursor:
+        not-allowed;
+}
+
+
+.full-button {
+
+    width:
+        100%;
+
+    margin-top:
+        12px;
+}
+
+
+/* =========================================
+   MANUAL
+========================================= */
+
+.manual-card p {
+
+    margin-bottom:
+        20px;
+}
+
+
+.manual-status {
+
+    min-height:
+        20px;
+
+    margin-top:
+        12px;
+
+    font-size:
+        11px;
+
+}
+
+
+/* =========================================
+   STUDENT CARD
+========================================= */
+
+.student-card {
+
+    margin-top:
+        20px;
+}
+
+
+.student-card.hidden {
+
+    display:
+        none;
+}
+
+
+.student-header {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    margin-bottom:
+        20px;
+}
+
+
+.verified-badge {
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    background:
+        #e6f4ec;
+
+    color:
+        #198754;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+}
+
+
+.student-details {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        12px;
+
+    margin-bottom:
+        18px;
+}
+
+
+.detail {
+
+    padding:
+        14px;
+
+    border:
+        1px solid
+        #e4e0d9;
+
+    border-radius:
+        9px;
+}
+
+
+.detail span {
+
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #888;
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+}
+
+
+.detail strong {
+
+    color:
+        #333;
+
+    font-size:
+        13px;
+}
+
+
+.student-message {
+
+    min-height:
+        20px;
+
+    margin-bottom:
+        12px;
+
+    font-size:
+        11px;
+}
+
+
+.confirm-button {
+
+    border:
+        none;
+
+    background:
+        #7b1113;
+
+    color:
+        white;
+}
+
+
+.confirm-button:hover {
+
+    background:
+        #641012;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .scanner-layout {
+
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .sidebar {
+
+        position:
+            relative;
+
+        width:
+            100%;
+
+        height:
+            auto;
+
+        padding-bottom:
+            80px;
+    }
+
+
+    .main {
+
+        margin-left:
+            0;
+    }
+
+
+    .topbar {
+
+        padding:
+            0 18px;
+    }
+
+
+    .content {
+
+        padding:
+            22px 18px;
+    }
+
+
+    .scanner-header {
+
+        flex-direction:
+            column;
+    }
+
+
+    .scanner-controls {
+
+        flex-direction:
+            column;
+    }
+
+
+    .student-details {
+
+        grid-template-columns:
+            1fr;
+    }
+
+}

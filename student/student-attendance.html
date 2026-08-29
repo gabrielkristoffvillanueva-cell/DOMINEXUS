@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Attendance History | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-attendance.css">
+</head>
+
+<body>
+
+    <!-- ================================
+         SIDEBAR
+    ================================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">
+                D
+            </div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Student Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="student-qr.html" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>My QR Code</span>
+            </a>
+
+            <a href="student-attendance.html" class="nav-item active">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="student-profile.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>My Profile</span>
+            </a>
+
+            <a href="student-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="student-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="student-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="logoutButton"
+                class="logout-button">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================================
+         MOBILE OVERLAY
+    ================================= -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- ================================
+         MAIN CONTENT
+    ================================= -->
+
+    <main class="main-content">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                id="menuButton"
+                aria-label="Open menu">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Attendance History</h1>
+
+                <p>
+                    View your meeting attendance records
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div
+                    class="profile-avatar"
+                    id="topAvatar">
+
+                    ST
+
+                </div>
+
+
+                <div class="top-profile-info">
+
+                    <strong id="topStudentName">
+                        Student
+                    </strong>
+
+                    <span id="topStudentId">
+                        Student ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================================
+             PAGE CONTENT
+        ================================= -->
+
+        <div class="page-container">
+
+
+            <!-- PAGE INTRO -->
+
+            <section class="page-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        ATTENDANCE RECORD
+                    </span>
+
+                    <h2>
+                        My Attendance
+                    </h2>
+
+                    <p>
+                        Review your attendance history
+                        for organization meetings.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================
+                 SUMMARY CARDS
+            ================================= -->
+
+            <section class="summary-grid">
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        %
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Attendance Rate
+                        </span>
+
+                        <strong id="attendancePercentage">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Meetings Attended
+                        </span>
+
+                        <strong id="meetingsAttended">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ×
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Meetings Missed
+                        </span>
+
+                        <strong id="meetingsMissed">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        #
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Meetings
+                        </span>
+
+                        <strong id="totalMeetings">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- ================================
+                 ATTENDANCE STATUS
+            ================================= -->
+
+            <section class="status-card">
+
+                <div class="status-left">
+
+                    <div
+                        class="status-indicator"
+                        id="statusIndicator">
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Current Attendance Status
+                        </span>
+
+                        <strong id="attendanceStatus">
+                            No Records Yet
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="status-message" id="statusMessage">
+
+                    Your attendance records will appear
+                    here once meetings have been recorded.
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================
+                 ATTENDANCE TABLE
+            ================================= -->
+
+            <section class="attendance-card">
+
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Attendance History
+                        </h3>
+
+                        <p>
+                            Your recorded meeting attendance
+                        </p>
+
+                    </div>
+
+
+                    <select
+                        id="attendanceFilter"
+                        class="attendance-filter">
+
+                        <option value="all">
+                            All Records
+                        </option>
+
+                        <option value="Present">
+                            Present
+                        </option>
+
+                        <option value="Late">
+                            Late
+                        </option>
+
+                        <option value="Absent">
+                            Absent
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DESKTOP TABLE -->
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Meeting
+                                </th>
+
+                                <th>
+                                    Time In
+                                </th>
+
+                                <th>
+                                    Time Out
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Remarks
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="attendanceTableBody">
+
+                            <!-- JavaScript inserts records here -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- EMPTY STATE -->
+
+                <div
+                    class="empty-state"
+                    id="emptyState">
+
+                    <div class="empty-icon">
+                        ✓
+                    </div>
+
+                    <h3>
+                        No Attendance Records
+                    </h3>
+
+                    <p>
+                        You don't have any recorded
+                        attendance yet.
+                    </p>
+
+                </div>
+
+
+            </section>
+
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance
+                Management System
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+    <script src="student-attendance.js"></script>
+
+</body>
+
+</html>

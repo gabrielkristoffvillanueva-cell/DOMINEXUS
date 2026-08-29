@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Live Attendance | DOMINEXUS</title>
+
+    <link
+        rel="stylesheet"
+        href="moderator-live-attendance.css"
+    >
+
+</head>
+
+<body>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                D
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    DOMINEXUS
+                </div>
+
+                <span class="brand-role">
+                    MODERATOR PORTAL
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <div class="nav-title">
+                MODERATOR
+            </div>
+
+
+            <a
+                href="moderator-dashboard.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▦</span>
+                Dashboard
+            </a>
+
+
+            <a
+                href="moderator-meetings.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">◫</span>
+                Meeting Management
+            </a>
+
+
+            <a
+                href="moderator-scanner.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▣</span>
+                QR Scanner
+            </a>
+
+
+            <a
+                href="moderator-live-attendance.html"
+                class="nav-item active"
+            >
+                <span class="nav-icon">●</span>
+                Live Attendance
+            </a>
+
+
+            <a
+                href="moderator-students.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">♙</span>
+                Student Records
+            </a>
+
+
+            <a
+                href="moderator-history.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▤</span>
+                Attendance History
+            </a>
+
+
+            <a
+                href="moderator-participation.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">◔</span>
+                Participation
+            </a>
+
+
+            <a
+                href="moderator-alerts.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">!</span>
+                Notifications
+            </a>
+
+
+            <a
+                href="moderator-reports.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▥</span>
+                Reports
+            </a>
+
+        </nav>
+
+
+        <button
+            type="button"
+            class="logout-button"
+            id="logoutButton"
+        >
+            Log Out
+        </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+            <div class="page-title">
+                Live Attendance
+            </div>
+
+
+            <div class="profile">
+
+                <div
+                    class="avatar"
+                    id="moderatorAvatar"
+                >
+                    M
+                </div>
+
+
+                <div>
+
+                    <div
+                        class="profile-name"
+                        id="moderatorName"
+                    >
+                        System Moderator
+                    </div>
+
+                    <span class="profile-role">
+                        Moderator
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+
+            <div class="page-heading">
+
+                <h1>
+                    Live Attendance
+                </h1>
+
+                <p>
+                    View students who are currently
+                    marked present for a meeting.
+                </p>
+
+            </div>
+
+
+            <!-- MEETING SELECTOR -->
+
+            <section class="card meeting-card">
+
+                <label for="meetingSelect">
+                    SELECT MEETING
+                </label>
+
+
+                <select id="meetingSelect">
+
+                    <option value="">
+                        Select a meeting
+                    </option>
+
+                </select>
+
+
+                <div
+                    id="meetingStatus"
+                    class="meeting-status"
+                >
+                    Select a meeting to view attendance.
+                </div>
+
+            </section>
+
+
+            <!-- STATISTICS -->
+
+            <section class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        PRESENT
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="presentCount"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-description">
+                        Students marked present
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        ABSENT
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="absentCount"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-description">
+                        Students marked absent
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        TOTAL
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="totalCount"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-description">
+                        Registered students
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        ATTENDANCE RATE
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="attendanceRate"
+                    >
+                        0%
+                    </div>
+
+                    <div class="stat-description">
+                        Current meeting
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- LIVE LIST -->
+
+            <section class="card attendance-card">
+
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Currently Present
+                        </h2>
+
+                        <p>
+                            Students recorded as present
+                            for the selected meeting.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        class="live-indicator"
+                        id="liveIndicator"
+                    >
+
+                        <span class="live-dot"></span>
+
+                        LIVE
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="attendanceList"
+                    class="attendance-list"
+                >
+
+                    <div class="empty-state">
+
+                        Select a meeting to view
+                        live attendance.
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+        </section>
+
+
+    </main>
+
+
+    <script src="moderator-live-attendance.js"></script>
+
+</body>
+
+</html>
