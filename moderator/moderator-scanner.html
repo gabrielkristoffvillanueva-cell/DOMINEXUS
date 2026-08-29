@@ -20,20 +20,23 @@
     <!-- QR SCANNER LIBRARY -->
     <script
         src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"
-        defer
-    ></script>
+        defer>
+    </script>
 
     <script
         src="moderator-scanner.js"
-        defer
-    ></script>
+        defer>
+    </script>
 
 </head>
 
 
 <body>
 
-    <!-- SIDEBAR -->
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
 
     <aside class="sidebar">
 
@@ -65,55 +68,82 @@
             </div>
 
 
-            <a href="moderator-dashboard.html" class="nav-item">
+            <a
+                href="moderator-dashboard.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">▦</span>
                 Dashboard
             </a>
 
 
-            <a href="moderator-meetings.html" class="nav-item">
+            <a
+                href="moderator-meetings.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">◫</span>
                 Meeting Management
             </a>
 
 
-            <a href="moderator-scanner.html" class="nav-item active">
+            <a
+                href="moderator-scanner.html"
+                class="nav-item active"
+            >
                 <span class="nav-icon">▣</span>
                 QR Scanner
             </a>
 
 
-            <a href="moderator-live-attendance.html" class="nav-item">
+            <a
+                href="moderator-live-attendance.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">●</span>
                 Live Attendance
             </a>
 
 
-            <a href="moderator-students.html" class="nav-item">
+            <a
+                href="moderator-students.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">♙</span>
                 Student Records
             </a>
 
 
-            <a href="moderator-history.html" class="nav-item">
+            <a
+                href="moderator-history.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">▤</span>
                 Attendance History
             </a>
 
 
-            <a href="moderator-participation.html" class="nav-item">
+            <a
+                href="moderator-participation.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">◔</span>
                 Participation
             </a>
 
 
-            <a href="moderator-alerts.html" class="nav-item">
+            <a
+                href="moderator-alerts.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">!</span>
                 Notifications
             </a>
 
 
-            <a href="moderator-reports.html" class="nav-item">
+            <a
+                href="moderator-reports.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">▥</span>
                 Reports
             </a>
@@ -132,7 +162,9 @@
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- =========================================
+         MAIN
+    ========================================== -->
 
     <main class="main">
 
@@ -191,7 +223,9 @@
             </div>
 
 
-            <!-- MEETING -->
+            <!-- =====================================
+                 MEETING
+            ====================================== -->
 
             <section class="card meeting-card">
 
@@ -213,14 +247,23 @@
                     class="meeting-status"
                     id="meetingStatus"
                 >
-                    Please select a meeting before
-                    starting the scanner.
+                    Select a meeting to record attendance.
                 </div>
+
+
+                <a
+                    href="moderator-meetings.html"
+                    class="meeting-link"
+                >
+                    + Create or manage meetings
+                </a>
 
             </section>
 
 
-            <!-- SCANNER -->
+            <!-- =====================================
+                 SCANNER
+            ====================================== -->
 
             <section class="scanner-layout">
 
@@ -237,8 +280,8 @@
                             </h2>
 
                             <p>
-                                Position the student's
-                                QR code inside the frame.
+                                Position the student's QR
+                                code inside the frame.
                             </p>
 
                         </div>
@@ -251,7 +294,9 @@
 
                             <span class="indicator-dot"></span>
 
-                            <span id="scannerIndicatorText">
+                            <span
+                                id="scannerIndicatorText"
+                            >
                                 Scanner Off
                             </span>
 
@@ -273,16 +318,28 @@
                         ></div>
 
 
-                        <div class="scan-frame">
+                        <div
+                            class="scan-frame"
+                        >
 
-                            <span class="corner top-left"></span>
-                            <span class="corner top-right"></span>
-                            <span class="corner bottom-left"></span>
-                            <span class="corner bottom-right"></span>
+                            <span
+                                class="corner top-left"
+                            ></span>
+
+                            <span
+                                class="corner top-right"
+                            ></span>
+
+                            <span
+                                class="corner bottom-left"
+                            ></span>
+
+                            <span
+                                class="corner bottom-right"
+                            ></span>
 
                             <div
                                 class="scan-line"
-                                id="scanLine"
                             ></div>
 
                         </div>
@@ -292,7 +349,8 @@
                             class="scanner-message"
                             id="scannerMessage"
                         >
-                            Scanner is ready.
+                            Click "Start QR Scanner"
+                            to activate the camera.
                         </div>
 
                     </div>
@@ -326,7 +384,9 @@
                 </div>
 
 
-                <!-- MANUAL BACKUP -->
+                <!-- =================================
+                     MANUAL ID
+                ================================== -->
 
                 <div class="card manual-card">
 
@@ -337,8 +397,7 @@
 
                     <p>
                         If the student's QR code cannot
-                        be scanned, enter their Unique ID
-                        manually.
+                        be scanned, enter their Unique ID.
                     </p>
 
 
@@ -375,7 +434,9 @@
             </section>
 
 
-            <!-- STUDENT RESULT -->
+            <!-- =====================================
+                 STUDENT RESULT
+            ====================================== -->
 
             <section
                 class="card student-card hidden"
@@ -391,8 +452,8 @@
                         </h2>
 
                         <p>
-                            Verify the information
-                            before recording attendance.
+                            Verify the information before
+                            recording attendance.
                         </p>
 
                     </div>
@@ -400,7 +461,6 @@
 
                     <span
                         class="verified-badge"
-                        id="verifiedBadge"
                     >
                         Verified
                     </span>
@@ -409,6 +469,7 @@
 
 
                 <div class="student-details">
+
 
                     <div class="detail">
 
@@ -448,6 +509,7 @@
 
                     </div>
 
+
                 </div>
 
 
@@ -472,6 +534,7 @@
 
 
     </main>
+
 
 </body>
 

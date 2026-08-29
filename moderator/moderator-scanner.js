@@ -38,7 +38,9 @@ const scannerIndicator =
     document.getElementById("scannerIndicator");
 
 const scannerIndicatorText =
-    document.getElementById("scannerIndicatorText");
+    document.getElementById(
+        "scannerIndicatorText"
+    );
 
 const scannerMessage =
     document.getElementById("scannerMessage");
@@ -47,7 +49,9 @@ const manualUniqueId =
     document.getElementById("manualUniqueId");
 
 const manualSearchButton =
-    document.getElementById("manualSearchButton");
+    document.getElementById(
+        "manualSearchButton"
+    );
 
 const manualStatus =
     document.getElementById("manualStatus");
@@ -62,37 +66,61 @@ const studentId =
     document.getElementById("studentId");
 
 const studentUniqueId =
-    document.getElementById("studentUniqueId");
+    document.getElementById(
+        "studentUniqueId"
+    );
 
 const studentMessage =
-    document.getElementById("studentMessage");
+    document.getElementById(
+        "studentMessage"
+    );
 
 const confirmAttendanceButton =
-    document.getElementById("confirmAttendanceButton");
+    document.getElementById(
+        "confirmAttendanceButton"
+    );
 
 const logoutButton =
     document.getElementById("logoutButton");
 
 const moderatorNameElement =
-    document.getElementById("moderatorName");
+    document.getElementById(
+        "moderatorName"
+    );
 
 const moderatorAvatar =
-    document.getElementById("moderatorAvatar");
+    document.getElementById(
+        "moderatorAvatar"
+    );
 
 
 /* =========================================================
-   SCANNER VARIABLES
+   STORAGE KEYS
+========================================================= */
+
+const MEETINGS_KEY =
+    "dominexus_meetings";
+
+const STUDENTS_KEY =
+    "dominexus_students";
+
+const ATTENDANCE_KEY =
+    "dominexus_attendance";
+
+
+/* =========================================================
+   VARIABLES
 ========================================================= */
 
 let html5QrCode = null;
 
 let scannerRunning = false;
 
+let currentStudent = null;
+
 let lastDecodedValue = "";
 
 let lastDecodedAt = 0;
-
-let currentStudent = null;
 
 
 /* =========================================================
@@ -100,7 +128,9 @@ let currentStudent = null;
 ========================================================= */
 
 const moderatorName =
-    sessionStorage.getItem("moderatorName") ||
+    sessionStorage.getItem(
+        "moderatorName"
+    ) ||
     "System Moderator";
 
 
@@ -109,106 +139,161 @@ moderatorNameElement.textContent =
 
 
 moderatorAvatar.textContent =
-    getInitials(moderatorName);
+    getInitials(
+        moderatorName
+    );
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+loadMeetings();
 
 
 /* =========================================================
    LOAD MEETINGS
 ========================================================= */
 
-loadMeetings();
-
-
 function loadMeetings() {
 
-    meetingSelect.innerHTML = `
-        <option value="">
-            Select a meeting
-        </option>
-    `;
+    const previousValue =
+        meetingSelect.value;
 
 
-    let meetings = [];
+    meetingSelect.innerHTML = "";
 
 
-    try {
-
-        const raw =
-            localStorage.getItem(
-                "dominexus_meetings"
-            );
+    const defaultOption =
+        document.createElement("option");
 
 
-        if (raw) {
+    defaultOption.value = "";
 
-            const parsed =
-                JSON.parse(raw);
-
-
-            if (
-                Array.isArray(parsed)
-            ) {
-
-                meetings =
-                    parsed;
-
-            }
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Unable to load meetings.",
-            error
-        );
-
-    }
+    defaultOption.textContent =
+        "Select a meeting";
 
 
-    meetings.forEach(
-        function(meeting) {
-
-            const option =
-                document.createElement("option");
-
-
-            option.value =
-                meeting.id;
-
-
-            option.textContent =
-                buildMeetingLabel(meeting);
-
-
-            meetingSelect.appendChild(
-                option
-            );
-
-        }
+    meetingSelect.appendChild(
+        defaultOption
     );
+
+
+    const meetings =
+        getMeetings();
 
 
     if (
         meetings.length === 0
     ) {
 
-        const option =
-            document.createElement("option");
+        const emptyOption =
+            document.createElement(
+                "option"
+            );
 
 
-        option.value = "";
+        emptyOption.value = "";
 
-        option.textContent =
-            "No meetings available";
+        emptyOption.textContent =
+            "No meetings available — create one first";
 
-        option.disabled =
+        emptyOption.disabled =
             true;
 
 
         meetingSelect.appendChild(
-            option
+            emptyOption
         );
+
+
+        meetingStatus.textContent =
+            "No meetings found on this browser. Create a meeting first.";
+
+
+        meetingStatus.classList.add(
+            "warning"
+        );
+
+
+        return;
+
+    }
+
+
+    meetingStatus.textContent =
+        "Select a meeting to record attendance.";
+
+
+    meetingStatus.classList.remove(
+        "warning"
+    );
+
+
+    meetings
+        .sort(
+            function(a, b) {
+
+                return (
+                    new Date(
+                        b.createdAt ||
+                        0
+                    ) -
+                    new Date(
+                        a.createdAt ||
+                        0
+                    )
+                );
+
+            }
+        )
+        .forEach(
+            function(meeting) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    meeting.id;
+
+
+                option.textContent =
+                    buildMeetingLabel(
+                        meeting
+                    );
+
+
+                meetingSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+    if (
+        previousValue &&
+        meetings.some(
+            function(meeting) {
+
+                return (
+                    String(
+                        meeting.id
+                    ) ===
+                    String(
+                        previousValue
+                    )
+                );
+
+            }
+        )
+    ) {
+
+        meetingSelect.value =
+            previousValue;
 
     }
 
@@ -216,96 +301,259 @@ function loadMeetings() {
 
 
 /* =========================================================
-   MEETING SELECTION
+   GET MEETINGS
+========================================================= */
+
+function getMeetings() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                MEETINGS_KEY
+            );
+
+
+        if (!raw) {
+
+            return [];
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                raw
+            );
+
+
+        /*
+         * Normal DOMINEXUS format:
+         * Array
+         */
+
+        if (
+            Array.isArray(
+                parsed
+            )
+        ) {
+
+            return parsed;
+
+        }
+
+
+        /*
+         * Extra compatibility in case
+         * the backend later changes the
+         * storage structure.
+         */
+
+        if (
+            parsed &&
+            Array.isArray(
+                parsed.meetings
+            )
+        ) {
+
+            return parsed.meetings;
+
+        }
+
+
+        if (
+            parsed &&
+            Array.isArray(
+                parsed.data
+            )
+        ) {
+
+            return parsed.data;
+
+        }
+
+
+        return [];
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "DOMINEXUS: Could not read meetings.",
+            error
+        );
+
+
+        return [];
+
+    }
+
+}
+
+
+/* =========================================================
+   MEETING CHANGE
 ========================================================= */
 
 meetingSelect.addEventListener(
     "change",
     function() {
 
-        const selected =
-            meetingSelect.value;
-
-
-        if (!selected) {
+        if (
+            !meetingSelect.value
+        ) {
 
             meetingStatus.textContent =
-                "Please select a meeting before starting the scanner.";
-
-            meetingStatus.style.color =
-                "#888";
+                "Select a meeting to record attendance.";
 
             return;
 
         }
 
 
-        meetingStatus.textContent =
-            "Meeting selected. The scanner can now be started.";
+        const meetings =
+            getMeetings();
 
-        meetingStatus.style.color =
-            "#198754";
+
+        const meeting =
+            meetings.find(
+                function(item) {
+
+                    return (
+                        String(
+                            item.id
+                        ) ===
+                        String(
+                            meetingSelect.value
+                        )
+                    );
+
+                }
+            );
+
+
+        if (meeting) {
+
+            meetingStatus.textContent =
+                "Selected: " +
+                buildMeetingLabel(
+                    meeting
+                );
+
+        }
 
     }
 );
 
 
 /* =========================================================
-   START SCANNER
+   START CAMERA
 ========================================================= */
 
 startScannerButton.addEventListener(
     "click",
-    async function() {
-
-        if (!meetingSelect.value) {
-
-            meetingStatus.textContent =
-                "Please select a meeting first.";
-
-            meetingStatus.style.color =
-                "#7b1113";
-
-            return;
-
-        }
+    startScanner
+);
 
 
-        if (scannerRunning) {
+async function startScanner() {
 
-            return;
+    /*
+     * IMPORTANT:
+     * A meeting is NOT required just to
+     * start the camera.
+     */
 
-        }
+    if (
+        scannerRunning
+    ) {
+
+        return;
+
+    }
 
 
-        if (
-            typeof Html5Qrcode ===
-            "undefined"
-        ) {
+    if (
+        typeof Html5Qrcode ===
+        "undefined"
+    ) {
 
-            scannerMessage.textContent =
-                "QR scanner library did not load. Check your internet connection.";
+        scannerMessage.textContent =
+            "QR scanner library did not load. Make sure you are connected to the internet.";
 
-            return;
 
-        }
+        console.error(
+            "Html5Qrcode is undefined."
+        );
 
+
+        return;
+
+    }
+
+
+    try {
+
+        startScannerButton.disabled =
+            true;
+
+
+        scannerMessage.textContent =
+            "Requesting camera permission...";
+
+
+        html5QrCode =
+            new Html5Qrcode(
+                "qr-reader"
+            );
+
+
+        /*
+         * First try the rear/environment
+         * camera.
+         */
 
         try {
 
-            scannerMessage.textContent =
-                "Requesting camera permission...";
+            await html5QrCode.start(
+
+                {
+                    facingMode:
+                        "environment"
+                },
+
+                {
+                    fps: 10,
+
+                    qrbox: {
+                        width: 250,
+                        height: 250
+                    },
+
+                    aspectRatio: 1.0
+
+                },
+
+                handleQrSuccess,
+
+                handleQrError
+
+            );
+
+        }
+
+        catch (environmentError) {
+
+            console.warn(
+                "Environment camera failed. Trying available camera.",
+                environmentError
+            );
 
 
-            startScannerButton.disabled =
-                true;
-
-
-            html5QrCode =
-                new Html5Qrcode(
-                    "qr-reader"
-                );
-
+            /*
+             * Fallback for laptops/desktops.
+             */
 
             const cameras =
                 await Html5Qrcode.getCameras();
@@ -323,182 +571,149 @@ startScannerButton.addEventListener(
             }
 
 
-            /*
-             * Use the first available camera
-             * by default.
-             */
-
-            let cameraId =
-                cameras[0].id;
-
-
-            /*
-             * Prefer the rear camera
-             * on phones.
-             */
-
-            const rearCamera =
-                cameras.find(
-                    function(camera) {
-
-                        const label =
-                            String(
-                                camera.label ||
-                                ""
-                            ).toLowerCase();
-
-
-                        return (
-                            label.includes("back") ||
-                            label.includes("rear") ||
-                            label.includes("environment")
-                        );
-
-                    }
-                );
-
-
-            if (rearCamera) {
-
-                cameraId =
-                    rearCamera.id;
-
-            }
-
-
             await html5QrCode.start(
 
-                cameraId,
+                cameras[0].id,
 
                 {
 
                     fps: 10,
 
                     qrbox: {
-                        width: 230,
-                        height: 230
+                        width: 250,
+                        height: 250
                     },
 
-                    aspectRatio: 1.0,
-
-                    formatsToSupport: [
-                        Html5QrcodeSupportedFormats.QR_CODE
-                    ]
+                    aspectRatio: 1.0
 
                 },
 
-                onQrSuccess,
+                handleQrSuccess,
 
-                onQrError
+                handleQrError
 
             );
-
-
-            scannerRunning =
-                true;
-
-
-            setScannerActive(
-                true
-            );
-
-
-            scannerMessage.textContent =
-                "Scanner is active. Position the student's QR code inside the frame.";
-
-
-            stopScannerButton.disabled =
-                false;
 
         }
 
-        catch (error) {
 
-            console.error(
-                "DOMINEXUS: Scanner failed to start:",
-                error
-            );
+        scannerRunning =
+            true;
 
 
-            scannerRunning =
-                false;
+        setScannerActive(
+            true
+        );
 
 
-            setScannerActive(
-                false
-            );
+        scannerMessage.textContent =
+            "Camera is active. Point it at a QR code.";
 
 
-            startScannerButton.disabled =
-                false;
-
-
-            stopScannerButton.disabled =
-                true;
-
-
-            let message =
-                "Unable to start the camera.";
-
-
-            const errorText =
-                String(
-                    error?.message ||
-                    error ||
-                    ""
-                ).toLowerCase();
-
-
-            if (
-                errorText.includes(
-                    "permission"
-                )
-            ) {
-
-                message =
-                    "Camera permission was denied. Allow camera access and try again.";
-
-            }
-
-            else if (
-                errorText.includes(
-                    "no camera"
-                )
-            ) {
-
-                message =
-                    "No camera was found on this device.";
-
-            }
-
-            else {
-
-                message =
-                    "Unable to start the camera. Check your camera permission and try again.";
-
-            }
-
-
-            scannerMessage.textContent =
-                message;
-
-        }
+        stopScannerButton.disabled =
+            false;
 
     }
-);
+
+    catch (error) {
+
+        console.error(
+            "DOMINEXUS CAMERA ERROR:",
+            error
+        );
+
+
+        scannerRunning =
+            false;
+
+
+        startScannerButton.disabled =
+            false;
+
+
+        stopScannerButton.disabled =
+            true;
+
+
+        setScannerActive(
+            false
+        );
+
+
+        let message =
+            "Unable to start the camera.";
+
+
+        const errorText =
+            String(
+                error?.message ||
+                error ||
+                ""
+            ).toLowerCase();
+
+
+        if (
+            errorText.includes(
+                "permission"
+            ) ||
+            errorText.includes(
+                "notallowed"
+            )
+        ) {
+
+            message =
+                "Camera permission was denied. Allow camera access in your browser.";
+
+        }
+
+        else if (
+            errorText.includes(
+                "notfound"
+            ) ||
+            errorText.includes(
+                "no camera"
+            )
+        ) {
+
+            message =
+                "No camera was found on this device.";
+
+        }
+
+        else if (
+            errorText.includes(
+                "secure"
+            )
+        ) {
+
+            message =
+                "Camera requires HTTPS or localhost.";
+
+        }
+
+        else {
+
+            message =
+                "Camera could not start. Open the browser console for the exact error.";
+
+        }
+
+
+        scannerMessage.textContent =
+            message;
+
+    }
+
+}
 
 
 /* =========================================================
    QR SUCCESS
 ========================================================= */
 
-function onQrSuccess(
+function handleQrSuccess(
     decodedText
 ) {
-
-    const now =
-        Date.now();
-
 
     const value =
         String(
@@ -514,14 +729,21 @@ function onQrSuccess(
     }
 
 
+    const now =
+        Date.now();
+
+
     /*
-     * Prevent repeated detection of the
-     * same QR code within 3 seconds.
+     * Prevent the same QR code from
+     * being processed repeatedly.
      */
 
     if (
-        value === lastDecodedValue &&
-        now - lastDecodedAt < 3000
+        value ===
+        lastDecodedValue &&
+        now -
+        lastDecodedAt <
+        3000
     ) {
 
         return;
@@ -538,13 +760,13 @@ function onQrSuccess(
 
 
     console.log(
-        "DOMINEXUS QR DECODED:",
+        "DOMINEXUS QR:",
         value
     );
 
 
     scannerMessage.textContent =
-        "QR detected. Verifying student...";
+        "QR detected. Looking for student...";
 
 
     findStudent(
@@ -555,17 +777,19 @@ function onQrSuccess(
 
 
 /* =========================================================
-   QR ERROR
+   QR SCAN ERROR
 ========================================================= */
 
-function onQrError(
+function handleQrError(
     errorMessage
 ) {
 
     /*
-     * Ignore temporary scanning errors.
-     * The library calls this repeatedly while
-     * searching for a QR code.
+     * html5-qrcode calls this repeatedly
+     * while it is searching.
+     *
+     * Do not display these messages to
+     * the user because they are normal.
      */
 
 }
@@ -583,7 +807,9 @@ function findStudent(
         String(
             uniqueId ||
             ""
-        ).trim();
+        )
+        .trim()
+        .toUpperCase();
 
 
     if (!cleanedId) {
@@ -593,51 +819,15 @@ function findStudent(
     }
 
 
-    let students = [];
-
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                "dominexus_students"
-            );
-
-
-        if (raw) {
-
-            const parsed =
-                JSON.parse(raw);
-
-
-            if (
-                Array.isArray(parsed)
-            ) {
-
-                students =
-                    parsed;
-
-            }
-
-        }
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "DOMINEXUS: Student data error:",
-            error
-        );
-
-    }
+    const students =
+        getStudents();
 
 
     const student =
         students.find(
             function(item) {
 
-                const storedUniqueId =
+                const storedId =
                     String(
                         item.uniqueId ||
                         ""
@@ -647,8 +837,8 @@ function findStudent(
 
 
                 return (
-                    storedUniqueId ===
-                    cleanedId.toUpperCase()
+                    storedId ===
+                    cleanedId
                 );
 
             }
@@ -683,6 +873,87 @@ function findStudent(
 
 
 /* =========================================================
+   GET STUDENTS
+========================================================= */
+
+function getStudents() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                STUDENTS_KEY
+            );
+
+
+        if (!raw) {
+
+            return [];
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                raw
+            );
+
+
+        if (
+            Array.isArray(
+                parsed
+            )
+        ) {
+
+            return parsed;
+
+        }
+
+
+        if (
+            parsed &&
+            Array.isArray(
+                parsed.students
+            )
+        ) {
+
+            return parsed.students;
+
+        }
+
+
+        if (
+            parsed &&
+            Array.isArray(
+                parsed.data
+            )
+        ) {
+
+            return parsed.data;
+
+        }
+
+
+        return [];
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "DOMINEXUS: Student data error.",
+            error
+        );
+
+
+        return [];
+
+    }
+
+}
+
+
+/* =========================================================
    DISPLAY STUDENT
 ========================================================= */
 
@@ -697,7 +968,7 @@ function displayStudent(
     studentName.textContent =
         student.fullName ||
         student.name ||
-        "Unknown";
+        "Unknown Student";
 
 
     studentId.textContent =
@@ -728,7 +999,7 @@ function displayStudent(
 
 
     /*
-     * Stop the camera after successful detection.
+     * Stop camera after successful scan.
      */
 
     stopScanner();
@@ -746,10 +1017,6 @@ manualSearchButton.addEventListener(
 
         const value =
             manualUniqueId.value.trim();
-
-
-        manualStatus.textContent =
-            "";
 
 
         if (!value) {
@@ -772,6 +1039,29 @@ manualSearchButton.addEventListener(
         findStudent(
             value
         );
+
+
+        if (
+            currentStudent
+        ) {
+
+            manualStatus.textContent =
+                "Student found.";
+
+            manualStatus.style.color =
+                "#198754";
+
+        }
+
+        else {
+
+            manualStatus.textContent =
+                "No student found.";
+
+            manualStatus.style.color =
+                "#7b1113";
+
+        }
 
     }
 );
@@ -808,20 +1098,40 @@ confirmAttendanceButton.addEventListener(
     "click",
     function() {
 
-        if (!meetingSelect.value) {
+        /*
+         * NOW a meeting IS required.
+         */
+
+        if (
+            !meetingSelect.value
+        ) {
 
             studentMessage.textContent =
-                "Please select a meeting first.";
+                "Please select a meeting before confirming attendance.";
 
             studentMessage.style.color =
                 "#7b1113";
+
+
+            meetingStatus.textContent =
+                "A meeting is required to record attendance.";
+
+            meetingStatus.classList.add(
+                "warning"
+            );
+
+
+            meetingSelect.focus();
+
 
             return;
 
         }
 
 
-        if (!currentStudent) {
+        if (
+            !currentStudent
+        ) {
 
             studentMessage.textContent =
                 "No student is currently selected.";
@@ -829,35 +1139,126 @@ confirmAttendanceButton.addEventListener(
             studentMessage.style.color =
                 "#7b1113";
 
+
             return;
 
         }
 
 
-        /*
-         * Backend/database connection will be added later.
-         */
-
-        studentMessage.textContent =
-            "Attendance confirmed for this student.";
-
-        studentMessage.style.color =
-            "#198754";
-
-
-        console.log(
-            "DOMINEXUS ATTENDANCE:",
-            {
-                meetingId:
-                    meetingSelect.value,
-
-                student:
-                    currentStudent
-            }
+        recordAttendance(
+            currentStudent,
+            meetingSelect.value
         );
 
     }
 );
+
+
+/* =========================================================
+   RECORD ATTENDANCE
+========================================================= */
+
+function recordAttendance(
+    student,
+    meetingId
+) {
+
+    let attendance =
+        {};
+
+
+    try {
+
+        attendance =
+            JSON.parse(
+                localStorage.getItem(
+                    ATTENDANCE_KEY
+                ) ||
+                "{}"
+            );
+
+    }
+
+    catch (error) {
+
+        attendance =
+            {};
+
+    }
+
+
+    if (
+        !attendance[meetingId]
+    ) {
+
+        attendance[meetingId] =
+            {};
+
+    }
+
+
+    const uniqueId =
+        student.uniqueId ||
+        student.studentId;
+
+
+    attendance[meetingId][
+        uniqueId
+    ] = {
+
+        studentId:
+            student.studentId ||
+            "",
+
+        uniqueId:
+            student.uniqueId ||
+            "",
+
+        studentName:
+            student.fullName ||
+            student.name ||
+            "",
+
+        status:
+            "Present",
+
+        recordedAt:
+            new Date()
+                .toISOString(),
+
+        recordedBy:
+            sessionStorage.getItem(
+                "moderatorId"
+            ) ||
+            "MOD-0001"
+
+    };
+
+
+    localStorage.setItem(
+        ATTENDANCE_KEY,
+        JSON.stringify(
+            attendance
+        )
+    );
+
+
+    studentMessage.textContent =
+        "Attendance successfully recorded.";
+
+
+    studentMessage.style.color =
+        "#198754";
+
+
+    console.log(
+        "DOMINEXUS ATTENDANCE RECORDED:",
+        attendance[meetingId][
+            uniqueId
+        ]
+    );
+
+}
 
 
 /* =========================================================
@@ -866,42 +1267,49 @@ confirmAttendanceButton.addEventListener(
 
 async function stopScanner() {
 
-    if (html5QrCode) {
+    if (
+        !html5QrCode
+    ) {
 
-        try {
+        return;
 
-            if (scannerRunning) {
+    }
 
-                await html5QrCode.stop();
 
-            }
+    try {
 
-        }
+        if (
+            scannerRunning
+        ) {
 
-        catch (error) {
-
-            console.warn(
-                "DOMINEXUS: Scanner stop warning:",
-                error
-            );
+            await html5QrCode.stop();
 
         }
 
+    }
 
-        try {
+    catch (error) {
 
-            await html5QrCode.clear();
+        console.warn(
+            "DOMINEXUS: Camera stop warning.",
+            error
+        );
 
-        }
+    }
 
-        catch (error) {
 
-            console.warn(
-                "DOMINEXUS: Scanner clear warning:",
-                error
-            );
+    try {
 
-        }
+        await html5QrCode.clear();
+
+    }
+
+    catch (error) {
+
+        console.warn(
+            "DOMINEXUS: Camera clear warning.",
+            error
+        );
 
     }
 
@@ -926,28 +1334,30 @@ async function stopScanner() {
         false
     );
 
+
+    scannerMessage.textContent =
+        "Scanner stopped.";
+
 }
 
 
 stopScannerButton.addEventListener(
     "click",
-    function() {
-
-        stopScanner();
-
-    }
+    stopScanner
 );
 
 
 /* =========================================================
-   SCANNER INDICATOR
+   SCANNER STATUS
 ========================================================= */
 
 function setScannerActive(
     active
 ) {
 
-    if (active) {
+    if (
+        active
+    ) {
 
         scannerIndicator.classList.add(
             "active"
@@ -1028,16 +1438,14 @@ function buildMeetingLabel(
     meeting
 ) {
 
-    const title =
+    let label =
         meeting.title ||
         "Untitled Meeting";
 
 
-    let label =
-        title;
-
-
-    if (meeting.date) {
+    if (
+        meeting.date
+    ) {
 
         label +=
             " — " +
@@ -1048,7 +1456,9 @@ function buildMeetingLabel(
     }
 
 
-    if (meeting.time) {
+    if (
+        meeting.time
+    ) {
 
         label +=
             " • " +
@@ -1121,7 +1531,8 @@ function formatTime(
 
 
     if (
-        parts.length < 2
+        parts.length <
+        2
     ) {
 
         return time;
@@ -1207,3 +1618,40 @@ function getInitials(
     ).toUpperCase();
 
 }
+
+
+/* =========================================================
+   REFRESH WHEN RETURNING TO PAGE
+========================================================= */
+
+window.addEventListener(
+    "pageshow",
+    function() {
+
+        loadMeetings();
+
+    }
+);
+
+
+/*
+ * If another DOMINEXUS page changes
+ * localStorage in another tab, update
+ * the meeting list automatically.
+ */
+
+window.addEventListener(
+    "storage",
+    function(event) {
+
+        if (
+            event.key ===
+            MEETINGS_KEY
+        ) {
+
+            loadMeetings();
+
+        }
+
+    }
+);
