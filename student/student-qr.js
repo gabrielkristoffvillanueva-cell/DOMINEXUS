@@ -1,57 +1,77 @@
 /* =========================================================
    DOMINEXUS — STUDENT QR CODE
-   Reliable QR Generator
+   Laravel / MySQL VERSION
 ========================================================= */
+
+const API_BASE = "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
-   LOAD QR LIBRARY
+   AUTHENTICATION
 ========================================================= */
 
-const qrScript =
-    document.createElement("script");
+if (
+    sessionStorage.getItem("studentLoggedIn") !== "true"
+) {
+    window.location.href = "student-login.html";
+}
 
-qrScript.src =
-    "https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js";
 
-qrScript.onload =
-    initializeQR;
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-qrScript.onerror =
-    function () {
+const studentNameElement =
+    document.getElementById("studentName");
 
-        console.error(
-            "DOMINEXUS: QR library failed to load."
-        );
+const studentIdElement =
+    document.getElementById("studentId");
 
-        alert(
-            "Unable to load the QR Code generator."
-        );
+const uniqueIdElement =
+    document.getElementById("uniqueId");
 
-    };
+const topStudentName =
+    document.getElementById("topStudentName");
 
-document.head.appendChild(
-    qrScript
-);
+const topStudentId =
+    document.getElementById("topStudentId");
+
+const topAvatar =
+    document.getElementById("topAvatar");
+
+const qrCodeContainer =
+    document.getElementById("qrCode");
+
+const downloadButton =
+    document.getElementById("downloadQR");
+
+const logoutButton =
+    document.getElementById("logoutButton");
 
 
 /* =========================================================
    INITIALIZE
 ========================================================= */
 
-function initializeQR() {
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeQR
+);
 
-    /* -----------------------------------------
-       LOGIN
-    ----------------------------------------- */
 
-    const loggedIn =
-        sessionStorage.getItem(
-            "studentLoggedIn"
+async function initializeQR() {
+
+    const studentId =
+        sessionStorage.getItem("studentId");
+
+
+    if (!studentId) {
+
+        alert(
+            "Your student session is missing. Please log in again."
         );
 
-
-    if (loggedIn !== "true") {
+        sessionStorage.clear();
 
         window.location.href =
             "student-login.html";
@@ -61,780 +81,371 @@ function initializeQR() {
     }
 
 
-    /* -----------------------------------------
-       CURRENT STUDENT
-    ----------------------------------------- */
-
-    const currentStudentId =
-        sessionStorage.getItem(
-            "studentId"
-        );
-
-
-    if (!currentStudentId) {
-
-        alert(
-            "Student information could not be found."
-        );
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------
-       LOAD STUDENTS
-    ----------------------------------------- */
-
-    let students = [];
-
-
     try {
 
-        students =
-            JSON.parse(
-                localStorage.getItem(
-                    "dominexus_students"
-                ) || "[]"
+        console.log(
+            "Loading student:",
+            studentId
+        );
+
+
+        /*
+         * Get the actual student from Laravel.
+         */
+
+        const response =
+            await fetch(
+                `${API_BASE}/students/by-student-id/${encodeURIComponent(studentId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
             );
 
-    } catch (error) {
 
-        console.error(
-            "DOMINEXUS student storage error:",
-            error
-        );
+        let data = {};
 
-        return;
 
-    }
+        try {
 
+            data =
+                await response.json();
 
-    /* -----------------------------------------
-       FIND REGISTERED STUDENT
-    ----------------------------------------- */
+        } catch (error) {
 
-    const registeredStudent =
-        students.find(
-            function (student) {
-
-                return (
-
-                    student.studentId &&
-
-                    String(
-                        student.studentId
-                    )
-                    .trim()
-                    .toLowerCase() ===
-
-                    String(
-                        currentStudentId
-                    )
-                    .trim()
-                    .toLowerCase()
-
-                );
-
-            }
-        );
-
-
-    /* -----------------------------------------
-       DO NOT CREATE A FAKE UNIQUE ID
-    ----------------------------------------- */
-
-    if (!registeredStudent) {
-
-        alert(
-            "Your registered student account could not be found."
-        );
-
-        console.error(
-            "Student not found:",
-            currentStudentId
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       STUDENT DATA
-    ================================================= */
-
-    const studentName =
-        registeredStudent.fullName ||
-        registeredStudent.name ||
-        "Student";
-
-
-    const studentId =
-        registeredStudent.studentId ||
-        "";
-
-
-    const uniqueId =
-        String(
-            registeredStudent.uniqueId ||
-            ""
-        )
-        .trim();
-
-
-    /* -----------------------------------------
-       UNIQUE ID IS REQUIRED
-    ----------------------------------------- */
-
-    if (!uniqueId) {
-
-        alert(
-            "Your account does not have a DOMINEXUS Unique ID."
-        );
-
-        console.error(
-            "Missing uniqueId:",
-            registeredStudent
-        );
-
-        return;
-
-    }
-
-
-    console.log(
-        "======================================"
-    );
-
-    console.log(
-        "DOMINEXUS STUDENT QR"
-    );
-
-    console.log(
-        "Student:",
-        studentName
-    );
-
-    console.log(
-        "Student ID:",
-        studentId
-    );
-
-    console.log(
-        "QR VALUE:",
-        uniqueId
-    );
-
-    console.log(
-        "QR VALUE LENGTH:",
-        uniqueId.length
-    );
-
-    console.log(
-        "======================================"
-    );
-
-
-    /* =================================================
-       DISPLAY STUDENT INFORMATION
-    ================================================= */
-
-    const studentNameElement =
-        document.getElementById(
-            "studentName"
-        );
-
-
-    const studentIdElement =
-        document.getElementById(
-            "studentId"
-        );
-
-
-    const uniqueIdElement =
-        document.getElementById(
-            "uniqueId"
-        );
-
-
-    const topStudentName =
-        document.getElementById(
-            "topStudentName"
-        );
-
-
-    const topStudentId =
-        document.getElementById(
-            "topStudentId"
-        );
-
-
-    const topAvatar =
-        document.getElementById(
-            "topAvatar"
-        );
-
-
-    if (studentNameElement) {
-
-        studentNameElement.textContent =
-            studentName;
-
-    }
-
-
-    if (studentIdElement) {
-
-        studentIdElement.textContent =
-            studentId;
-
-    }
-
-
-    if (uniqueIdElement) {
-
-        uniqueIdElement.textContent =
-            uniqueId;
-
-    }
-
-
-    if (topStudentName) {
-
-        topStudentName.textContent =
-            studentName;
-
-    }
-
-
-    if (topStudentId) {
-
-        topStudentId.textContent =
-            studentId;
-
-    }
-
-
-    if (topAvatar) {
-
-        topAvatar.textContent =
-            getInitials(
-                studentName
-            );
-
-    }
-
-
-    /* =================================================
-       QR CONTAINER
-    ================================================= */
-
-    const qrContainer =
-        document.getElementById(
-            "qrCode"
-        );
-
-
-    if (!qrContainer) {
-
-        console.error(
-            "DOMINEXUS: #qrCode not found."
-        );
-
-        return;
-
-    }
-
-
-    /* =================================================
-       CLEAR OLD QR
-    ================================================= */
-
-    qrContainer.innerHTML = "";
-
-
-    /*
-       Keep the QR itself at 300 × 300.
-
-       The surrounding white area is separate.
-    */
-
-    qrContainer.style.width =
-        "300px";
-
-    qrContainer.style.height =
-        "300px";
-
-    qrContainer.style.padding =
-        "15px";
-
-    qrContainer.style.backgroundColor =
-        "#ffffff";
-
-    qrContainer.style.display =
-        "flex";
-
-    qrContainer.style.alignItems =
-        "center";
-
-    qrContainer.style.justifyContent =
-        "center";
-
-    qrContainer.style.boxSizing =
-        "content-box";
-
-
-    /* =================================================
-       CREATE CANVAS
-    ================================================= */
-
-    const canvas =
-        document.createElement(
-            "canvas"
-        );
-
-
-    canvas.width =
-        300;
-
-    canvas.height =
-        300;
-
-
-    canvas.style.width =
-        "300px";
-
-    canvas.style.height =
-        "300px";
-
-    canvas.style.display =
-        "block";
-
-
-    qrContainer.appendChild(
-        canvas
-    );
-
-
-    /* =================================================
-       GENERATE QR
-    ================================================= */
-
-    QRCode.toCanvas(
-
-        canvas,
-
-        uniqueId,
-
-        {
-
-            /*
-             * LOW error correction keeps the QR
-             * simple and easier for cameras to read.
-             *
-             * The QR is displayed on a clean white
-             * background, so high correction is not needed.
-             */
-
-            errorCorrectionLevel:
-                "L",
-
-            width:
-                300,
-
-            margin:
-                4,
-
-            color: {
-
-                dark:
-                    "#000000",
-
-                light:
-                    "#ffffff"
-
-            }
-
-        },
-
-        function (error) {
-
-            if (error) {
-
-                console.error(
-                    "DOMINEXUS QR generation error:",
-                    error
-                );
-
-                qrContainer.innerHTML = "";
-
-                alert(
-                    "Unable to generate your QR Code."
-                );
-
-                return;
-
-            }
-
-
-            console.log(
-                "DOMINEXUS QR GENERATED SUCCESSFULLY."
-            );
-
-            console.log(
-                "QR contains ONLY:",
-                uniqueId
+            console.warn(
+                "Server did not return JSON."
             );
 
         }
 
-    );
 
-
-    /* =================================================
-       DOWNLOAD
-    ================================================= */
-
-    const downloadButton =
-        document.getElementById(
-            "downloadQrButton"
+        console.log(
+            "Student API response:",
+            data
         );
 
 
-    if (downloadButton) {
+        if (!response.ok) {
 
-        downloadButton.onclick =
-            function () {
+            throw new Error(
+                data.message ||
+                "Unable to load your student information."
+            );
 
-                /*
-                 * Use the actual canvas.
-                 */
-
-                const link =
-                    document.createElement(
-                        "a"
-                    );
+        }
 
 
-                link.download =
-                    uniqueId +
-                    "-DOMINEXUS-QR.png";
+        const student =
+            data.student ||
+            data.data ||
+            data;
 
 
-                link.href =
-                    canvas.toDataURL(
-                        "image/png"
-                    );
+        /*
+         * Get database values.
+         */
+
+        const name =
+            student.name ||
+            "Student";
 
 
-                link.click();
-
-            };
-
-    }
+        const actualStudentId =
+            student.student_id ||
+            studentId;
 
 
-    /* =================================================
-       PRINT
-    ================================================= */
+        const uniqueId =
+            student.unique_id;
 
-    const printButton =
-        document.getElementById(
-            "printQrButton"
+
+        if (!uniqueId) {
+
+            throw new Error(
+                "Your account does not have a Unique ID yet."
+            );
+
+        }
+
+
+        /*
+         * Display student information.
+         */
+
+        if (studentNameElement) {
+
+            studentNameElement.textContent =
+                name;
+
+        }
+
+
+        if (studentIdElement) {
+
+            studentIdElement.textContent =
+                actualStudentId;
+
+        }
+
+
+        if (uniqueIdElement) {
+
+            uniqueIdElement.textContent =
+                uniqueId;
+
+        }
+
+
+        if (topStudentName) {
+
+            topStudentName.textContent =
+                name;
+
+        }
+
+
+        if (topStudentId) {
+
+            topStudentId.textContent =
+                actualStudentId;
+
+        }
+
+
+        if (topAvatar) {
+
+            topAvatar.textContent =
+                getInitials(name);
+
+        }
+
+
+        /*
+         * Generate QR.
+         *
+         * IMPORTANT:
+         * The QR contains ONLY the Unique ID.
+         */
+
+        generateQRCode(
+            uniqueId
         );
 
 
-    if (printButton) {
-
-        printButton.onclick =
-            function () {
-
-                printQRCode(
-                    studentName,
-                    studentId,
-                    uniqueId,
-                    canvas
-                );
-
-            };
-
-    }
-
-
-    /* =================================================
-       LOGOUT
-    ================================================= */
-
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
+        console.log(
+            "DOMINEXUS QR generated:",
+            uniqueId
         );
 
 
-    if (logoutButton) {
+    } catch (error) {
 
-        logoutButton.onclick =
-            logoutStudent;
+        console.error(
+            "DOMINEXUS QR ERROR:",
+            error
+        );
+
+
+        if (qrCodeContainer) {
+
+            qrCodeContainer.innerHTML = `
+                <div class="qr-error">
+                    Unable to load QR code.
+                </div>
+            `;
+
+        }
+
+
+        alert(
+            "Unable to load your QR code.\n\n" +
+            error.message
+        );
 
     }
-
-
-    /* =================================================
-       MOBILE MENU
-    ================================================= */
-
-    setupMobileMenu();
 
 }
 
 
 /* =========================================================
-   PRINT QR
+   GENERATE QR CODE
 ========================================================= */
 
-function printQRCode(
-    studentName,
-    studentId,
-    uniqueId,
-    canvas
+function generateQRCode(
+    uniqueId
 ) {
 
-    if (!canvas) {
+    if (!qrCodeContainer) {
 
-        alert(
-            "QR Code is not ready yet."
+        console.error(
+            "QR container was not found."
         );
 
         return;
 
     }
+
+
+    /*
+     * Make sure the QR library loaded.
+     */
+
+    if (
+        typeof QRCode ===
+        "undefined"
+    ) {
+
+        console.error(
+            "QRCode library is not loaded."
+        );
+
+
+        qrCodeContainer.innerHTML = `
+            <div class="qr-error">
+                QR Code library failed to load.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    /*
+     * Clear old QR.
+     */
+
+    qrCodeContainer.innerHTML = "";
+
+
+    /*
+     * White background makes the QR
+     * easier for scanners to read.
+     */
+
+    /*
+     * Generate QR.
+     */
+
+    new QRCode(
+        qrCodeContainer,
+        {
+            text: String(uniqueId),
+
+            width: 280,
+
+            height: 280,
+
+            colorDark: "#000000",
+
+            colorLight: "#ffffff",
+
+            correctLevel:
+                QRCode.CorrectLevel.M
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DOWNLOAD QR
+========================================================= */
+
+if (downloadButton) {
+
+    downloadButton.addEventListener(
+        "click",
+        downloadQRCode
+    );
+
+}
+
+
+function downloadQRCode() {
+
+    if (!qrCodeContainer) {
+
+        return;
+
+    }
+
+
+    const canvas =
+        qrCodeContainer.querySelector(
+            "canvas"
+        );
 
 
     const image =
-        canvas.toDataURL(
-            "image/png"
+        qrCodeContainer.querySelector(
+            "img"
         );
 
 
-    const printWindow =
-        window.open(
-            "",
-            "_blank",
-            "width=600,height=700"
-        );
+    /*
+     * html5-qrcode / qrcode libraries
+     * can render either canvas or img.
+     */
+
+    if (canvas) {
+
+        const link =
+            document.createElement("a");
 
 
-    if (!printWindow) {
+        link.download =
+            "DOMINEXUS-Student-QR.png";
 
-        alert(
-            "Please allow pop-ups to print the QR code."
-        );
+
+        link.href =
+            canvas.toDataURL(
+                "image/png"
+            );
+
+
+        link.click();
+
 
         return;
 
     }
 
 
-    printWindow.document.write(`
+    if (image) {
 
-        <!DOCTYPE html>
-
-        <html>
-
-        <head>
-
-            <title>
-                DOMINEXUS QR Code
-            </title>
-
-            <style>
-
-                body {
-
-                    font-family:
-                        Arial,
-                        sans-serif;
-
-                    text-align:
-                        center;
-
-                    padding:
-                        40px;
-
-                }
-
-                h1 {
-
-                    color:
-                        #8b0000;
-
-                }
-
-                img {
-
-                    width:
-                        300px;
-
-                    height:
-                        300px;
-
-                    margin:
-                        25px;
-
-                }
-
-                p {
-
-                    margin:
-                        8px;
-
-                }
-
-            </style>
-
-        </head>
-
-        <body>
-
-            <h1>
-                DOMINEXUS
-            </h1>
-
-            <h2>
-                Student Attendance QR Code
-            </h2>
-
-            <img
-                src="${image}"
-            >
-
-            <p>
-                <strong>
-                    ${studentName}
-                </strong>
-            </p>
-
-            <p>
-                Student ID:
-                ${studentId}
-            </p>
-
-            <p>
-                Unique ID:
-                ${uniqueId}
-            </p>
-
-            <script>
-
-                window.onload =
-                    function () {
-
-                        window.print();
-
-                    };
-
-            <\/script>
-
-        </body>
-
-        </html>
-
-    `);
+        const link =
+            document.createElement("a");
 
 
-    printWindow.document.close();
-
-}
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-function setupMobileMenu() {
-
-    const menuButton =
-        document.getElementById(
-            "menuButton"
-        );
+        link.download =
+            "DOMINEXUS-Student-QR.png";
 
 
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
+        link.href =
+            image.src;
 
 
-    const sidebarOverlay =
-        document.getElementById(
-            "sidebarOverlay"
-        );
+        link.target =
+            "_blank";
 
 
-    if (
-        !menuButton ||
-        !sidebar ||
-        !sidebarOverlay
-    ) {
+        link.click();
+
 
         return;
 
     }
 
 
-    menuButton.onclick =
-        function () {
-
-            sidebar.classList.add(
-                "open"
-            );
-
-            sidebarOverlay.classList.add(
-                "show"
-            );
-
-        };
-
-
-    sidebarOverlay.onclick =
-        function () {
-
-            sidebar.classList.remove(
-                "open"
-            );
-
-            sidebarOverlay.classList.remove(
-                "show"
-            );
-
-        };
-
-
-    document
-        .querySelectorAll(
-            ".nav-item"
-        )
-        .forEach(
-            function (link) {
-
-                link.addEventListener(
-                    "click",
-                    function () {
-
-                        sidebar.classList.remove(
-                            "open"
-                        );
-
-                        sidebarOverlay.classList.remove(
-                            "show"
-                        );
-
-                    }
-                );
-
-            }
-        );
+    alert(
+        "QR code is not ready yet."
+    );
 
 }
 
@@ -843,38 +454,33 @@ function setupMobileMenu() {
    LOGOUT
 ========================================================= */
 
-function logoutStudent() {
+if (logoutButton) {
 
-    if (
-        !confirm(
-            "Are you sure you want to log out?"
-        )
-    ) {
+    logoutButton.addEventListener(
+        "click",
+        function() {
 
-        return;
+            const confirmed =
+                confirm(
+                    "Are you sure you want to log out?"
+                );
 
-    }
+
+            if (!confirmed) {
+
+                return;
+
+            }
 
 
-    sessionStorage.removeItem(
-        "studentLoggedIn"
+            sessionStorage.clear();
+
+
+            window.location.href =
+                "student-login.html";
+
+        }
     );
-
-    sessionStorage.removeItem(
-        "studentId"
-    );
-
-    sessionStorage.removeItem(
-        "studentName"
-    );
-
-    sessionStorage.removeItem(
-        "studentUniqueId"
-    );
-
-
-    window.location.href =
-        "student-login.html";
 
 }
 
@@ -883,7 +489,9 @@ function logoutStudent() {
    INITIALS
 ========================================================= */
 
-function getInitials(name) {
+function getInitials(
+    name
+) {
 
     if (!name) {
 
@@ -893,7 +501,7 @@ function getInitials(name) {
 
 
     const parts =
-        name
+        String(name)
             .trim()
             .split(/\s+/);
 
@@ -903,7 +511,10 @@ function getInitials(name) {
     ) {
 
         return parts[0]
-            .substring(0, 2)
+            .substring(
+                0,
+                2
+            )
             .toUpperCase();
 
     }

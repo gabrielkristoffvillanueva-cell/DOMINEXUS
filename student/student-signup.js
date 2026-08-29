@@ -372,7 +372,7 @@ if (signupForm) {
 
                 isValid = false;
 
-            } else if (password.length < 6) {
+            } else if (password.length < 8) {
 
                 showError(
                     "password",

@@ -410,34 +410,29 @@ body {
 }
 
 
-.qr-code {
+.qrCode {
     width: 340px;
-
     height: 340px;
 
-    background: white;
-
-    padding: 10px;
-
-    border: 1px solid #eee;
-
-    border-radius: 12px;
-
-    box-shadow:
-        0 6px 20px rgba(0, 0, 0, 0.10);
-
     display: flex;
-
+    align-items: center;
     justify-content: center;
 
-    align-items: center;
+    background: #ffffff;
+    border-radius: 14px;
+
+    box-sizing: border-box;
+    padding: 20px;
+
+    margin: 0 auto;
 }
 
-
-.qr-code canvas {
-    width: 300px !important;
-    height: 300px !important;
+.qrCode canvas,
+.qrCode img {
     display: block;
+    width: 280px !important;
+    height: 280px !important;
+    margin: 0 auto;
 }
 
 
