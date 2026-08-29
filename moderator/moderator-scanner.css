@@ -1236,3 +1236,89 @@ input:focus {
     }
 
 }
+
+/* =========================================
+   QR CAMERA
+========================================= */
+
+#qr-reader {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 390px;
+
+    background: #111;
+
+    overflow: hidden;
+
+}
+
+
+#qr-reader__scan_region {
+
+    min-height: 390px;
+
+    background: #111 !important;
+
+}
+
+
+#qr-reader video {
+
+    width: 100% !important;
+
+    height: 390px !important;
+
+    object-fit: cover;
+
+    display: block;
+
+    background: #111 !important;
+
+}
+
+
+#qr-reader__scan_region img {
+
+    display: none !important;
+
+}
+
+
+/* Hide unnecessary html5-qrcode controls */
+
+#qr-reader__dashboard_section_csr,
+#qr-reader__dashboard_section_swaplink {
+
+    display: none !important;
+
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+    #qr-reader {
+
+        min-height: 320px;
+
+    }
+
+
+    #qr-reader__scan_region {
+
+        min-height: 320px;
+
+    }
+
+
+    #qr-reader video {
+
+        height: 320px !important;
+
+    }
+
+}
