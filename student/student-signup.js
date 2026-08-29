@@ -1,198 +1,68 @@
 /* =========================================================
    DOMINEXUS — STUDENT SIGN UP
-   Front-End Prototype
+   Connected to Laravel API
 ========================================================= */
 
-
-/* =========================================================
-   FORM
-========================================================= */
+const API_URL = "http://127.0.0.1:8000/api";
 
 const signupForm = document.getElementById("signupForm");
 
+const fullNameInput = document.getElementById("fullName");
+const studentIdInput = document.getElementById("studentId");
+const sectionInput = document.getElementById("section");
+const organizationInput = document.getElementById("organization");
+const clubRoleInput = document.getElementById("clubRole");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("confirmPassword");
+const digitalSignatureInput = document.getElementById("digitalSignature");
 
-/* =========================================================
-   INPUTS
-========================================================= */
+const privacyAgreement = document.getElementById("privacyAgreement");
+const termsAgreement = document.getElementById("termsAgreement");
 
-const fullNameInput =
-    document.getElementById("fullName");
-
-const studentIdInput =
-    document.getElementById("studentId");
-
-const sectionInput =
-    document.getElementById("section");
-
-const organizationInput =
-    document.getElementById("organization");
-
-const clubRoleInput =
-    document.getElementById("clubRole");
-
-const passwordInput =
-    document.getElementById("password");
-
-const confirmPasswordInput =
-    document.getElementById("confirmPassword");
-
-const digitalSignatureInput =
-    document.getElementById("digitalSignature");
-
-const privacyAgreement =
-    document.getElementById("privacyAgreement");
-
-const termsAgreement =
-    document.getElementById("termsAgreement");
-
-
-/* =========================================================
-   SIGNATURE PREVIEW
-========================================================= */
-
-const signaturePreview =
-    document.getElementById("signaturePreview");
-
+const signaturePreview = document.getElementById("signaturePreview");
 const signaturePreviewImage =
     document.getElementById("signaturePreviewImage");
-
 const signatureFileName =
     document.getElementById("signatureFileName");
 
-
-/* =========================================================
-   SUCCESS BOX
-========================================================= */
-
-const successBox =
-    document.getElementById("successBox");
-
+const successBox = document.getElementById("successBox");
 const generatedUniqueId =
     document.getElementById("generatedUniqueId");
-
 const signupButton =
     document.getElementById("signupButton");
-
-
-/* =========================================================
-   LOCAL STORAGE
-========================================================= */
-
-function getStudents() {
-
-    return JSON.parse(
-        localStorage.getItem("dominexus_students") || "[]"
-    );
-
-}
-
-
-function saveStudents(students) {
-
-    localStorage.setItem(
-        "dominexus_students",
-        JSON.stringify(students)
-    );
-
-}
-
-
-/* =========================================================
-   GENERATE UNIQUE ID
-========================================================= */
-
-function generateUniqueId() {
-
-    const students = getStudents();
-
-    let uniqueId;
-
-    do {
-
-        const randomNumber =
-            Math.floor(
-                100000 +
-                Math.random() * 900000
-            );
-
-        uniqueId =
-            "SDCA-" + randomNumber;
-
-    } while (
-        students.some(
-            student =>
-                student.uniqueId === uniqueId
-        )
-    );
-
-    return uniqueId;
-
-}
 
 
 /* =========================================================
    ERROR HANDLING
 ========================================================= */
 
-function showError(
-    inputId,
-    errorId,
-    message
-) {
+function showError(inputId, errorId, message) {
 
-    const input =
-        document.getElementById(inputId);
-
-    const error =
-        document.getElementById(errorId);
-
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
 
     if (input) {
-
-        input.classList.add(
-            "input-error"
-        );
-
+        input.classList.add("input-error");
     }
-
 
     if (error) {
-
-        error.textContent =
-            message;
-
+        error.textContent = message;
     }
-
 }
 
 
-function clearError(
-    inputId,
-    errorId
-) {
+function clearError(inputId, errorId) {
 
-    const input =
-        document.getElementById(inputId);
-
-    const error =
-        document.getElementById(errorId);
-
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
 
     if (input) {
-
-        input.classList.remove(
-            "input-error"
-        );
-
+        input.classList.remove("input-error");
     }
-
 
     if (error) {
-
         error.textContent = "";
-
     }
-
 }
 
 
@@ -200,28 +70,71 @@ function clearAllErrors() {
 
     document
         .querySelectorAll(".error-message")
-        .forEach(
-            error => {
-                error.textContent = "";
-            }
-        );
-
+        .forEach(error => {
+            error.textContent = "";
+        });
 
     document
         .querySelectorAll(".input-error")
-        .forEach(
-            input => {
-                input.classList.remove(
-                    "input-error"
-                );
-            }
-        );
-
+        .forEach(input => {
+            input.classList.remove("input-error");
+        });
 }
 
 
 /* =========================================================
-   DIGITAL SIGNATURE
+   LOAD ORGANIZATIONS FROM LARAVEL
+========================================================= */
+
+async function loadOrganizations() {
+
+    if (!organizationInput) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/organizations`
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load organizations.");
+        }
+
+        const organizations = await response.json();
+
+        organizationInput.innerHTML = `
+            <option value="" selected disabled>
+                Select your organization
+            </option>
+        `;
+
+        organizations.forEach(organization => {
+
+            const option = document.createElement("option");
+
+            option.value = organization.id;
+            option.textContent = organization.name;
+
+            organizationInput.appendChild(option);
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "organization",
+            "organizationError",
+            "Unable to load organizations. Please make sure the Laravel server is running."
+        );
+    }
+}
+
+
+/* =========================================================
+   DIGITAL SIGNATURE PREVIEW
 ========================================================= */
 
 if (digitalSignatureInput) {
@@ -235,35 +148,20 @@ if (digitalSignatureInput) {
                 "digitalSignatureError"
             );
 
-
-            const file =
-                this.files[0];
-
+            const file = this.files[0];
 
             if (!file) {
 
                 if (signaturePreview) {
-
-                    signaturePreview.hidden =
-                        true;
-
+                    signaturePreview.hidden = true;
                 }
 
                 return;
-
             }
-
-
-            /* ---------------------------------------------
-               CHECK PNG
-            --------------------------------------------- */
 
             const isPNG =
                 file.type === "image/png" ||
-                file.name
-                    .toLowerCase()
-                    .endsWith(".png");
-
+                file.name.toLowerCase().endsWith(".png");
 
             if (!isPNG) {
 
@@ -275,28 +173,14 @@ if (digitalSignatureInput) {
 
                 this.value = "";
 
-
                 if (signaturePreview) {
-
-                    signaturePreview.hidden =
-                        true;
-
+                    signaturePreview.hidden = true;
                 }
 
                 return;
-
             }
 
-
-            /* ---------------------------------------------
-               CHECK FILE SIZE
-            --------------------------------------------- */
-
-            const maxSize =
-                2 * 1024 * 1024;
-
-
-            if (file.size > maxSize) {
+            if (file.size > 2 * 1024 * 1024) {
 
                 showError(
                     "digitalSignature",
@@ -306,61 +190,35 @@ if (digitalSignatureInput) {
 
                 this.value = "";
 
-
                 if (signaturePreview) {
-
-                    signaturePreview.hidden =
-                        true;
-
+                    signaturePreview.hidden = true;
                 }
 
                 return;
-
             }
 
+            const reader = new FileReader();
 
-            /* ---------------------------------------------
-               PREVIEW IMAGE
-            --------------------------------------------- */
+            reader.onload = function (event) {
 
-            const reader =
-                new FileReader();
+                if (signaturePreviewImage) {
+                    signaturePreviewImage.src =
+                        event.target.result;
+                }
 
+                if (signatureFileName) {
+                    signatureFileName.textContent =
+                        file.name;
+                }
 
-            reader.onload =
-                function (event) {
-
-                    if (signaturePreviewImage) {
-
-                        signaturePreviewImage.src =
-                            event.target.result;
-
-                    }
-
-
-                    if (signatureFileName) {
-
-                        signatureFileName.textContent =
-                            file.name;
-
-                    }
-
-
-                    if (signaturePreview) {
-
-                        signaturePreview.hidden =
-                            false;
-
-                    }
-
-                };
-
+                if (signaturePreview) {
+                    signaturePreview.hidden = false;
+                }
+            };
 
             reader.readAsDataURL(file);
-
         }
     );
-
 }
 
 
@@ -370,79 +228,496 @@ if (digitalSignatureInput) {
 
 document
     .querySelectorAll(".password-toggle")
-    .forEach(
-        button => {
+    .forEach(button => {
 
-            button.addEventListener(
-                "click",
-                function () {
+        button.addEventListener("click", function () {
 
-                    const targetId =
-                        this.dataset.target;
+            const targetId = this.dataset.target;
 
-                    const input =
-                        document.getElementById(
-                            targetId
-                        );
+            const input =
+                document.getElementById(targetId);
+
+            if (!input) {
+                return;
+            }
+
+            if (input.type === "password") {
+
+                input.type = "text";
+                this.textContent = "Hide";
+                this.setAttribute(
+                    "aria-label",
+                    "Hide password"
+                );
+
+            } else {
+
+                input.type = "password";
+                this.textContent = "Show";
+                this.setAttribute(
+                    "aria-label",
+                    "Show password"
+                );
+            }
+        });
+    });
 
 
-                    if (!input) {
+/* =========================================================
+   FORM SUBMISSION
+========================================================= */
+
+if (signupForm) {
+
+    signupForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            clearAllErrors();
+
+            let isValid = true;
+
+            const fullName =
+                fullNameInput.value.trim();
+
+            const studentId =
+                studentIdInput.value.trim();
+
+            const section =
+                sectionInput.value.trim();
+
+            const organizationId =
+                organizationInput.value;
+
+            const clubRole =
+                clubRoleInput.value;
+
+            const password =
+                passwordInput.value;
+
+            const confirmPassword =
+                confirmPasswordInput.value;
+
+            const signatureFile =
+                digitalSignatureInput.files[0];
+
+            /* -----------------------------------------
+               BASIC VALIDATION
+            ----------------------------------------- */
+
+            if (!fullName) {
+
+                showError(
+                    "fullName",
+                    "fullNameError",
+                    "Please enter your full name."
+                );
+
+                isValid = false;
+            }
+
+            if (!studentId) {
+
+                showError(
+                    "studentId",
+                    "studentIdError",
+                    "Please enter your Student ID."
+                );
+
+                isValid = false;
+            }
+
+            if (!section) {
+
+                showError(
+                    "section",
+                    "sectionError",
+                    "Please enter your section."
+                );
+
+                isValid = false;
+            }
+
+            if (!organizationId) {
+
+                showError(
+                    "organization",
+                    "organizationError",
+                    "Please select your organization."
+                );
+
+                isValid = false;
+            }
+
+            if (!clubRole) {
+
+                showError(
+                    "clubRole",
+                    "clubRoleError",
+                    "Please select your club role."
+                );
+
+                isValid = false;
+            }
+
+            if (!password) {
+
+                showError(
+                    "password",
+                    "passwordError",
+                    "Please create a password."
+                );
+
+                isValid = false;
+
+            } else if (password.length < 6) {
+
+                showError(
+                    "password",
+                    "passwordError",
+                    "Password must be at least 6 characters."
+                );
+
+                isValid = false;
+            }
+
+            if (!confirmPassword) {
+
+                showError(
+                    "confirmPassword",
+                    "confirmPasswordError",
+                    "Please confirm your password."
+                );
+
+                isValid = false;
+
+            } else if (password !== confirmPassword) {
+
+                showError(
+                    "confirmPassword",
+                    "confirmPasswordError",
+                    "Passwords do not match."
+                );
+
+                isValid = false;
+            }
+
+            if (!signatureFile) {
+
+                showError(
+                    "digitalSignature",
+                    "digitalSignatureError",
+                    "Please upload your digital signature."
+                );
+
+                isValid = false;
+            }
+
+            if (!privacyAgreement.checked) {
+
+                showError(
+                    "privacyAgreement",
+                    "privacyAgreementError",
+                    "You must accept the Data Privacy Agreement."
+                );
+
+                isValid = false;
+            }
+
+            if (!termsAgreement.checked) {
+
+                showError(
+                    "termsAgreement",
+                    "termsAgreementError",
+                    "You must accept the Terms and Conditions."
+                );
+
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+
+            /* -----------------------------------------
+               READ SIGNATURE
+            ----------------------------------------- */
+
+            const reader = new FileReader();
+
+            reader.onload = async function (event) {
+
+                const digitalSignature =
+                    event.target.result;
+
+                try {
+
+                    signupButton.disabled = true;
+                    signupButton.textContent =
+                        "Creating Account...";
+
+
+                    /* ---------------------------------
+                       SEND TO LARAVEL
+                    --------------------------------- */
+
+                    const response = await fetch(
+                        `${API_URL}/register`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+                                "Accept":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                name: fullName,
+
+                                student_id: studentId,
+
+                                section: section,
+
+                                club_role: clubRole,
+
+                                password: password,
+
+                                organization_id:
+                                    Number(organizationId),
+
+                                digital_signature:
+                                    digitalSignature
+
+                            })
+                        }
+                    );
+
+
+                    const data =
+                        await response.json();
+
+
+                    /* ---------------------------------
+                       VALIDATION ERROR
+                    --------------------------------- */
+
+                    if (!response.ok) {
+
+                        if (data.errors) {
+
+                            Object.entries(
+                                data.errors
+                            ).forEach(
+                                ([field, messages]) => {
+
+                                    const fieldMap = {
+                                        name: [
+                                            "fullName",
+                                            "fullNameError"
+                                        ],
+
+                                        student_id: [
+                                            "studentId",
+                                            "studentIdError"
+                                        ],
+
+                                        section: [
+                                            "section",
+                                            "sectionError"
+                                        ],
+
+                                        organization_id: [
+                                            "organization",
+                                            "organizationError"
+                                        ],
+
+                                        club_role: [
+                                            "clubRole",
+                                            "clubRoleError"
+                                        ],
+
+                                        password: [
+                                            "password",
+                                            "passwordError"
+                                        ],
+
+                                        digital_signature: [
+                                            "digitalSignature",
+                                            "digitalSignatureError"
+                                        ]
+                                    };
+
+                                    if (
+                                        fieldMap[field]
+                                    ) {
+
+                                        showError(
+                                            fieldMap[field][0],
+                                            fieldMap[field][1],
+                                            messages[0]
+                                        );
+                                    }
+                                }
+                            );
+
+                        } else {
+
+                            alert(
+                                data.message ||
+                                "Registration failed."
+                            );
+                        }
+
                         return;
                     }
 
 
-                    if (
-                        input.type ===
-                        "password"
-                    ) {
+                    /* ---------------------------------
+                       SUCCESS
+                    --------------------------------- */
 
-                        input.type =
-                            "text";
+                    const user = data.user;
 
-                        this.textContent =
-                            "Hide";
+                    sessionStorage.setItem(
+                        "studentId",
+                        user.student_id
+                    );
 
-                        this.setAttribute(
-                            "aria-label",
-                            "Hide password"
-                        );
+                    sessionStorage.setItem(
+                        "studentName",
+                        user.name
+                    );
 
-                    } else {
+                    sessionStorage.setItem(
+                        "studentUniqueId",
+                        user.unique_id
+                    );
 
-                        input.type =
-                            "password";
 
-                        this.textContent =
-                            "Show";
+                    if (generatedUniqueId) {
 
-                        this.setAttribute(
-                            "aria-label",
-                            "Show password"
-                        );
-
+                        generatedUniqueId.textContent =
+                            user.unique_id;
                     }
 
-                }
-            );
+                    signupForm.style.display =
+                        "none";
 
+                    if (successBox) {
+                        successBox.hidden = false;
+                    }
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "Cannot connect to the DOMINEXUS server. Make sure Laravel is running."
+                    );
+
+                } finally {
+
+                    signupButton.disabled = false;
+
+                    signupButton.textContent =
+                        "Create Student Account";
+                }
+            };
+
+            reader.readAsDataURL(signatureFile);
         }
     );
+}
 
 
 /* =========================================================
-   CONFIRM PASSWORD
+   REAL-TIME VALIDATION
 ========================================================= */
 
-if (confirmPasswordInput) {
+if (fullNameInput) {
+    fullNameInput.addEventListener(
+        "input",
+        () => {
+            if (fullNameInput.value.trim()) {
+                clearError(
+                    "fullName",
+                    "fullNameError"
+                );
+            }
+        }
+    );
+}
 
+if (studentIdInput) {
+    studentIdInput.addEventListener(
+        "input",
+        () => {
+            if (studentIdInput.value.trim()) {
+                clearError(
+                    "studentId",
+                    "studentIdError"
+                );
+            }
+        }
+    );
+}
+
+if (sectionInput) {
+    sectionInput.addEventListener(
+        "input",
+        () => {
+            if (sectionInput.value.trim()) {
+                clearError(
+                    "section",
+                    "sectionError"
+                );
+            }
+        }
+    );
+}
+
+if (organizationInput) {
+    organizationInput.addEventListener(
+        "change",
+        () => {
+            if (organizationInput.value) {
+                clearError(
+                    "organization",
+                    "organizationError"
+                );
+            }
+        }
+    );
+}
+
+if (clubRoleInput) {
+    clubRoleInput.addEventListener(
+        "change",
+        () => {
+            if (clubRoleInput.value) {
+                clearError(
+                    "clubRole",
+                    "clubRoleError"
+                );
+            }
+        }
+    );
+}
+
+if (confirmPasswordInput) {
     confirmPasswordInput.addEventListener(
         "input",
         function () {
 
             if (
                 this.value &&
-                this.value !==
-                passwordInput.value
+                this.value !== passwordInput.value
             ) {
 
                 showError(
@@ -457,673 +732,44 @@ if (confirmPasswordInput) {
                     "confirmPassword",
                     "confirmPasswordError"
                 );
-
             }
-
         }
     );
-
 }
-
-
-/* =========================================================
-   REAL-TIME FIELD VALIDATION
-========================================================= */
-
-if (fullNameInput) {
-
-    fullNameInput.addEventListener(
-        "input",
-        () => {
-
-            if (
-                fullNameInput.value.trim()
-            ) {
-
-                clearError(
-                    "fullName",
-                    "fullNameError"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-if (studentIdInput) {
-
-    studentIdInput.addEventListener(
-        "input",
-        () => {
-
-            if (
-                studentIdInput.value.trim()
-            ) {
-
-                clearError(
-                    "studentId",
-                    "studentIdError"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-if (sectionInput) {
-
-    sectionInput.addEventListener(
-        "input",
-        () => {
-
-            if (
-                sectionInput.value.trim()
-            ) {
-
-                clearError(
-                    "section",
-                    "sectionError"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-if (organizationInput) {
-
-    organizationInput.addEventListener(
-        "input",
-        () => {
-
-            if (
-                organizationInput.value.trim()
-            ) {
-
-                clearError(
-                    "organization",
-                    "organizationError"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-if (clubRoleInput) {
-
-    clubRoleInput.addEventListener(
-        "change",
-        () => {
-
-            if (
-                clubRoleInput.value
-            ) {
-
-                clearError(
-                    "clubRole",
-                    "clubRoleError"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   AGREEMENT VALIDATION
-========================================================= */
 
 if (privacyAgreement) {
-
     privacyAgreement.addEventListener(
         "change",
         function () {
 
             if (this.checked) {
-
                 clearError(
                     "privacyAgreement",
                     "privacyAgreementError"
                 );
-
             }
-
         }
     );
-
 }
 
-
 if (termsAgreement) {
-
     termsAgreement.addEventListener(
         "change",
         function () {
 
             if (this.checked) {
-
                 clearError(
                     "termsAgreement",
                     "termsAgreementError"
                 );
-
             }
-
         }
     );
-
 }
 
 
 /* =========================================================
-   FORM SUBMISSION
+   START
 ========================================================= */
 
-if (signupForm) {
-
-    signupForm.addEventListener(
-        "submit",
-        function (event) {
-
-            event.preventDefault();
-
-
-            clearAllErrors();
-
-
-            let isValid = true;
-
-
-            /* ---------------------------------------------
-               GET VALUES
-            --------------------------------------------- */
-
-            const fullName =
-                fullNameInput.value.trim();
-
-            const studentId =
-                studentIdInput.value.trim();
-
-            const section =
-                sectionInput.value.trim();
-
-            const organization =
-                organizationInput.value.trim();
-
-            const clubRole =
-                clubRoleInput.value;
-
-            const password =
-                passwordInput.value;
-
-            const confirmPassword =
-                confirmPasswordInput.value;
-
-            const signatureFile =
-                digitalSignatureInput.files[0];
-
-            const privacyAccepted =
-                privacyAgreement.checked;
-
-            const termsAccepted =
-                termsAgreement.checked;
-
-
-            /* ---------------------------------------------
-               FULL NAME
-            --------------------------------------------- */
-
-            if (!fullName) {
-
-                showError(
-                    "fullName",
-                    "fullNameError",
-                    "Please enter your full name."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               STUDENT ID
-            --------------------------------------------- */
-
-            if (!studentId) {
-
-                showError(
-                    "studentId",
-                    "studentIdError",
-                    "Please enter your Student ID."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               SECTION
-            --------------------------------------------- */
-
-            if (!section) {
-
-                showError(
-                    "section",
-                    "sectionError",
-                    "Please enter your section."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               ORGANIZATION
-            --------------------------------------------- */
-
-            if (!organization) {
-
-                showError(
-                    "organization",
-                    "organizationError",
-                    "Please enter your organization."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               CLUB ROLE
-            --------------------------------------------- */
-
-            if (!clubRole) {
-
-                showError(
-                    "clubRole",
-                    "clubRoleError",
-                    "Please select your club role."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               PASSWORD
-            --------------------------------------------- */
-
-            if (!password) {
-
-                showError(
-                    "password",
-                    "passwordError",
-                    "Please create a password."
-                );
-
-                isValid = false;
-
-            } else if (
-                password.length < 6
-            ) {
-
-                showError(
-                    "password",
-                    "passwordError",
-                    "Password must be at least 6 characters."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               CONFIRM PASSWORD
-            --------------------------------------------- */
-
-            if (!confirmPassword) {
-
-                showError(
-                    "confirmPassword",
-                    "confirmPasswordError",
-                    "Please confirm your password."
-                );
-
-                isValid = false;
-
-            } else if (
-                password !== confirmPassword
-            ) {
-
-                showError(
-                    "confirmPassword",
-                    "confirmPasswordError",
-                    "Passwords do not match."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               DIGITAL SIGNATURE
-            --------------------------------------------- */
-
-            if (!signatureFile) {
-
-                showError(
-                    "digitalSignature",
-                    "digitalSignatureError",
-                    "Please upload your digital signature."
-                );
-
-                isValid = false;
-
-            } else {
-
-                const isPNG =
-                    signatureFile.type === "image/png" ||
-                    signatureFile.name
-                        .toLowerCase()
-                        .endsWith(".png");
-
-
-                if (!isPNG) {
-
-                    showError(
-                        "digitalSignature",
-                        "digitalSignatureError",
-                        "Only PNG files are accepted."
-                    );
-
-                    isValid = false;
-
-                }
-
-
-                if (
-                    signatureFile.size >
-                    2 * 1024 * 1024
-                ) {
-
-                    showError(
-                        "digitalSignature",
-                        "digitalSignatureError",
-                        "The digital signature must be 2 MB or smaller."
-                    );
-
-                    isValid = false;
-
-                }
-
-            }
-
-
-            /* ---------------------------------------------
-               DATA PRIVACY
-            --------------------------------------------- */
-
-            if (!privacyAccepted) {
-
-                showError(
-                    "privacyAgreement",
-                    "privacyAgreementError",
-                    "You must accept the Data Privacy Agreement."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               TERMS
-            --------------------------------------------- */
-
-            if (!termsAccepted) {
-
-                showError(
-                    "termsAgreement",
-                    "termsAgreementError",
-                    "You must accept the Terms and Conditions."
-                );
-
-                isValid = false;
-
-            }
-
-
-            /* ---------------------------------------------
-               STOP IF INVALID
-            --------------------------------------------- */
-
-            if (!isValid) {
-
-                return;
-
-            }
-
-
-            /* ---------------------------------------------
-               GET STUDENTS
-            --------------------------------------------- */
-
-            const students =
-                getStudents();
-
-
-            /* ---------------------------------------------
-               DUPLICATE STUDENT ID
-            --------------------------------------------- */
-
-            const duplicateStudent =
-                students.find(
-                    student =>
-                        String(
-                            student.studentId
-                        ).toLowerCase() ===
-                        studentId.toLowerCase()
-                );
-
-
-            if (duplicateStudent) {
-
-                showError(
-                    "studentId",
-                    "studentIdError",
-                    "This Student ID is already registered."
-                );
-
-                return;
-
-            }
-
-
-            /* ---------------------------------------------
-               READ SIGNATURE
-            --------------------------------------------- */
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload =
-                function (event) {
-
-                    const uniqueId =
-                        generateUniqueId();
-
-
-                    /* -------------------------------------
-                       STUDENT OBJECT
-                    ------------------------------------- */
-
-                    const newStudent = {
-
-                        id:
-                            Date.now(),
-
-                        fullName:
-                            fullName,
-
-                        studentId:
-                            studentId,
-
-                        section:
-                            section,
-
-                        organization:
-                            organization,
-
-                        clubRole:
-                            clubRole,
-
-                        password:
-                            password,
-
-                        uniqueId:
-                            uniqueId,
-
-                        digitalSignature:
-                            event.target.result,
-
-                        digitalSignatureFileName:
-                            signatureFile.name,
-
-                        privacyAgreementAccepted:
-                            true,
-
-                        termsAccepted:
-                            true,
-
-                        attendancePercentage:
-                            0,
-
-                        meetingsAttended:
-                            0,
-
-                        participationStatus:
-                            "NEW",
-
-                        attendanceHistory:
-                            [],
-
-                        status:
-                            "Active",
-
-                        createdAt:
-                            new Date().toISOString()
-
-                    };
-
-
-                    /* -------------------------------------
-                       SAVE
-                    ------------------------------------- */
-
-                    students.push(
-                        newStudent
-                    );
-
-
-                    saveStudents(
-                        students
-                    );
-
-
-                    /* -------------------------------------
-                       SESSION
-                    ------------------------------------- */
-
-                    sessionStorage.setItem(
-                        "studentId",
-                        studentId
-                    );
-
-
-                    sessionStorage.setItem(
-                        "studentName",
-                        fullName
-                    );
-
-
-                    sessionStorage.setItem(
-                        "studentUniqueId",
-                        uniqueId
-                    );
-
-
-                    /* -------------------------------------
-                       SUCCESS SCREEN
-                    ------------------------------------- */
-
-                    if (generatedUniqueId) {
-
-                        generatedUniqueId.textContent =
-                            uniqueId;
-
-                    }
-
-
-                    signupForm.style.display =
-                        "none";
-
-
-                    if (successBox) {
-
-                        successBox.hidden =
-                            false;
-
-                    }
-
-
-                    /* -------------------------------------
-                       DO NOT REDIRECT IMMEDIATELY
-                    ------------------------------------- */
-
-                };
-
-
-            reader.onerror =
-                function () {
-
-                    showError(
-                        "digitalSignature",
-                        "digitalSignatureError",
-                        "The signature could not be processed. Please try again."
-                    );
-
-                };
-
-
-            reader.readAsDataURL(
-                signatureFile
-            );
-
-        }
-    );
-
-}
+loadOrganizations();
