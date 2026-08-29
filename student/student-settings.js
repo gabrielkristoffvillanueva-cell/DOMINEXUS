@@ -1,42 +1,41 @@
 /* =========================================
    DOMINEXUS STUDENT SETTINGS
-   FRONT-END ONLY
+   DARK MODE + STUDENT SESSION
 ========================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    if (!isLoggedIn()) return;
+
+    loadStudentInformation();
+    setupNavigation();
+    setupTheme();
+    setupNotifications();
+    setupLogout();
+
+});
 
 
 /* =========================================
-   SAMPLE STUDENT
+   LOGIN CHECK
 ========================================= */
 
-const settingsStudent = {
+function isLoggedIn() {
 
-    fullName: "Jaerist Kholean J. Orbita",
+    if (
+        sessionStorage.getItem("studentLoggedIn") !== "true"
+    ) {
 
-    studentId: "SDCA-001"
+        window.location.href =
+            "student-login.html";
 
-};
-
-
-/* =========================================
-   START
-========================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadStudentInformation();
-
-        setupNavigation();
-
-        setupTheme();
-
-        setupNotifications();
-
-        setupLogout();
+        return false;
 
     }
-);
+
+    return true;
+
+}
 
 
 /* =========================================
@@ -46,23 +45,23 @@ document.addEventListener(
 function loadStudentInformation() {
 
     const name =
-        settingsStudent.fullName;
+        sessionStorage.getItem("studentName") ||
+        "Student";
 
 
     const studentId =
-        settingsStudent.studentId;
+        sessionStorage.getItem("studentId") ||
+        "Student ID";
 
 
     document.getElementById(
         "topStudentName"
-    ).textContent =
-        name;
+    ).textContent = name;
 
 
     document.querySelector(
         ".top-profile-info span"
-    ).textContent =
-        studentId;
+    ).textContent = studentId;
 
 
     document.getElementById(
@@ -71,55 +70,6 @@ function loadStudentInformation() {
         getInitials(name);
 
 }
-
-
-/* =========================================
-   THEME
-========================================= */
-
-function setupTheme() {
-
-    const themeSelect =
-        document.getElementById(
-            "themeSelect"
-        );
-
-
-    themeSelect.addEventListener(
-        "change",
-        function () {
-
-            if (
-                this.value === "dark"
-            ) {
-
-                document.body.classList.add(
-                    "dark-mode"
-                );
-
-                document.getElementById(
-                    "themeDescription"
-                ).textContent =
-                    "Dark mode is currently selected.";
-
-            } else {
-
-                document.body.classList.remove(
-                    "dark-mode"
-                );
-
-                document.getElementById(
-                    "themeDescription"
-                ).textContent =
-                    "Choose between light and dark mode.";
-
-            }
-
-        }
-    );
-
-}
-
 
 /* =========================================
    NOTIFICATIONS
@@ -145,58 +95,110 @@ function setupNotifications() {
         );
 
 
-    meeting.addEventListener(
-        "change",
-        function () {
+    if (meeting) {
 
-            showSettingMessage(
-                "Meeting reminder preference changed."
-            );
+        meeting.addEventListener(
+            "change",
+            function () {
 
-        }
-    );
+                localStorage.setItem(
+                    "dominexus_meeting_notifications",
+                    this.checked
+                );
 
+            }
+        );
 
-    attendance.addEventListener(
-        "change",
-        function () {
-
-            showSettingMessage(
-                "Attendance notification preference changed."
-            );
-
-        }
-    );
+    }
 
 
-    requests.addEventListener(
-        "change",
-        function () {
+    if (attendance) {
 
-            showSettingMessage(
-                "Request notification preference changed."
-            );
+        attendance.addEventListener(
+            "change",
+            function () {
 
-        }
-    );
+                localStorage.setItem(
+                    "dominexus_attendance_notifications",
+                    this.checked
+                );
 
-}
+            }
+        );
+
+    }
 
 
-/* =========================================
-   TEMPORARY MESSAGE
-========================================= */
+    if (requests) {
 
-function showSettingMessage(message) {
+        requests.addEventListener(
+            "change",
+            function () {
+
+                localStorage.setItem(
+                    "dominexus_request_notifications",
+                    this.checked
+                );
+
+            }
+        );
+
+    }
+
 
     /*
-       Front-end only.
+     * Restore notification preferences.
+     */
 
-       Later this can save the preference
-       to the user's account in the database.
-    */
+    const savedMeeting =
+        localStorage.getItem(
+            "dominexus_meeting_notifications"
+        );
 
-    console.log(message);
+
+    const savedAttendance =
+        localStorage.getItem(
+            "dominexus_attendance_notifications"
+        );
+
+
+    const savedRequests =
+        localStorage.getItem(
+            "dominexus_request_notifications"
+        );
+
+
+    if (
+        meeting &&
+        savedMeeting !== null
+    ) {
+
+        meeting.checked =
+            savedMeeting === "true";
+
+    }
+
+
+    if (
+        attendance &&
+        savedAttendance !== null
+    ) {
+
+        attendance.checked =
+            savedAttendance === "true";
+
+    }
+
+
+    if (
+        requests &&
+        savedRequests !== null
+    ) {
+
+        requests.checked =
+            savedRequests === "true";
+
+    }
 
 }
 
@@ -225,6 +227,17 @@ function setupNavigation() {
         );
 
 
+    if (
+        !menuButton ||
+        !sidebar ||
+        !overlay
+    ) {
+
+        return;
+
+    }
+
+
     menuButton.addEventListener(
         "click",
         function () {
@@ -243,28 +256,22 @@ function setupNavigation() {
 
     overlay.addEventListener(
         "click",
-        function () {
-
-            closeSidebar();
-
-        }
+        closeSidebar
     );
 
 
     document.querySelectorAll(
         ".nav-item"
-    ).forEach(function (link) {
+    ).forEach(
+        function (link) {
 
-        link.addEventListener(
-            "click",
-            function () {
+            link.addEventListener(
+                "click",
+                closeSidebar
+            );
 
-                closeSidebar();
-
-            }
-        );
-
-    });
+        }
+    );
 
 
     function closeSidebar() {
@@ -300,16 +307,24 @@ function setupLogout() {
         );
 
 
-    sidebarLogout.addEventListener(
-        "click",
-        logout
-    );
+    if (sidebarLogout) {
+
+        sidebarLogout.addEventListener(
+            "click",
+            logout
+        );
+
+    }
 
 
-    settingsLogout.addEventListener(
-        "click",
-        logout
-    );
+    if (settingsLogout) {
+
+        settingsLogout.addEventListener(
+            "click",
+            logout
+        );
+
+    }
 
 
     function logout() {
@@ -325,32 +340,7 @@ function setupLogout() {
         }
 
 
-        /*
-           TEMPORARY FRONT-END LOGOUT.
-
-           Backend authentication will be
-           connected later.
-        */
-
-
-        sessionStorage.removeItem(
-            "studentLoggedIn"
-        );
-
-
-        sessionStorage.removeItem(
-            "studentId"
-        );
-
-
-        sessionStorage.removeItem(
-            "studentName"
-        );
-
-
-        sessionStorage.removeItem(
-            "studentUniqueId"
-        );
+        sessionStorage.clear();
 
 
         window.location.href =
