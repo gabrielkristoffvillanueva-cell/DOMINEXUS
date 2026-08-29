@@ -1,6 +1,9 @@
 /* =========================================
    DOMINEXUS STUDENT MEETINGS
+   Laravel API Connected
 ========================================= */
+
+const API_URL = "http://127.0.0.1:8000/api";
 
 
 /* =========================================
@@ -55,82 +58,21 @@ function checkStudentLogin() {
 
 
 /* =========================================
-   GET CURRENT STUDENT
-========================================= */
-
-function getCurrentStudent() {
-
-    const studentId =
-        sessionStorage.getItem(
-            "studentId"
-        );
-
-
-    const students =
-        JSON.parse(
-            localStorage.getItem(
-                "dominexus_students"
-            ) || "[]"
-        );
-
-
-    const student =
-        students.find(function (item) {
-
-            return (
-
-                item.studentId &&
-                studentId &&
-                item.studentId.toLowerCase() ===
-                studentId.toLowerCase()
-
-            );
-
-        });
-
-
-    return student || null;
-
-}
-
-
-/* =========================================
    LOAD STUDENT INFORMATION
 ========================================= */
 
 function loadStudentInformation() {
 
-    const student =
-        getCurrentStudent();
-
-
-    if (!student) {
-
-        const studentId =
-            sessionStorage.getItem(
-                "studentId"
-            );
-
-
-        document.getElementById(
-            "topStudentId"
-        ).textContent =
-            studentId || "Student ID";
-
-        return;
-
-    }
-
-
     const name =
-        student.fullName ||
-        student.name ||
-        "Student";
+        sessionStorage.getItem(
+            "studentName"
+        ) || "Student";
 
 
     const studentId =
-        student.studentId ||
-        "---";
+        sessionStorage.getItem(
+            "studentId"
+        ) || "Student ID";
 
 
     document.getElementById(
@@ -154,47 +96,69 @@ function loadStudentInformation() {
 
 
 /* =========================================
-   LOAD MEETINGS
+   LOAD MEETINGS FROM LARAVEL
 ========================================= */
 
-function loadMeetings() {
+async function loadMeetings() {
 
-    const meetings =
-        JSON.parse(
-            localStorage.getItem(
-                "dominexus_meetings"
-            ) || "[]"
-        );
+    try {
 
+        const response =
+            await fetch(
+                `${API_URL}/meetings`,
+                {
+                    method: "GET",
 
-    const today =
-        new Date();
-
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
 
 
-    const upcoming = [];
+        if (!response.ok) {
 
-    const previous = [];
+            throw new Error(
+                "Failed to load meetings."
+            );
 
-
-    meetings.forEach(function (meeting) {
-
-        const meetingDate =
-            getMeetingDate(meeting);
-
-
-        if (!meetingDate) {
-            return;
         }
 
 
-        meetingDate.setHours(
+        const meetings =
+            await response.json();
+
+
+        const studentOrganizationId =
+            sessionStorage.getItem(
+                "studentOrganizationId"
+            );
+
+
+        /*
+         * Only show meetings belonging
+         * to the student's organization.
+         */
+
+        const organizationMeetings =
+            meetings.filter(
+                function (meeting) {
+
+                    return String(
+                        meeting.organization_id
+                    ) === String(
+                        studentOrganizationId
+                    );
+
+                }
+            );
+
+
+        const today =
+            new Date();
+
+        today.setHours(
             0,
             0,
             0,
@@ -202,55 +166,104 @@ function loadMeetings() {
         );
 
 
-        if (meetingDate >= today) {
+        const upcoming = [];
 
-            upcoming.push(meeting);
-
-        } else {
-
-            previous.push(meeting);
-
-        }
-
-    });
+        const previous = [];
 
 
-    /* Newest/soonest first */
+        organizationMeetings.forEach(
+            function (meeting) {
 
-    upcoming.sort(function (a, b) {
+                const meetingDate =
+                    getMeetingDate(meeting);
 
-        return (
-            getMeetingDate(a) -
-            getMeetingDate(b)
+
+                if (!meetingDate) {
+                    return;
+                }
+
+
+                meetingDate.setHours(
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+
+                if (
+                    meetingDate >= today
+                    &&
+                    meeting.status !== "cancelled"
+                ) {
+
+                    upcoming.push(
+                        meeting
+                    );
+
+                } else {
+
+                    previous.push(
+                        meeting
+                    );
+
+                }
+
+            }
         );
 
-    });
 
+        upcoming.sort(
+            function (a, b) {
 
-    previous.sort(function (a, b) {
+                return (
+                    getMeetingDate(a) -
+                    getMeetingDate(b)
+                );
 
-        return (
-            getMeetingDate(b) -
-            getMeetingDate(a)
+            }
         );
 
-    });
+
+        previous.sort(
+            function (a, b) {
+
+                return (
+                    getMeetingDate(b) -
+                    getMeetingDate(a)
+                );
+
+            }
+        );
 
 
-    displayMeetings(
-        upcoming,
-        "upcomingMeetings",
-        "upcomingEmpty",
-        "upcoming"
-    );
+        displayMeetings(
+            upcoming,
+            "upcomingMeetings",
+            "upcomingEmpty",
+            "upcoming"
+        );
 
 
-    displayMeetings(
-        previous,
-        "previousMeetings",
-        "previousEmpty",
-        "previous"
-    );
+        displayMeetings(
+            previous,
+            "previousMeetings",
+            "previousEmpty",
+            "previous"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Meeting loading error:",
+            error
+        );
+
+
+        showMeetingError();
+
+    }
 
 }
 
@@ -295,18 +308,22 @@ function displayMeetings(
         "none";
 
 
-    meetings.forEach(function (meeting) {
+    meetings.forEach(
+        function (meeting) {
 
-        const card =
-            createMeetingCard(
-                meeting,
-                type
+            const card =
+                createMeetingCard(
+                    meeting,
+                    type
+                );
+
+
+            container.appendChild(
+                card
             );
 
-
-        container.appendChild(card);
-
-    });
+        }
+    );
 
 }
 
@@ -340,46 +357,35 @@ function createMeetingCard(
 
     const meetingName =
         meeting.title ||
-        meeting.meetingName ||
-        meeting.name ||
         "Organization Meeting";
 
 
     const organization =
-        meeting.organization ||
-        "Student Organization";
+        meeting.organization
+            ? meeting.organization.name
+            : "Student Organization";
 
 
     const location =
         meeting.location ||
-        meeting.venue ||
         "TBA";
 
 
     const startTime =
-        meeting.startTime ||
-        meeting.time ||
-        meeting.timeIn ||
-        "TBA";
-
-
-    const endTime =
-        meeting.endTime ||
-        "";
-
-
-    const status =
-        meeting.status ||
-        (
-            type === "upcoming"
-                ? "Upcoming"
-                : "Completed"
+        formatTime(
+            meeting.start_time
         );
 
 
-    const attendance =
-        getStudentAttendance(
-            meeting
+    const endTime =
+        formatTime(
+            meeting.end_time
+        );
+
+
+    const status =
+        formatStatus(
+            meeting.status
         );
 
 
@@ -388,18 +394,8 @@ function createMeetingCard(
 
     if (type === "previous") {
 
-        if (attendance) {
-
-            attendanceText =
-                "Your attendance: " +
-                attendance;
-
-        } else {
-
-            attendanceText =
-                "Attendance: No record";
-
-        }
+        attendanceText =
+            "Attendance will be connected next.";
 
     }
 
@@ -438,10 +434,14 @@ function createMeetingCard(
 
                 <span>
                     🕐 ${escapeHTML(startTime)}
-                    ${endTime
-            ? " - " + escapeHTML(endTime)
-            : ""}
+                    ${
+                        endTime
+                            ? " - " +
+                              escapeHTML(endTime)
+                            : ""
+                    }
                 </span>
+
 
                 <span>
                     📍 ${escapeHTML(location)}
@@ -454,16 +454,19 @@ function createMeetingCard(
 
         <div class="meeting-status">
 
-            <span class="status-badge ${getStatusClass(status)}">
+            <span class="status-badge ${getStatusClass(meeting.status)}">
                 ${escapeHTML(status)}
             </span>
 
-            ${attendanceText
-            ? `<span class="attendance-status">
-                        ${escapeHTML(attendanceText)}
+            ${
+                attendanceText
+                    ? `<span class="attendance-status">
+                            ${escapeHTML(
+                                attendanceText
+                            )}
                        </span>`
-            : ""
-        }
+                    : ""
+            }
 
         </div>
 
@@ -481,19 +484,15 @@ function createMeetingCard(
 
 function getMeetingDate(meeting) {
 
-    const value =
-        meeting.date ||
-        meeting.meetingDate ||
-        meeting.startDate;
-
-
-    if (!value) {
+    if (!meeting.date) {
         return null;
     }
 
 
     const date =
-        new Date(value);
+        new Date(
+            meeting.date + "T00:00:00"
+        );
 
 
     if (isNaN(date.getTime())) {
@@ -555,80 +554,66 @@ function formatDateParts(date) {
 
 
 /* =========================================
-   GET STUDENT ATTENDANCE
+   FORMAT TIME
 ========================================= */
 
-function getStudentAttendance(meeting) {
+function formatTime(time) {
 
-    const student =
-        getCurrentStudent();
-
-
-    if (!student) {
-        return null;
+    if (!time) {
+        return "";
     }
 
 
-    const attendance =
-        JSON.parse(
-            localStorage.getItem(
-                "dominexus_attendance"
-            ) || "[]"
+    const parts =
+        time.split(":");
+
+
+    if (parts.length < 2) {
+        return time;
+    }
+
+
+    let hour =
+        parseInt(
+            parts[0],
+            10
         );
 
 
-    const meetingId =
-        meeting.id ||
-        meeting.meetingId;
+    const minute =
+        parts[1];
 
 
-    const record =
-        attendance.find(
-            function (item) {
-
-                const sameStudent =
-                    (
-                        item.studentId ===
-                        student.studentId
-                    )
-                    ||
-                    (
-                        item.uniqueId ===
-                        student.uniqueId
-                    );
+    const period =
+        hour >= 12
+            ? "PM"
+            : "AM";
 
 
-                const sameMeeting =
-                    (
-                        meetingId &&
-                        (
-                            item.meetingId ===
-                            meetingId
-                        )
-                    )
-                    ||
-                    (
-                        item.meetingName ===
-                        (
-                            meeting.title ||
-                            meeting.meetingName ||
-                            meeting.name
-                        )
-                    );
+    hour =
+        hour % 12 || 12;
 
 
-                return (
-                    sameStudent &&
-                    sameMeeting
-                );
+    return `${hour}:${minute} ${period}`;
 
-            }
-        );
+}
 
 
-    return record
-        ? record.status || "Recorded"
-        : null;
+/* =========================================
+   FORMAT STATUS
+========================================= */
+
+function formatStatus(status) {
+
+    if (!status) {
+        return "Upcoming";
+    }
+
+
+    return status
+        .charAt(0)
+        .toUpperCase() +
+        status.slice(1);
 
 }
 
@@ -645,7 +630,9 @@ function getStatusClass(status) {
 
 
     if (
-        normalized.includes("cancel")
+        normalized.includes(
+            "cancel"
+        )
     ) {
 
         return "status-cancelled";
@@ -654,8 +641,9 @@ function getStatusClass(status) {
 
 
     if (
-        normalized.includes("complete") ||
-        normalized.includes("finished")
+        normalized.includes(
+            "complete"
+        )
     ) {
 
         return "status-completed";
@@ -664,6 +652,54 @@ function getStatusClass(status) {
 
 
     return "status-upcoming";
+
+}
+
+
+/* =========================================
+   SHOW API ERROR
+========================================= */
+
+function showMeetingError() {
+
+    const upcomingEmpty =
+        document.getElementById(
+            "upcomingEmpty"
+        );
+
+
+    const previousEmpty =
+        document.getElementById(
+            "previousEmpty"
+        );
+
+
+    if (upcomingEmpty) {
+
+        upcomingEmpty.style.display =
+            "block";
+
+        const text =
+            upcomingEmpty.querySelector(
+                "p"
+            );
+
+        if (text) {
+
+            text.textContent =
+                "Unable to load meetings. Please make sure the Laravel server is running.";
+
+        }
+
+    }
+
+
+    if (previousEmpty) {
+
+        previousEmpty.style.display =
+            "none";
+
+    }
 
 }
 
@@ -730,24 +766,26 @@ function setupNavigation() {
         );
 
 
-    navLinks.forEach(function (link) {
+    navLinks.forEach(
+        function (link) {
 
-        link.addEventListener(
-            "click",
-            function () {
+            link.addEventListener(
+                "click",
+                function () {
 
-                sidebar.classList.remove(
-                    "open"
-                );
+                    sidebar.classList.remove(
+                        "open"
+                    );
 
-                overlay.classList.remove(
-                    "show"
-                );
+                    overlay.classList.remove(
+                        "show"
+                    );
 
-            }
-        );
+                }
+            );
 
-    });
+        }
+    );
 
 }
 
@@ -781,21 +819,7 @@ function logoutStudent() {
     }
 
 
-    sessionStorage.removeItem(
-        "studentLoggedIn"
-    );
-
-    sessionStorage.removeItem(
-        "studentId"
-    );
-
-    sessionStorage.removeItem(
-        "studentName"
-    );
-
-    sessionStorage.removeItem(
-        "studentUniqueId"
-    );
+    sessionStorage.clear();
 
 
     window.location.href =
@@ -843,7 +867,9 @@ function getInitials(name) {
 function escapeHTML(value) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     div.textContent =
