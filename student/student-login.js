@@ -1,6 +1,9 @@
 /* =========================================================
    DOMINEXUS — STUDENT LOGIN
+   Laravel API Connected
 ========================================================= */
+
+const API_URL = "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -66,11 +69,21 @@ togglePassword.addEventListener(
 
             togglePassword.textContent = "Hide";
 
+            togglePassword.setAttribute(
+                "aria-label",
+                "Hide password"
+            );
+
         } else {
 
             passwordInput.type = "password";
 
             togglePassword.textContent = "Show";
+
+            togglePassword.setAttribute(
+                "aria-label",
+                "Show password"
+            );
 
         }
 
@@ -84,23 +97,15 @@ togglePassword.addEventListener(
 
 loginForm.addEventListener(
     "submit",
-    function (event) {
+    async function (event) {
 
         event.preventDefault();
 
-
-        /* ---------------------------------------------
-           GET INPUT
-        --------------------------------------------- */
-
         const enteredStudentId =
-            studentIdInput.value
-                .trim()
-                .toLowerCase();
+            studentIdInput.value.trim();
 
         const enteredPassword =
             passwordInput.value;
-
 
         loginMessage.textContent = "";
 
@@ -109,10 +114,7 @@ loginForm.addEventListener(
            EMPTY CHECK
         --------------------------------------------- */
 
-        if (
-            !enteredStudentId ||
-            !enteredPassword
-        ) {
+        if (!enteredStudentId || !enteredPassword) {
 
             showMessage(
                 "Please enter your Student ID and password.",
@@ -120,226 +122,205 @@ loginForm.addEventListener(
             );
 
             return;
-
         }
 
 
         /* ---------------------------------------------
-           LOAD STUDENTS
+           DISABLE BUTTON
         --------------------------------------------- */
 
-        let students = [];
+        const loginButton =
+            loginForm.querySelector(
+                'button[type="submit"]'
+            );
+
+        if (loginButton) {
+            loginButton.disabled = true;
+            loginButton.textContent = "Logging in...";
+        }
+
+
+        /* ---------------------------------------------
+           SEND LOGIN REQUEST TO LARAVEL
+        --------------------------------------------- */
 
         try {
 
-            students =
-                JSON.parse(
-                    localStorage.getItem(
-                        "dominexus_students"
-                    ) || "[]"
-                );
+            const response = await fetch(
+                `${API_URL}/login`,
+                {
+                    method: "POST",
 
-        } catch (error) {
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-            console.error(
-                "Student storage error:",
-                error
-            );
+                        "Accept":
+                            "application/json"
+                    },
 
-            showMessage(
-                "Unable to load student accounts.",
-                "error"
-            );
+                    body: JSON.stringify({
 
-            return;
+                        student_id:
+                            enteredStudentId,
 
-        }
+                        password:
+                            enteredPassword
 
-
-        /* ---------------------------------------------
-           DEBUG
-        --------------------------------------------- */
-
-        console.log(
-            "Entered Student ID:",
-            enteredStudentId
-        );
-
-        console.log(
-            "Registered Student IDs:",
-            students.map(
-                student =>
-                    String(
-                        student.studentId || ""
-                    )
-                    .trim()
-                    .toLowerCase()
-            )
-        );
-
-
-        /* ---------------------------------------------
-           FIND STUDENT
-        --------------------------------------------- */
-
-        const student =
-            students.find(
-                function (account) {
-
-                    const savedStudentId =
-                        String(
-                            account.studentId || ""
-                        )
-                        .trim()
-                        .toLowerCase();
-
-
-                    return (
-                        savedStudentId ===
-                        enteredStudentId
-                    );
-
+                    })
                 }
             );
 
 
-        /* ---------------------------------------------
-           STUDENT ID CHECK
-        --------------------------------------------- */
+            const data =
+                await response.json();
 
-        if (!student) {
+
+            /* -----------------------------------------
+               LOGIN FAILED
+            ----------------------------------------- */
+
+            if (!response.ok) {
+
+                showMessage(
+                    data.message ||
+                    "Invalid Student ID or password.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            /* -----------------------------------------
+               LOGIN SUCCESS
+            ----------------------------------------- */
+
+            const student =
+                data.user;
+
+
+            sessionStorage.setItem(
+                "studentLoggedIn",
+                "true"
+            );
+
+            sessionStorage.setItem(
+                "studentId",
+                student.student_id || ""
+            );
+
+            sessionStorage.setItem(
+                "studentUniqueId",
+                student.unique_id || ""
+            );
+
+            sessionStorage.setItem(
+                "studentName",
+                student.name || "Student"
+            );
+
+            sessionStorage.setItem(
+                "studentSection",
+                student.section || ""
+            );
+
+            sessionStorage.setItem(
+                "studentOrganization",
+                student.organization
+                    ? student.organization.name
+                    : ""
+            );
+
+            sessionStorage.setItem(
+                "studentOrganizationId",
+                student.organization_id || ""
+            );
+
+            sessionStorage.setItem(
+                "studentClubRole",
+                student.club_role || ""
+            );
+
+            sessionStorage.setItem(
+                "studentRole",
+                student.role || ""
+            );
+
+            sessionStorage.setItem(
+                "studentStatus",
+                student.status || ""
+            );
+
+
+            /* -----------------------------------------
+               REMEMBER ME
+            ----------------------------------------- */
+
+            if (rememberMe.checked) {
+
+                localStorage.setItem(
+                    "rememberedStudentId",
+                    student.student_id
+                );
+
+            } else {
+
+                localStorage.removeItem(
+                    "rememberedStudentId"
+                );
+
+            }
+
+
+            /* -----------------------------------------
+               SUCCESS MESSAGE
+            ----------------------------------------- */
 
             showMessage(
-                "Student ID is not registered.",
+                "Login successful! Redirecting...",
+                "success"
+            );
+
+
+            /* -----------------------------------------
+               REDIRECT
+            ----------------------------------------- */
+
+            setTimeout(
+                function () {
+
+                    window.location.href =
+                        "student-dashboard.html";
+
+                },
+                700
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+            showMessage(
+                "Unable to connect to the server. Make sure Laravel is running.",
                 "error"
             );
 
-            return;
+        } finally {
+
+            if (loginButton) {
+
+                loginButton.disabled = false;
+
+                loginButton.textContent = "Log In";
+
+            }
 
         }
-
-
-        /* ---------------------------------------------
-           PASSWORD CHECK
-        --------------------------------------------- */
-
-        const savedPassword =
-            String(
-                student.password || ""
-            );
-
-
-        if (
-            savedPassword !==
-            String(enteredPassword)
-        ) {
-
-            showMessage(
-                "Incorrect password.",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        /* =================================================
-           SUCCESSFUL LOGIN
-        ================================================= */
-
-
-        sessionStorage.setItem(
-            "studentLoggedIn",
-            "true"
-        );
-
-
-        sessionStorage.setItem(
-            "studentId",
-            student.studentId
-        );
-
-
-        sessionStorage.setItem(
-            "studentUniqueId",
-            student.uniqueId || ""
-        );
-
-
-        /* ---------------------------------------------
-           SUPPORT BOTH fullName AND fullname
-        --------------------------------------------- */
-
-        sessionStorage.setItem(
-            "studentName",
-            student.fullName ||
-            student.fullname ||
-            "Student"
-        );
-
-
-        sessionStorage.setItem(
-            "studentSection",
-            student.section || ""
-        );
-
-
-        sessionStorage.setItem(
-            "studentOrganization",
-            student.organization || ""
-        );
-
-
-        sessionStorage.setItem(
-            "studentClubRole",
-            student.clubRole || ""
-        );
-
-
-        /* ---------------------------------------------
-           REMEMBER ME
-        --------------------------------------------- */
-
-        if (rememberMe.checked) {
-
-            localStorage.setItem(
-                "rememberedStudentId",
-                student.studentId
-            );
-
-        } else {
-
-            localStorage.removeItem(
-                "rememberedStudentId"
-            );
-
-        }
-
-
-        /* ---------------------------------------------
-           SUCCESS MESSAGE
-        --------------------------------------------- */
-
-        showMessage(
-            "Login successful! Redirecting...",
-            "success"
-        );
-
-
-        /* ---------------------------------------------
-           REDIRECT
-        --------------------------------------------- */
-
-        setTimeout(
-            function () {
-
-                window.location.href =
-                    "student-dashboard.html";
-
-            },
-            700
-        );
 
     }
 );
@@ -356,7 +337,6 @@ function showMessage(
 
     loginMessage.textContent =
         message;
-
 
     if (type === "success") {
 
