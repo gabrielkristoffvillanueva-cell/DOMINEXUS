@@ -1,6 +1,9 @@
 /* =========================================
    DOMINEXUS STUDENT DASHBOARD
+   Laravel Connected
 ========================================= */
+
+const API_URL = "http://127.0.0.1:8000/api";
 
 
 /* =========================================
@@ -23,60 +26,7 @@ if (loggedIn !== "true") {
 ========================================= */
 
 const currentStudentId =
-    sessionStorage.getItem("studentId") ||
-    "2026-0001";
-
-
-const students =
-    JSON.parse(
-        localStorage.getItem("dominexus_students") || "[]"
-    );
-
-
-const registeredStudent =
-    students.find(student =>
-
-        student.studentId &&
-        student.studentId.toLowerCase() ===
-        currentStudentId.toLowerCase()
-
-    );
-
-
-const currentStudent =
-    registeredStudent || {
-
-        studentId: currentStudentId,
-
-        fullName:
-            sessionStorage.getItem("studentName") ||
-            "Juan Dela Cruz",
-
-        section:
-            "Demo Section",
-
-        organization:
-            "DOMINEXUS",
-
-        clubRole:
-            "Student",
-
-        uniqueId:
-            sessionStorage.getItem("studentUniqueId") ||
-            "SDCA-DEMO",
-
-        attendanceHistory:
-            []
-
-    };
-
-
-const studentId =
-    currentStudent.studentId;
-
-
-const studentName =
-    currentStudent.fullName;
+    sessionStorage.getItem("studentId");
 
 
 /* =========================================
@@ -86,83 +36,215 @@ const studentName =
 const welcomeName =
     document.getElementById("welcomeName");
 
-
 const topStudentName =
     document.getElementById("topStudentName");
-
 
 const topStudentId =
     document.getElementById("topStudentId");
 
-
 const topAvatar =
     document.getElementById("topAvatar");
-
 
 const attendanceTable =
     document.getElementById("attendanceTable");
 
-
 const noAttendance =
     document.getElementById("noAttendance");
-
 
 const recordCount =
     document.getElementById("recordCount");
 
-
 const totalAttendance =
     document.getElementById("totalAttendance");
-
 
 const attendanceRate =
     document.getElementById("attendanceRate");
 
-
 const meetingsAttended =
     document.getElementById("meetingsAttended");
-
 
 const logoutButton =
     document.getElementById("logoutButton");
 
-
 const menuButton =
     document.getElementById("menuButton");
 
-
 const sidebar =
     document.getElementById("sidebar");
-
 
 const sidebarOverlay =
     document.getElementById("sidebarOverlay");
 
 
 /* =========================================
+   LOAD STUDENT FROM LARAVEL
+========================================= */
+
+async function loadStudent() {
+
+    if (!currentStudentId) {
+        window.location.href = "student-login.html";
+        return;
+    }
+
+    try {
+
+        /*
+         * For now we use the login information
+         * stored in sessionStorage.
+         *
+         * The login response already contains:
+         * name
+         * student_id
+         * section
+         * organization
+         * club_role
+         * unique_id
+         * role
+         * status
+         */
+
+        const student = {
+
+            student_id:
+                sessionStorage.getItem("studentId") || "",
+
+            name:
+                sessionStorage.getItem("studentName") ||
+                "Student",
+
+            section:
+                sessionStorage.getItem("studentSection") ||
+                "",
+
+            organization:
+                sessionStorage.getItem(
+                    "studentOrganization"
+                ) || "",
+
+            club_role:
+                sessionStorage.getItem(
+                    "studentClubRole"
+                ) || "",
+
+            unique_id:
+                sessionStorage.getItem(
+                    "studentUniqueId"
+                ) || "",
+
+            role:
+                sessionStorage.getItem(
+                    "studentRole"
+                ) || "student",
+
+            status:
+                sessionStorage.getItem(
+                    "studentStatus"
+                ) || "Active"
+
+        };
+
+
+        displayStudent(student);
+
+        /*
+         * Attendance will be connected to Laravel
+         * after the attendance API is created.
+         */
+
+        displayAttendance([]);
+
+    } catch (error) {
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
    DISPLAY STUDENT INFORMATION
 ========================================= */
 
-if (welcomeName) {
+function displayStudent(student) {
 
-    welcomeName.textContent =
-        getFirstName(studentName);
+    const studentName =
+        student.name || "Student";
 
-}
-
-
-if (topStudentName) {
-
-    topStudentName.textContent =
-        studentName;
-
-}
+    const studentId =
+        student.student_id || "Student ID";
 
 
-if (topStudentId) {
+    if (welcomeName) {
 
-    topStudentId.textContent =
-        studentId;
+        welcomeName.textContent =
+            getFirstName(studentName);
+
+    }
+
+
+    if (topStudentName) {
+
+        topStudentName.textContent =
+            studentName;
+
+    }
+
+
+    if (topStudentId) {
+
+        topStudentId.textContent =
+            studentId;
+
+    }
+
+
+    if (topAvatar) {
+
+        topAvatar.textContent =
+            getInitials(studentName);
+
+    }
+
+
+    /*
+     * Save current information locally
+     * for other frontend pages to use.
+     */
+
+    sessionStorage.setItem(
+        "studentId",
+        studentId
+    );
+
+    sessionStorage.setItem(
+        "studentName",
+        studentName
+    );
+
+    sessionStorage.setItem(
+        "studentSection",
+        student.section || ""
+    );
+
+    sessionStorage.setItem(
+        "studentOrganization",
+        student.organization || ""
+    );
+
+    sessionStorage.setItem(
+        "studentClubRole",
+        student.club_role || ""
+    );
+
+    sessionStorage.setItem(
+        "studentUniqueId",
+        student.unique_id || ""
+    );
 
 }
 
@@ -171,29 +253,15 @@ if (topStudentId) {
    CREATE INITIALS
 ========================================= */
 
-const initials =
-    getInitials(studentName);
-
-
-if (topAvatar) {
-
-    topAvatar.textContent =
-        initials;
-
-}
-
-
-/* =========================================
-   FUNCTIONS
-========================================= */
-
 function getFirstName(name) {
 
     if (!name) {
         return "Student";
     }
 
-    return name.trim().split(/\s+/)[0];
+    return name
+        .trim()
+        .split(/\s+/)[0];
 
 }
 
@@ -204,10 +272,8 @@ function getInitials(name) {
         return "ST";
     }
 
-
     const parts =
         name.trim().split(/\s+/);
-
 
     if (parts.length === 1) {
 
@@ -216,7 +282,6 @@ function getInitials(name) {
             .toUpperCase();
 
     }
-
 
     return (
         parts[0].charAt(0) +
@@ -227,22 +292,12 @@ function getInitials(name) {
 
 
 /* =========================================
-   ATTENDANCE DATA
+   ATTENDANCE
 ========================================= */
 
-const attendanceRecords =
-    Array.isArray(
-        currentStudent.attendanceHistory
-    )
-        ? currentStudent.attendanceHistory
-        : [];
-
-
-/* =========================================
-   DISPLAY ATTENDANCE
-========================================= */
-
-function displayAttendance() {
+function displayAttendance(
+    attendanceRecords
+) {
 
     if (!attendanceTable) {
         return;
@@ -253,6 +308,7 @@ function displayAttendance() {
 
 
     if (
+        !Array.isArray(attendanceRecords) ||
         attendanceRecords.length === 0
     ) {
 
@@ -263,14 +319,12 @@ function displayAttendance() {
 
         }
 
-
         if (recordCount) {
 
             recordCount.textContent =
                 "0";
 
         }
-
 
         if (totalAttendance) {
 
@@ -279,14 +333,12 @@ function displayAttendance() {
 
         }
 
-
         if (meetingsAttended) {
 
             meetingsAttended.textContent =
                 "0";
 
         }
-
 
         if (attendanceRate) {
 
@@ -295,9 +347,7 @@ function displayAttendance() {
 
         }
 
-
         return;
-
     }
 
 
@@ -315,13 +365,8 @@ function displayAttendance() {
             document.createElement("tr");
 
 
-        /* =========================
-           MEETING
-        ========================= */
-
         const meetingCell =
             document.createElement("td");
-
 
         meetingCell.textContent =
             record.meeting ||
@@ -329,36 +374,21 @@ function displayAttendance() {
             "Organization Meeting";
 
 
-        /* =========================
-           DATE
-        ========================= */
-
         const dateCell =
             document.createElement("td");
 
-
         dateCell.textContent =
-            record.date ||
-            "--";
+            record.date || "--";
 
-
-        /* =========================
-           TIME
-        ========================= */
 
         const timeCell =
             document.createElement("td");
-
 
         timeCell.textContent =
             record.time ||
             record.timeIn ||
             "--";
 
-
-        /* =========================
-           STATUS
-        ========================= */
 
         const statusCell =
             document.createElement("td");
@@ -381,34 +411,26 @@ function displayAttendance() {
             recordStatus.toLowerCase();
 
 
-        if (
-            normalizedStatus === "present"
-        ) {
+        if (normalizedStatus === "present") {
 
             status.className =
                 "attendance-status status-present";
 
-        }
-
-        else if (
+        } else if (
             normalizedStatus === "late"
         ) {
 
             status.className =
                 "attendance-status status-late";
 
-        }
-
-        else if (
+        } else if (
             normalizedStatus === "excused"
         ) {
 
             status.className =
                 "attendance-status status-excused";
 
-        }
-
-        else {
+        } else {
 
             status.className =
                 "attendance-status status-absent";
@@ -419,16 +441,9 @@ function displayAttendance() {
         statusCell.appendChild(status);
 
 
-        /* =========================
-           ADD ROW
-        ========================= */
-
         row.appendChild(meetingCell);
-
         row.appendChild(dateCell);
-
         row.appendChild(timeCell);
-
         row.appendChild(statusCell);
 
 
@@ -436,10 +451,6 @@ function displayAttendance() {
 
     });
 
-
-    /* =================================
-       UPDATE STATISTICS
-    ================================= */
 
     const total =
         attendanceRecords.length;
@@ -523,24 +534,7 @@ if (logoutButton) {
             }
 
 
-            sessionStorage.removeItem(
-                "studentLoggedIn"
-            );
-
-
-            sessionStorage.removeItem(
-                "studentId"
-            );
-
-
-            sessionStorage.removeItem(
-                "studentName"
-            );
-
-
-            sessionStorage.removeItem(
-                "studentUniqueId"
-            );
+            sessionStorage.clear();
 
 
             window.location.href =
@@ -566,14 +560,9 @@ if (
         "click",
         () => {
 
-            sidebar.classList.add(
-                "open"
-            );
+            sidebar.classList.add("open");
 
-
-            sidebarOverlay.classList.add(
-                "show"
-            );
+            sidebarOverlay.classList.add("show");
 
         }
     );
@@ -595,18 +584,13 @@ function closeSidebar() {
 
     if (sidebar) {
 
-        sidebar.classList.remove(
-            "open"
-        );
+        sidebar.classList.remove("open");
 
     }
 
-
     if (sidebarOverlay) {
 
-        sidebarOverlay.classList.remove(
-            "show"
-        );
+        sidebarOverlay.classList.remove("show");
 
     }
 
@@ -614,7 +598,7 @@ function closeSidebar() {
 
 
 /* =========================================
-   CLOSE MOBILE MENU WHEN LINK IS CLICKED
+   CLOSE MOBILE MENU
 ========================================= */
 
 const navigationLinks =
@@ -638,7 +622,7 @@ navigationLinks.forEach(link => {
 
 
 /* =========================================
-   INITIALIZE DASHBOARD
+   START DASHBOARD
 ========================================= */
 
-displayAttendance();
+loadStudent();
