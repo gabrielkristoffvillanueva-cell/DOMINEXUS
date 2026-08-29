@@ -1,35 +1,25 @@
-/* =========================================
-   DOMINEXUS STUDENT PROFILE
-   FRONT-END VERSION
-========================================= */
+/* =========================================================
+   DOMINEXUS — STUDENT PROFILE
+   LARAVEL / MYSQL VERSION
+========================================================= */
+
+const API_BASE = "http://127.0.0.1:8000/api";
 
 
-/* =========================================
-   SAMPLE STUDENT DATA
-========================================= */
+/* =========================================================
+   AUTH CHECK
+========================================================= */
 
-const profileStudent = {
-
-    fullName: "Juan Dela Cruz",
-
-    studentId: "SDCA-0001",
-
-    uniqueId: "SDCA-0001",
-
-    section: "11 TVL CP",
-
-    organization: "Student Organization",
-
-    clubRole: "Member",
-
-    accountType: "Student"
-
-};
+if (
+    sessionStorage.getItem("studentLoggedIn") !== "true"
+) {
+    window.location.href = "student-login.html";
+}
 
 
-/* =========================================
+/* =========================================================
    START
-========================================= */
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -45,170 +35,404 @@ document.addEventListener(
 );
 
 
-/* =========================================
-   LOAD PROFILE
-========================================= */
+/* =========================================================
+   LOAD PROFILE FROM LARAVEL
+========================================================= */
 
-function loadProfile() {
-
-    const student =
-        getStudentData();
-
-
-    const name =
-        student.fullName ||
-        "Student Name";
-
+async function loadProfile() {
 
     const studentId =
-        student.studentId ||
-        "—";
+        sessionStorage.getItem("studentId");
 
 
-    const uniqueId =
-        student.uniqueId ||
-        studentId;
+    if (!studentId) {
+
+        alert(
+            "Student session is missing. Please log in again."
+        );
+
+        sessionStorage.clear();
+
+        window.location.href =
+            "student-login.html";
+
+        return;
+
+    }
 
 
-    const section =
-        student.section ||
-        "—";
+    try {
+
+        console.log(
+            "Loading student profile:",
+            studentId
+        );
 
 
-    const organization =
-        student.organization ||
-        "—";
+        const response =
+            await fetch(
+                `${API_BASE}/students/by-student-id/${encodeURIComponent(studentId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
 
 
-    const role =
-        student.clubRole ||
-        student.role ||
-        "Member";
+        let data = {};
 
 
-    const accountType =
-        student.accountType ||
-        "Student";
+        try {
+
+            data =
+                await response.json();
+
+        } catch (error) {
+
+            console.warn(
+                "Server did not return JSON."
+            );
+
+        }
 
 
-    /* TOPBAR */
-
-    document.getElementById(
-        "topStudentName"
-    ).textContent =
-        name;
+        console.log(
+            "Profile API response:",
+            data
+        );
 
 
-    document.getElementById(
-        "topStudentId"
-    ).textContent =
-        studentId;
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load your profile."
+            );
+
+        }
 
 
-    document.getElementById(
-        "topAvatar"
-    ).textContent =
-        getInitials(name);
+        const student =
+            data.student ||
+            data.data ||
+            data;
 
 
-    /* PROFILE HEADER */
+        /* =================================================
+           STUDENT DATA
+        ================================================= */
 
-    document.getElementById(
-        "profileAvatar"
-    ).textContent =
-        getInitials(name);
-
-
-    document.getElementById(
-        "profileName"
-    ).textContent =
-        name;
+        const name =
+            student.name ||
+            "Student";
 
 
-    document.getElementById(
-        "profileRole"
-    ).textContent =
-        role;
+        const actualStudentId =
+            student.student_id ||
+            studentId;
 
 
-    document.getElementById(
-        "profileUniqueId"
-    ).textContent =
-        uniqueId;
+        const uniqueId =
+            student.unique_id ||
+            "—";
 
 
-    /* PERSONAL INFORMATION */
-
-    document.getElementById(
-        "fullName"
-    ).textContent =
-        name;
+        const section =
+            student.section ||
+            "—";
 
 
-    document.getElementById(
-        "studentId"
-    ).textContent =
-        studentId;
+        const clubRole =
+            student.club_role ||
+            student.role ||
+            "Member";
 
 
-    document.getElementById(
-        "uniqueId"
-    ).textContent =
-        uniqueId;
+        const accountType =
+            "Student";
 
 
-    document.getElementById(
-        "section"
-    ).textContent =
-        section;
+        /*
+         * Organization can be returned as:
+         *
+         * student.organization.name
+         *
+         * or organization_id
+         */
+
+        let organization = "—";
 
 
-    document.getElementById(
-        "organization"
-    ).textContent =
-        organization;
+        if (
+            student.organization &&
+            typeof student.organization === "object"
+        ) {
+
+            organization =
+                student.organization.name ||
+                student.organization.organization_name ||
+                "—";
+
+        }
 
 
-    document.getElementById(
-        "clubRole"
-    ).textContent =
-        role;
+        /*
+         * Fallback if backend only returns organization_id.
+         */
+
+        if (
+            organization === "—" &&
+            student.organization_id
+        ) {
+
+            organization =
+                `Organization #${student.organization_id}`;
+
+        }
 
 
-    /* ACCOUNT */
+        /* =================================================
+           TOPBAR
+        ================================================= */
 
-    document.getElementById(
-        "accountType"
-    ).textContent =
-        accountType;
+        const topStudentName =
+            document.getElementById(
+                "topStudentName"
+            );
+
+
+        const topStudentId =
+            document.getElementById(
+                "topStudentId"
+            );
+
+
+        const topAvatar =
+            document.getElementById(
+                "topAvatar"
+            );
+
+
+        if (topStudentName) {
+
+            topStudentName.textContent =
+                name;
+
+        }
+
+
+        if (topStudentId) {
+
+            topStudentId.textContent =
+                actualStudentId;
+
+        }
+
+
+        if (topAvatar) {
+
+            topAvatar.textContent =
+                getInitials(name);
+
+        }
+
+
+        /* =================================================
+           PROFILE HEADER
+        ================================================= */
+
+        const profileAvatar =
+            document.getElementById(
+                "profileAvatar"
+            );
+
+
+        const profileName =
+            document.getElementById(
+                "profileName"
+            );
+
+
+        const profileRole =
+            document.getElementById(
+                "profileRole"
+            );
+
+
+        const profileUniqueId =
+            document.getElementById(
+                "profileUniqueId"
+            );
+
+
+        if (profileAvatar) {
+
+            profileAvatar.textContent =
+                getInitials(name);
+
+        }
+
+
+        if (profileName) {
+
+            profileName.textContent =
+                name;
+
+        }
+
+
+        if (profileRole) {
+
+            profileRole.textContent =
+                clubRole;
+
+        }
+
+
+        if (profileUniqueId) {
+
+            profileUniqueId.textContent =
+                uniqueId;
+
+        }
+
+
+        /* =================================================
+           PERSONAL INFORMATION
+        ================================================= */
+
+        const fullNameElement =
+            document.getElementById(
+                "fullName"
+            );
+
+
+        const studentIdElement =
+            document.getElementById(
+                "studentId"
+            );
+
+
+        const uniqueIdElement =
+            document.getElementById(
+                "uniqueId"
+            );
+
+
+        const sectionElement =
+            document.getElementById(
+                "section"
+            );
+
+
+        const organizationElement =
+            document.getElementById(
+                "organization"
+            );
+
+
+        const clubRoleElement =
+            document.getElementById(
+                "clubRole"
+            );
+
+
+        if (fullNameElement) {
+
+            fullNameElement.textContent =
+                name;
+
+        }
+
+
+        if (studentIdElement) {
+
+            studentIdElement.textContent =
+                actualStudentId;
+
+        }
+
+
+        if (uniqueIdElement) {
+
+            uniqueIdElement.textContent =
+                uniqueId;
+
+        }
+
+
+        if (sectionElement) {
+
+            sectionElement.textContent =
+                section;
+
+        }
+
+
+        if (organizationElement) {
+
+            organizationElement.textContent =
+                organization;
+
+        }
+
+
+        if (clubRoleElement) {
+
+            clubRoleElement.textContent =
+                clubRole;
+
+        }
+
+
+        /* =================================================
+           ACCOUNT INFORMATION
+        ================================================= */
+
+        const accountTypeElement =
+            document.getElementById(
+                "accountType"
+            );
+
+
+        if (accountTypeElement) {
+
+            accountTypeElement.textContent =
+                accountType;
+
+        }
+
+
+        console.log(
+            "Student profile loaded successfully."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Profile loading error:",
+            error
+        );
+
+
+        alert(
+            "Unable to load your profile.\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
 
-/* =========================================
-   FRONT-END STUDENT DATA
-========================================= */
-
-function getStudentData() {
-
-    /*
-       FRONT-END ONLY
-
-       For now, this uses sample data.
-
-       Later, this can be replaced with
-       database information.
-    */
-
-
-    return profileStudent;
-
-}
-
-
-/* =========================================
+/* =========================================================
    MOBILE NAVIGATION
-========================================= */
+========================================================= */
 
 function setupNavigation() {
 
@@ -230,8 +454,14 @@ function setupNavigation() {
         );
 
 
-    if (!menuButton) {
+    if (
+        !menuButton ||
+        !sidebar ||
+        !overlay
+    ) {
+
         return;
+
     }
 
 
@@ -253,28 +483,20 @@ function setupNavigation() {
 
     overlay.addEventListener(
         "click",
-        function () {
-
-            closeSidebar();
-
-        }
+        closeSidebar
     );
 
 
-    document.querySelectorAll(
-        ".nav-item"
-    ).forEach(function (link) {
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(function (link) {
 
-        link.addEventListener(
-            "click",
-            function () {
+            link.addEventListener(
+                "click",
+                closeSidebar
+            );
 
-                closeSidebar();
-
-            }
-        );
-
-    });
+        });
 
 
     function closeSidebar() {
@@ -292,9 +514,9 @@ function setupNavigation() {
 }
 
 
-/* =========================================
+/* =========================================================
    LOGOUT
-========================================= */
+========================================================= */
 
 function setupLogout() {
 
@@ -305,7 +527,9 @@ function setupLogout() {
 
 
     if (!logoutButton) {
+
         return;
+
     }
 
 
@@ -320,35 +544,13 @@ function setupLogout() {
 
 
             if (!confirmLogout) {
+
                 return;
+
             }
 
 
-            /*
-               TEMPORARY FRONT-END LOGOUT
-
-               This does not handle the backend.
-            */
-
-
-            sessionStorage.removeItem(
-                "studentLoggedIn"
-            );
-
-
-            sessionStorage.removeItem(
-                "studentId"
-            );
-
-
-            sessionStorage.removeItem(
-                "studentName"
-            );
-
-
-            sessionStorage.removeItem(
-                "studentUniqueId"
-            );
+            sessionStorage.clear();
 
 
             window.location.href =
@@ -360,22 +562,28 @@ function setupLogout() {
 }
 
 
-/* =========================================
+/* =========================================================
    GET INITIALS
-========================================= */
+========================================================= */
 
 function getInitials(name) {
 
     if (!name) {
+
         return "ST";
+
     }
 
 
     const parts =
-        name.trim().split(/\s+/);
+        String(name)
+            .trim()
+            .split(/\s+/);
 
 
-    if (parts.length === 1) {
+    if (
+        parts.length === 1
+    ) {
 
         return parts[0]
             .substring(0, 2)
@@ -386,7 +594,9 @@ function getInitials(name) {
 
     return (
         parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
+        parts[
+            parts.length - 1
+        ].charAt(0)
     ).toUpperCase();
 
 }
