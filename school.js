@@ -1,0 +1,1 @@
+console.log("DOMINEXUS About School page loaded.");

@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Moderator Dashboard | DOMINEXUS</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f7f5f1;
+
+            color:
+                #292929;
+
+        }
+
+
+        /* =========================================
+           SIDEBAR
+        ========================================= */
+
+        .sidebar {
+
+            position: fixed;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            width: 250px;
+
+            background:
+                #7b1113;
+
+            color:
+                white;
+
+            padding:
+                25px 16px;
+
+            z-index: 100;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding:
+                5px 10px 25px;
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.15);
+
+        }
+
+
+        .brand-logo {
+
+            width: 43px;
+
+            height: 43px;
+
+            border-radius: 50%;
+
+            background: white;
+
+            color: #7b1113;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-weight: 800;
+
+            font-size: 20px;
+
+        }
+
+
+        .brand-name {
+
+            font-size: 19px;
+
+            font-weight: 700;
+
+        }
+
+
+        .brand-role {
+
+            display: block;
+
+            margin-top: 3px;
+
+            font-size: 9px;
+
+            letter-spacing: 1.5px;
+
+            opacity: .65;
+
+        }
+
+
+        .nav {
+
+            margin-top: 25px;
+
+        }
+
+
+        .nav-title {
+
+            padding:
+                0 12px 9px;
+
+            font-size: 9px;
+
+            letter-spacing: 1.5px;
+
+            opacity: .55;
+
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            width: 100%;
+
+            padding:
+                11px 12px;
+
+            margin-bottom: 4px;
+
+            border-radius: 8px;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            transition:
+                background .2s ease;
+
+        }
+
+
+        .nav-item:hover,
+        .nav-item.active {
+
+            background:
+                rgba(255,255,255,.14);
+
+        }
+
+
+        .nav-icon {
+
+            width: 23px;
+
+            text-align: center;
+
+            font-size: 15px;
+
+        }
+
+
+        .logout-button {
+
+            position: absolute;
+
+            left: 16px;
+
+            right: 16px;
+
+            bottom: 20px;
+
+            width:
+                calc(100% - 32px);
+
+            padding: 11px;
+
+            border:
+                1px solid
+                rgba(255,255,255,.2);
+
+            border-radius: 8px;
+
+            background:
+                transparent;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-size: 12px;
+
+        }
+
+
+        .logout-button:hover {
+
+            background:
+                rgba(255,255,255,.1);
+
+        }
+
+
+        /* =========================================
+           MAIN
+        ========================================= */
+
+        .main {
+
+            margin-left: 250px;
+
+            min-height: 100vh;
+
+        }
+
+
+        .topbar {
+
+            height: 72px;
+
+            background: white;
+
+            border-bottom:
+                1px solid
+                #e4e0d9;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding:
+                0 32px;
+
+        }
+
+
+        .page-title {
+
+            color:
+                #7b1113;
+
+            font-size:
+                20px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .profile {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+        }
+
+
+        .avatar {
+
+            width: 38px;
+
+            height: 38px;
+
+            border-radius: 50%;
+
+            background:
+                #7b1113;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+        }
+
+
+        .profile-name {
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+        }
+
+
+        .profile-role {
+
+            display: block;
+
+            margin-top: 2px;
+
+            color: #888;
+
+            font-size: 10px;
+
+        }
+
+
+        /* =========================================
+           CONTENT
+        ========================================= */
+
+        .content {
+
+            padding:
+                30px 32px;
+
+        }
+
+
+        .welcome {
+
+            margin-bottom:
+                25px;
+
+        }
+
+
+        .welcome h1 {
+
+            margin: 0;
+
+            color:
+                #7b1113;
+
+            font-size:
+                26px;
+
+        }
+
+
+        .welcome p {
+
+            margin:
+                7px 0 0;
+
+            color:
+                #777;
+
+            font-size:
+                13px;
+
+        }
+
+
+        /* =========================================
+           STATISTICS
+        ========================================= */
+
+        .stats-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 17px;
+
+            margin-bottom:
+                22px;
+
+        }
+
+
+        .stat-card {
+
+            background: white;
+
+            border:
+                1px solid
+                #e3dfd8;
+
+            border-radius:
+                12px;
+
+            padding:
+                20px;
+
+        }
+
+
+        .stat-label {
+
+            color:
+                #777;
+
+            font-size:
+                11px;
+
+            margin-bottom:
+                10px;
+
+        }
+
+
+        .stat-value {
+
+            color:
+                #7b1113;
+
+            font-size:
+                28px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .stat-description {
+
+            margin-top:
+                5px;
+
+            color:
+                #999;
+
+            font-size:
+                10px;
+
+        }
+
+
+        /* =========================================
+           LOWER CONTENT
+        ========================================= */
+
+        .content-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                1.4fr 1fr;
+
+            gap:
+                20px;
+
+        }
+
+
+        .card {
+
+            background:
+                white;
+
+            border:
+                1px solid
+                #e3dfd8;
+
+            border-radius:
+                12px;
+
+            padding:
+                22px;
+
+        }
+
+
+        .card-title {
+
+            margin: 0;
+
+            color:
+                #7b1113;
+
+            font-size:
+                15px;
+
+        }
+
+
+        .card-description {
+
+            margin:
+                5px 0 20px;
+
+            color:
+                #888;
+
+            font-size:
+                11px;
+
+        }
+
+
+        /* =========================================
+           OVERVIEW
+        ========================================= */
+
+        .overview-row {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            padding:
+                13px 0;
+
+            border-bottom:
+                1px solid
+                #eeeeee;
+
+        }
+
+
+        .overview-row:last-child {
+
+            border-bottom:
+                none;
+
+        }
+
+
+        .overview-label {
+
+            color:
+                #777;
+
+            font-size:
+                12px;
+
+        }
+
+
+        .overview-value {
+
+            color:
+                #333;
+
+            font-size:
+                12px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        /* =========================================
+           QUICK ACCESS
+        ========================================= */
+
+        .quick-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap:
+                11px;
+
+        }
+
+
+        .quick-card {
+
+            padding:
+                15px;
+
+            border:
+                1px solid
+                #e4e0d9;
+
+            border-radius:
+                9px;
+
+            text-decoration:
+                none;
+
+            color:
+                inherit;
+
+            transition:
+                transform .2s ease,
+                border-color .2s ease;
+
+        }
+
+
+        .quick-card:hover {
+
+            transform:
+                translateY(-2px);
+
+            border-color:
+                #9a7b28;
+
+        }
+
+
+        .quick-icon {
+
+            font-size:
+                18px;
+
+            margin-bottom:
+                7px;
+
+        }
+
+
+        .quick-title {
+
+            color:
+                #7b1113;
+
+            font-size:
+                12px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .quick-text {
+
+            margin-top:
+                4px;
+
+            color:
+                #888;
+
+            font-size:
+                10px;
+
+            line-height:
+                1.4;
+
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (
+            max-width: 1050px
+        ) {
+
+            .stats-grid {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+            }
+
+
+            .content-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+        }
+
+
+        @media (
+            max-width: 700px
+        ) {
+
+            .sidebar {
+
+                position:
+                    relative;
+
+                width:
+                    100%;
+
+                height:
+                    auto;
+
+                padding-bottom:
+                    80px;
+
+            }
+
+
+            .main {
+
+                margin-left:
+                    0;
+
+            }
+
+
+            .stats-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .quick-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .topbar {
+
+                padding:
+                    0 18px;
+
+            }
+
+
+            .content {
+
+                padding:
+                    22px 18px;
+
+            }
+
+
+            .logout-button {
+
+                bottom:
+                    20px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                D
+            </div>
+
+            <div>
+
+                <div class="brand-name">
+                    DOMINEXUS
+                </div>
+
+                <span class="brand-role">
+                    MODERATOR PORTAL
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+
+            <div class="nav-title">
+                MODERATOR
+            </div>
+
+
+            <a
+                href="moderator-dashboard.html"
+                class="nav-item active"
+            >
+
+                <span class="nav-icon">
+                    ▦
+                </span>
+
+                Dashboard
+
+            </a>
+
+
+            <a
+                href="moderator-meetings.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ◫
+                </span>
+
+                Meeting Management
+
+            </a>
+
+
+            <a
+                href="moderator-scanner.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ▣
+                </span>
+
+                QR Scanner
+
+            </a>
+
+
+            <a
+                href="moderator-live-attendance.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ●
+                </span>
+
+                Live Attendance
+
+            </a>
+
+
+            <a
+                href="moderator-students.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ♙
+                </span>
+
+                Student Records
+
+            </a>
+
+
+            <a
+                href="moderator-history.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                Attendance History
+
+            </a>
+
+
+            <a
+                href="moderator-participation.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ◔
+                </span>
+
+                Participation
+
+            </a>
+
+
+            <a
+                href="moderator-alerts.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    !
+                </span>
+
+                Notifications
+
+            </a>
+
+
+            <a
+                href="moderator-reports.html"
+                class="nav-item"
+            >
+
+                <span class="nav-icon">
+                    ▥
+                </span>
+
+                Reports
+
+            </a>
+
+
+        </nav>
+
+
+        <button
+            class="logout-button"
+            id="logoutButton"
+        >
+            Log Out
+        </button>
+
+
+    </aside>
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+
+            <div class="page-title">
+                Dashboard Overview
+            </div>
+
+
+            <div class="profile">
+
+                <div
+                    class="avatar"
+                    id="moderatorAvatar"
+                >
+                    M
+                </div>
+
+
+                <div>
+
+                    <div
+                        class="profile-name"
+                        id="moderatorName"
+                    >
+                        System Moderator
+                    </div>
+
+                    <span class="profile-role">
+                        Moderator
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        </header>
+
+
+        <section class="content">
+
+
+            <div class="welcome">
+
+                <h1>
+
+                    Welcome,
+                    <span id="welcomeName">
+                        Moderator
+                    </span>
+
+                </h1>
+
+
+                <p>
+                    Overview of student participation
+                    and attendance across DOMINEXUS.
+                </p>
+
+            </div>
+
+
+            <!-- =====================================
+                 STATISTICS
+            ====================================== -->
+
+            <div class="stats-grid">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        TOTAL STUDENTS
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="totalStudents"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-description">
+                        Registered student accounts
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        PRESENT
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="totalPresent"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-description">
+                        Currently marked present
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        ABSENT
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="totalAbsent"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-description">
+                        Currently marked absent
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-label">
+                        ATTENDANCE RATE
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="attendanceRate"
+                    >
+                        0%
+                    </div>
+
+                    <div class="stat-description">
+                        Based on recorded attendance
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =====================================
+                 LOWER CONTENT
+            ====================================== -->
+
+            <div class="content-grid">
+
+
+                <!-- SYSTEM OVERVIEW -->
+
+                <div class="card">
+
+                    <h2 class="card-title">
+                        Attendance Overview
+                    </h2>
+
+                    <p class="card-description">
+                        Current attendance information
+                        available in the local system.
+                    </p>
+
+
+                    <div class="overview-row">
+
+                        <span class="overview-label">
+                            Registered Students
+                        </span>
+
+                        <span
+                            class="overview-value"
+                            id="overviewStudents"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div class="overview-row">
+
+                        <span class="overview-label">
+                            Recorded Present
+                        </span>
+
+                        <span
+                            class="overview-value"
+                            id="overviewPresent"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div class="overview-row">
+
+                        <span class="overview-label">
+                            Recorded Absent
+                        </span>
+
+                        <span
+                            class="overview-value"
+                            id="overviewAbsent"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div class="overview-row">
+
+                        <span class="overview-label">
+                            Meetings Recorded
+                        </span>
+
+                        <span
+                            class="overview-value"
+                            id="overviewMeetings"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div class="overview-row">
+
+                        <span class="overview-label">
+                            Storage Mode
+                        </span>
+
+                        <span class="overview-value">
+                            Offline / Local
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- QUICK ACCESS -->
+
+                <div class="card">
+
+                    <h2 class="card-title">
+                        Quick Access
+                    </h2>
+
+                    <p class="card-description">
+                        Moderator functions
+                    </p>
+
+
+                    <div class="quick-grid">
+
+
+                        <a
+                            href="moderator-meetings.html"
+                            class="quick-card"
+                        >
+
+                            <div class="quick-icon">
+                                ◫
+                            </div>
+
+                            <div class="quick-title">
+                                Meetings
+                            </div>
+
+                            <div class="quick-text">
+                                Create and manage general
+                                meetings.
+                            </div>
+
+                        </a>
+
+
+                        <a
+                            href="moderator-scanner.html"
+                            class="quick-card"
+                        >
+
+                            <div class="quick-icon">
+                                ▣
+                            </div>
+
+                            <div class="quick-title">
+                                QR Scanner
+                            </div>
+
+                            <div class="quick-text">
+                                Record attendance using
+                                student QR codes.
+                            </div>
+
+                        </a>
+
+
+                        <a
+                            href="moderator-students.html"
+                            class="quick-card"
+                        >
+
+                            <div class="quick-icon">
+                                ♙
+                            </div>
+
+                            <div class="quick-title">
+                                Students
+                            </div>
+
+                            <div class="quick-text">
+                                View registered student
+                                records.
+                            </div>
+
+                        </a>
+
+
+                        <a
+                            href="moderator-reports.html"
+                            class="quick-card"
+                        >
+
+                            <div class="quick-icon">
+                                ▥
+                            </div>
+
+                            <div class="quick-title">
+                                Reports
+                            </div>
+
+                            <div class="quick-text">
+                                Review attendance summaries
+                                and records.
+                            </div>
+
+                        </a>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+    <script>
+
+        /* =========================================
+           MODERATOR AUTHENTICATION
+        ========================================== */
+
+        if (
+            sessionStorage.getItem(
+                "moderatorLoggedIn"
+            ) !== "true"
+        ) {
+
+            window.location.href =
+                "moderator-login.html";
+
+        }
+
+
+        /* =========================================
+           MODERATOR INFORMATION
+        ========================================== */
+
+        const moderatorName =
+            sessionStorage.getItem(
+                "moderatorName"
+            ) ||
+            "System Moderator";
+
+
+        document.getElementById(
+            "moderatorName"
+        ).textContent =
+            moderatorName;
+
+
+        document.getElementById(
+            "welcomeName"
+        ).textContent =
+            getFirstName(
+                moderatorName
+            );
+
+
+        document.getElementById(
+            "moderatorAvatar"
+        ).textContent =
+            getInitials(
+                moderatorName
+            );
+
+
+        /* =========================================
+           STUDENTS
+        ========================================== */
+
+        const students =
+            getStorageArray(
+                "dominexus_students"
+            );
+
+
+        const totalStudents =
+            students.length;
+
+
+        /* =========================================
+           ATTENDANCE
+        ========================================== */
+
+        let attendance =
+            {};
+
+
+        try {
+
+            attendance =
+                JSON.parse(
+                    localStorage.getItem(
+                        "dominexus_attendance"
+                    ) || "{}"
+                );
+
+        } catch (error) {
+
+            attendance =
+                {};
+
+        }
+
+
+        let present =
+            0;
+
+        let absent =
+            0;
+
+
+        /*
+         * Count the latest recorded status
+         * for each student across the stored
+         * attendance records.
+         */
+
+        const latestStatus =
+            {};
+
+
+        if (
+            attendance &&
+            typeof attendance ===
+            "object"
+        ) {
+
+            Object.values(
+                attendance
+            )
+            .forEach(
+                function(
+                    meetingRecords
+                ) {
+
+                    if (
+                        !meetingRecords ||
+                        typeof meetingRecords !==
+                        "object"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    Object.values(
+                        meetingRecords
+                    )
+                    .forEach(
+                        function(
+                            record
+                        ) {
+
+                            if (
+                                !record ||
+                                !record.studentId
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            latestStatus[
+                                record.studentId
+                            ] =
+                                record.status;
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        Object.values(
+            latestStatus
+        )
+        .forEach(
+            function(status) {
+
+                if (
+                    status ===
+                    "Present"
+                ) {
+
+                    present++;
+
+                }
+
+
+                if (
+                    status ===
+                    "Absent"
+                ) {
+
+                    absent++;
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Attendance rate
+         *
+         * Present / (Present + Absent)
+         */
+
+        const recorded =
+            present +
+            absent;
+
+
+        const rate =
+            recorded > 0
+                ? Math.round(
+                    (
+                        present /
+                        recorded
+                    ) * 100
+                )
+                : 0;
+
+
+        /* =========================================
+           MEETINGS
+        ========================================== */
+
+        const meetings =
+            getStorageArray(
+                "dominexus_meetings"
+            );
+
+
+        /* =========================================
+           UPDATE DASHBOARD
+        ========================================== */
+
+        setText(
+            "totalStudents",
+            totalStudents
+        );
+
+
+        setText(
+            "totalPresent",
+            present
+        );
+
+
+        setText(
+            "totalAbsent",
+            absent
+        );
+
+
+        setText(
+            "attendanceRate",
+            rate + "%"
+        );
+
+
+        setText(
+            "overviewStudents",
+            totalStudents
+        );
+
+
+        setText(
+            "overviewPresent",
+            present
+        );
+
+
+        setText(
+            "overviewAbsent",
+            absent
+        );
+
+
+        setText(
+            "overviewMeetings",
+            meetings.length
+        );
+
+
+        /* =========================================
+           LOGOUT
+        ========================================== */
+
+        document
+            .getElementById(
+                "logoutButton"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    const confirmLogout =
+                        confirm(
+                            "Are you sure you want to log out?"
+                        );
+
+
+                    if (!confirmLogout) {
+
+                        return;
+
+                    }
+
+
+                    sessionStorage.removeItem(
+                        "moderatorLoggedIn"
+                    );
+
+
+                    sessionStorage.removeItem(
+                        "moderatorId"
+                    );
+
+
+                    sessionStorage.removeItem(
+                        "moderatorName"
+                    );
+
+
+                    window.location.href =
+                        "moderator-login.html";
+
+                }
+            );
+
+
+        /* =========================================
+           HELPERS
+        ========================================== */
+
+        function getStorageArray(
+            key
+        ) {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if (!raw) {
+
+                    return [];
+
+                }
+
+
+                const parsed =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if (
+                    Array.isArray(
+                        parsed
+                    )
+                ) {
+
+                    return parsed;
+
+                }
+
+
+                if (
+                    parsed &&
+                    Array.isArray(
+                        parsed.data
+                    )
+                ) {
+
+                    return parsed.data;
+
+                }
+
+
+                if (
+                    parsed &&
+                    Array.isArray(
+                        parsed.meetings
+                    )
+                ) {
+
+                    return parsed.meetings;
+
+                }
+
+
+                return [];
+
+            } catch (error) {
+
+                console.error(
+                    "DOMINEXUS storage error:",
+                    key,
+                    error
+                );
+
+                return [];
+
+            }
+
+        }
+
+
+        function setText(
+            id,
+            value
+        ) {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if (element) {
+
+                element.textContent =
+                    value;
+
+            }
+
+        }
+
+
+        function getFirstName(
+            name
+        ) {
+
+            return (
+                name
+                .trim()
+                .split(/\s+/)[0]
+            );
+
+        }
+
+
+        function getInitials(
+            name
+        ) {
+
+            const parts =
+                name
+                .trim()
+                .split(/\s+/);
+
+
+            if (
+                parts.length ===
+                1
+            ) {
+
+                return parts[0]
+                    .substring(
+                        0,
+                        2
+                    )
+                    .toUpperCase();
+
+            }
+
+
+            return (
+                parts[0][0] +
+                parts[
+                    parts.length - 1
+                ][0]
+            ).toUpperCase();
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

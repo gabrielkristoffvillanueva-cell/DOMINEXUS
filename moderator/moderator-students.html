@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Records | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="moderator-students.css">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">D</div>
+
+            <div>
+                <div class="brand-name">DOMINEXUS</div>
+
+                <span class="brand-role">
+                    MODERATOR PORTAL
+                </span>
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <div class="nav-title">
+                MODERATOR
+            </div>
+
+            <a href="moderator-dashboard.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                Dashboard
+            </a>
+
+            <a href="moderator-meetings.html" class="nav-item">
+                <span class="nav-icon">◫</span>
+                Meeting Management
+            </a>
+
+            <a href="moderator-scanner.html" class="nav-item">
+                <span class="nav-icon">▣</span>
+                QR Scanner
+            </a>
+
+            <a href="moderator-live-attendance.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                Live Attendance
+            </a>
+
+            <a href="moderator-students.html" class="nav-item active">
+                <span class="nav-icon">♙</span>
+                Student Records
+            </a>
+
+            <a href="moderator-history.html" class="nav-item">
+                <span class="nav-icon">▤</span>
+                Attendance History
+            </a>
+
+            <a href="moderator-participation.html" class="nav-item">
+                <span class="nav-icon">◔</span>
+                Participation
+            </a>
+
+            <a href="moderator-alerts.html" class="nav-item">
+                <span class="nav-icon">!</span>
+                Notifications
+            </a>
+
+            <a href="moderator-reports.html" class="nav-item">
+                <span class="nav-icon">▥</span>
+                Reports
+            </a>
+
+        </nav>
+
+
+        <button type="button" class="logout-button" id="logoutButton">
+            Log Out
+        </button>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div class="page-title">
+                Student Records
+            </div>
+
+            <div class="profile">
+
+                <div class="avatar" id="moderatorAvatar">
+                    M
+                </div>
+
+                <div>
+
+                    <div class="profile-name" id="moderatorName">
+                        System Moderator
+                    </div>
+
+                    <span class="profile-role">
+                        Moderator
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+            <div class="page-heading">
+
+                <h1>
+                    Registered Students
+                </h1>
+
+                <p>
+                    View registered student information
+                    stored in DOMINEXUS.
+                </p>
+
+            </div>
+
+
+            <!-- SUMMARY -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <span>
+                        TOTAL STUDENTS
+                    </span>
+
+                    <strong id="totalStudents">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        ORGANIZATIONS
+                    </span>
+
+                    <strong id="totalOrganizations">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        ACTIVE RECORDS
+                    </span>
+
+                    <strong id="activeStudents">
+                        0
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- STUDENTS -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Student Records
+                        </h2>
+
+                        <p>
+                            Search and view registered
+                            student accounts.
+                        </p>
+
+                    </div>
+
+
+                    <div class="record-count">
+                        <span id="recordCount">
+                            0
+                        </span>
+                        Records
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH -->
+
+                <div class="search-area">
+
+                    <input type="text" id="searchInput"
+                        placeholder="Search name, student ID, unique ID, section, or organization..."
+                        autocomplete="off">
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    STUDENT
+                                </th>
+
+                                <th>
+                                    STUDENT ID
+                                </th>
+
+                                <th>
+                                    UNIQUE ID
+                                </th>
+
+                                <th>
+                                    SECTION
+                                </th>
+
+                                <th>
+                                    ROLE
+                                </th>
+
+                                <th>
+                                    ORGANIZATION
+                                </th>
+
+                                <th>
+                                    ACTION
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="studentTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="emptyState" class="empty-state hidden">
+                    No student records found.
+                </div>
+
+            </section>
+
+
+        </section>
+
+    </main>
+
+
+    <!-- STUDENT DETAILS MODAL -->
+
+    <div class="modal-overlay hidden" id="studentModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        Student Information
+                    </h2>
+
+                    <p>
+                        Registered account details.
+                    </p>
+
+                </div>
+
+                <button type="button" class="close-button" id="closeModal">
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="detail-item">
+
+                    <span>
+                        FULL NAME
+                    </span>
+
+                    <strong id="detailName">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        STUDENT ID
+                    </span>
+
+                    <strong id="detailStudentId">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        UNIQUE ID
+                    </span>
+
+                    <strong id="detailUniqueId">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        SECTION
+                    </span>
+
+                    <strong id="detailSection">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        CLUB ROLE
+                    </span>
+
+                    <strong id="detailRole">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <span>
+                        ORGANIZATION
+                    </span>
+
+                    <strong id="detailOrganization">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item full">
+
+                    <span>
+                        DIGITAL SIGNATURE
+                    </span>
+
+                    <div class="signature-container">
+                        <img id="detailSignature" class="signature-image" alt="Student Digital Signature">
+
+                        <span id="signatureUnavailable" class="signature-unavailable">
+                            No digital signature available.
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="detail-item full">
+
+                    <span>
+                        ACCOUNT PASSWORD
+                    </span>
+
+                    <strong class="password-value">
+                        Hidden for security
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="moderator-students.js"></script>
+
+</body>
+
+</html>

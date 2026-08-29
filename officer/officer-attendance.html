@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Attendance | Officer | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="officer-attendance.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Officer Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="officer-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="officer-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="officer-attendance.html" class="nav-item active">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="officer-members.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>Members</span>
+            </a>
+
+            <a href="officer-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="officer-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <div class="sidebar-overlay" id="sidebarOverlay">
+    </div>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button id="menuButton" class="menu-button">
+                ☰
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Attendance</h1>
+
+                <p>
+                    Manage meeting attendance records
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+                    OF
+                </div>
+
+                <div class="top-profile-info">
+
+                    <strong id="topOfficerName">
+                        Officer
+                    </strong>
+
+                    <span id="topOfficerId">
+                        Officer ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENT -->
+
+        <div class="page-container">
+
+
+            <!-- PAGE HEADER -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <span class="page-label">
+                        ATTENDANCE MANAGEMENT
+                    </span>
+
+                    <h2>
+                        Meeting Attendance
+                    </h2>
+
+                    <p>
+                        Record and monitor member attendance.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- MEETING SELECTOR -->
+
+            <section class="selector-card">
+
+                <div class="selector-info">
+
+                    <span>
+                        SELECT MEETING
+                    </span>
+
+                    <h3>
+                        Attendance Record
+                    </h3>
+
+                </div>
+
+
+                <select id="meetingSelect">
+
+                    <option value="">
+                        Select a meeting
+                    </option>
+
+                </select>
+
+            </section>
+
+
+            <!-- STATISTICS -->
+
+            <section class="summary-grid" id="summarySection">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        👥
+                    </div>
+
+                    <div>
+
+                        <span>Total Members</span>
+
+                        <strong id="totalMembers">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>Present</span>
+
+                        <strong id="presentMembers">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        %
+                    </div>
+
+                    <div>
+
+                        <span>Attendance Rate</span>
+
+                        <strong id="attendanceRate">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =========================================
+     QR SCANNER
+========================================= -->
+
+            <section class="scanner-card">
+
+                <div class="scanner-header">
+
+                    <div>
+
+                        <span class="scanner-label">
+                            QR ATTENDANCE
+                        </span>
+
+                        <h3>
+                            Scan Student QR Code
+                        </h3>
+
+                        <p>
+                            Scan a student's QR code to record attendance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="scanner-content">
+
+                    <div id="qrScanner">
+
+                        <div class="scanner-placeholder">
+
+                            <div class="scanner-icon">
+                                ▣
+                            </div>
+
+                            <h4>
+                                Ready to Scan
+                            </h4>
+
+                            <p>
+                                Select a meeting first, then scan the student's QR code.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="scanner-actions">
+
+                        <button type="button" id="startScannerButton" class="scan-button">
+
+                            📷 Start QR Scanner
+
+                        </button>
+                        <button type="button" id="stopScannerButton" class="stop-scan-button" style="display: none;">
+
+                            Stop Scanner
+
+                        </button>
+
+                        <!-- =========================================
+     MANUAL UNIQUE ID FALLBACK
+========================================= -->
+
+                        <div class="manual-unique-id">
+
+                            <div class="manual-unique-id-title">
+                                QR not working?
+                            </div>
+
+                            <p class="manual-unique-id-description">
+                                Enter the student's Unique ID manually.
+                            </p>
+
+                            <div class="manual-unique-id-form">
+
+                                <input type="text" id="manualUniqueId" placeholder="Example: SDCA-220151"
+                                    autocomplete="off" maxlength="40">
+
+                                <button type="button" id="manualUniqueIdButton">
+                                    Find Student
+                                </button>
+
+                            </div>
+
+                            <div id="manualUniqueIdMessage" class="manual-unique-id-message"></div>
+
+                        </div>
+
+
+                        <div id="scanResult" class="scan-result" style="display: none;">
+
+                            <strong>
+                                Student Found
+                            </strong>
+
+                            <div class="scanned-student">
+
+                                <span id="scannedStudentName">
+                                    —
+                                </span>
+
+                                <span id="scannedStudentId">
+                                    —
+                                </span>
+
+                                <span id="scannedStudentUniqueId">
+                                    —
+                                </span>
+
+                            </div>
+
+
+                            <button type="button" id="confirmAttendanceButton" class="confirm-attendance-button">
+
+                                ✓ Mark Present
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+            </section>
+
+
+            <!-- ATTENDANCE CARD -->
+
+            <section class="attendance-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Attendance List
+                        </h3>
+
+                        <p id="selectedMeetingText">
+                            Select a meeting to view attendance.
+                        </p>
+
+                    </div>
+
+
+                    <button id="saveAttendanceButton" class="save-button">
+
+                        Save Attendance
+
+                    </button>
+
+                </div>
+
+
+                <!-- TABLE -->
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Member
+                                </th>
+
+                                <th>
+                                    Student ID
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Time In
+                                </th>
+
+                                <th>
+                                    Remarks
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="attendanceTable">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- EMPTY -->
+
+                <div id="emptyAttendance" class="empty-state">
+
+                    <div class="empty-icon">
+                        ✓
+                    </div>
+
+                    <h3>
+                        No attendance record
+                    </h3>
+
+                    <p>
+                        Select a meeting above to begin.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <script src="officer-attendance.js"></script>
+
+</body>
+
+</html>

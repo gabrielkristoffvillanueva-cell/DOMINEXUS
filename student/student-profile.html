@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Profile | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-profile.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Student Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="student-qr.html" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>My QR Code</span>
+            </a>
+
+            <a href="student-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="student-profile.html" class="nav-item active">
+                <span class="nav-icon">●</span>
+                <span>My Profile</span>
+            </a>
+
+            <a href="student-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="student-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="student-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button class="logout-button" id="logoutButton">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay">
+    </div>
+
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <button class="menu-button" id="menuButton">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>My Profile</h1>
+
+                <p>
+                    View your student information
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+
+                    ST
+
+                </div>
+
+
+                <div class="top-profile-info">
+
+                    <strong id="topStudentName">
+                        Student
+                    </strong>
+
+                    <span id="topStudentId">
+                        Student ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+        <div class="page-container">
+
+
+            <!-- PAGE TITLE -->
+            <section class="page-heading">
+
+                <span class="section-label">
+                    STUDENT ACCOUNT
+                </span>
+
+                <h2>
+                    My Profile
+                </h2>
+
+                <p>
+                    View the information associated with your
+                    DOMINEXUS student account.
+                </p>
+
+            </section>
+
+
+            <!-- PROFILE HEADER -->
+            <section class="profile-header-card">
+
+                <div class="large-avatar" id="profileAvatar">
+                    ST
+                </div>
+
+
+                <div class="profile-header-info">
+
+                    <h2 id="profileName">
+                        Student Name
+                    </h2>
+
+                    <p id="profileRole">
+                        Student
+                    </p>
+
+                    <span class="profile-id" id="profileUniqueId">
+
+                        Unique ID
+
+                    </span>
+
+                </div>
+
+
+                <div class="profile-status">
+
+                    <span class="status-dot"></span>
+
+                    Active Account
+
+                </div>
+
+            </section>
+
+
+            <!-- INFORMATION -->
+            <section class="profile-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Personal Information
+                        </h3>
+
+                        <p>
+                            Your basic student information.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="information-grid">
+
+
+                    <div class="information-item">
+
+                        <span class="information-label">
+                            Full Name
+                        </span>
+
+                        <strong id="fullName">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="information-item">
+
+                        <span class="information-label">
+                            Student ID
+                        </span>
+
+                        <strong id="studentId">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="information-item">
+
+                        <span class="information-label">
+                            Unique ID
+                        </span>
+
+                        <strong id="uniqueId">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="information-item">
+
+                        <span class="information-label">
+                            Section
+                        </span>
+
+                        <strong id="section">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="information-item">
+
+                        <span class="information-label">
+                            Organization
+                        </span>
+
+                        <strong id="organization">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="information-item">
+
+                        <span class="information-label">
+                            Club Role
+                        </span>
+
+                        <strong id="clubRole">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- ACCOUNT INFORMATION -->
+            <section class="profile-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Account Information
+                        </h3>
+
+                        <p>
+                            Information related to your DOMINEXUS account.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="account-information">
+
+
+                    <div class="account-row">
+
+                        <div>
+
+                            <span>
+                                Account Status
+                            </span>
+
+                            <strong>
+                                Active
+                            </strong>
+
+                        </div>
+
+                        <span class="account-badge">
+                            Active
+                        </span>
+
+                    </div>
+
+
+                    <div class="account-row">
+
+                        <div>
+
+                            <span>
+                                Account Type
+                            </span>
+
+                            <strong id="accountType">
+                                Student
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="account-row">
+
+                        <div>
+
+                            <span>
+                                Student QR Code
+                            </span>
+
+                            <strong>
+                                Automatically Generated
+                            </strong>
+
+                        </div>
+
+                        <a href="student-qr.html" class="view-button">
+
+                            View QR
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- NOTICE -->
+            <div class="profile-notice">
+
+                <div class="notice-icon">
+                    i
+                </div>
+
+                <div>
+
+                    <strong>
+                        Need to update your information?
+                    </strong>
+
+                    <p>
+                        Some student information may only be
+                        changed by an authorized Officer or Moderator.
+                        Account settings can be managed from the
+                        Settings page.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+    <script src="student-profile.js"></script>
+
+</body>
+
+</html>

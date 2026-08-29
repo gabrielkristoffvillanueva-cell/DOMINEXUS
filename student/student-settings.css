@@ -1,0 +1,829 @@
+/* =========================================
+   DOMINEXUS STUDENT SETTINGS
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    width: 250px;
+    height: 100vh;
+
+    background: #8b0000;
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 1000;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 28px 22px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.logo-circle {
+    width: 48px;
+    height: 48px;
+
+    border: 2px solid #d4af37;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #d4af37;
+
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.sidebar-logo h2 {
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.sidebar-logo span {
+    display: block;
+
+    font-size: 11px;
+
+    color: rgba(255, 255, 255, 0.7);
+
+    margin-top: 2px;
+}
+
+
+/* =========================================
+   SIDEBAR NAVIGATION
+========================================= */
+
+.sidebar-nav {
+    padding: 25px 15px;
+
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 13px 15px;
+
+    margin-bottom: 7px;
+
+    border-radius: 8px;
+
+    color: rgba(255, 255, 255, 0.8);
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.10);
+
+    color: white;
+}
+
+.nav-item.active {
+    background: white;
+
+    color: #8b0000;
+
+    font-weight: 700;
+}
+
+.nav-icon {
+    width: 22px;
+
+    text-align: center;
+
+    font-size: 17px;
+}
+
+
+/* =========================================
+   SIDEBAR LOGOUT
+========================================= */
+
+.sidebar-bottom {
+    padding: 20px 15px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.logout-button {
+    width: 100%;
+
+    border: none;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: white;
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    text-align: left;
+
+    transition: 0.2s;
+}
+
+.logout-button:hover {
+    background: rgba(255, 255, 255, 0.17);
+}
+
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.main-content {
+    margin-left: 250px;
+
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================
+   TOPBAR
+========================================= */
+
+.topbar {
+    height: 85px;
+
+    background: white;
+
+    border-bottom: 1px solid #e5e5e5;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 35px;
+}
+
+.topbar-title h1 {
+    font-size: 22px;
+
+    color: #333;
+}
+
+.topbar-title p {
+    font-size: 12px;
+
+    color: #888;
+
+    margin-top: 3px;
+}
+
+.topbar-profile {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.profile-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background: #8b0000;
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 700;
+
+    font-size: 14px;
+}
+
+.top-profile-info strong {
+    display: block;
+
+    font-size: 13px;
+}
+
+.top-profile-info span {
+    display: block;
+
+    font-size: 11px;
+
+    color: #888;
+
+    margin-top: 2px;
+}
+
+.menu-button {
+    display: none;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+    color: #8b0000;
+}
+
+
+/* =========================================
+   PAGE CONTAINER
+========================================= */
+
+.page-container {
+    width: 100%;
+
+    max-width: 1000px;
+
+    margin: 0 auto;
+
+    padding: 35px;
+
+    flex: 1;
+}
+
+.page-heading {
+    margin-bottom: 25px;
+}
+
+.section-label {
+    color: #8b0000;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+.page-heading h2 {
+    font-size: 28px;
+
+    color: #333;
+
+    margin-top: 5px;
+}
+
+.page-heading p {
+    color: #888;
+
+    font-size: 13px;
+
+    margin-top: 5px;
+}
+
+
+/* =========================================
+   SETTINGS CARD
+========================================= */
+
+.settings-card {
+    background: white;
+
+    border: 1px solid #eee;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    margin-bottom: 20px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.card-header {
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #eee;
+}
+
+.card-header h3 {
+    font-size: 16px;
+
+    color: #333;
+}
+
+.card-header p {
+    font-size: 11px;
+
+    color: #888;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   SETTING ROW
+========================================= */
+
+.settings-list {
+    padding: 0 22px;
+}
+
+.setting-row {
+    min-height: 75px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eee;
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-icon {
+    width: 40px;
+    height: 40px;
+
+    flex-shrink: 0;
+
+    background: #f8eeee;
+
+    color: #8b0000;
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+.setting-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.setting-info strong {
+    display: block;
+
+    color: #444;
+
+    font-size: 13px;
+
+    margin-bottom: 4px;
+}
+
+.setting-info span {
+    display: block;
+
+    color: #999;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   SETTING BUTTON
+========================================= */
+
+.setting-button {
+    border: none;
+
+    background: #8b0000;
+
+    color: white;
+
+    text-decoration: none;
+
+    padding: 8px 14px;
+
+    border-radius: 6px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: 0.2s;
+}
+
+.setting-button:hover {
+    background: #6f0000;
+}
+
+.disabled-button {
+    background: #ddd;
+
+    color: #888;
+
+    cursor: default;
+}
+
+.disabled-button:hover {
+    background: #ddd;
+}
+
+
+/* =========================================
+   THEME SELECT
+========================================= */
+
+.theme-select {
+    border: 1px solid #ddd;
+
+    border-radius: 6px;
+
+    padding: 8px 12px;
+
+    background: white;
+
+    color: #444;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+.theme-select:focus {
+    outline: none;
+
+    border-color: #8b0000;
+}
+
+
+/* =========================================
+   TOGGLE SWITCH
+========================================= */
+
+.switch {
+    position: relative;
+
+    display: inline-block;
+
+    width: 42px;
+    height: 23px;
+
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+
+    cursor: pointer;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: #ccc;
+
+    border-radius: 30px;
+
+    transition: 0.25s;
+}
+
+.slider::before {
+    content: "";
+
+    position: absolute;
+
+    width: 17px;
+    height: 17px;
+
+    left: 3px;
+    top: 3px;
+
+    background: white;
+
+    border-radius: 50%;
+
+    transition: 0.25s;
+}
+
+.switch input:checked + .slider {
+    background: #8b0000;
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(19px);
+}
+
+
+/* =========================================
+   SECURITY BOX
+========================================= */
+
+.security-box {
+    margin: 20px 22px;
+
+    padding: 18px;
+
+    background: #f8f8f8;
+
+    border-radius: 9px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 13px;
+}
+
+.security-icon {
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+.security-box strong {
+    display: block;
+
+    font-size: 12px;
+
+    color: #444;
+
+    margin-bottom: 5px;
+}
+
+.security-box p {
+    font-size: 10px;
+
+    color: #888;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   DANGER ZONE
+========================================= */
+
+.danger-card {
+    border-color: #f0dada;
+}
+
+.danger-content {
+    padding: 20px 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+}
+
+.danger-content strong {
+    display: block;
+
+    font-size: 13px;
+
+    color: #444;
+
+    margin-bottom: 4px;
+}
+
+.danger-content p {
+    font-size: 10px;
+
+    color: #999;
+}
+
+.danger-button {
+    border: 1px solid #b02a37;
+
+    background: white;
+
+    color: #b02a37;
+
+    padding: 9px 16px;
+
+    border-radius: 6px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: 0.2s;
+}
+
+.danger-button:hover {
+    background: #b02a37;
+
+    color: white;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.page-footer {
+    padding: 20px 35px;
+
+    text-align: center;
+
+    color: #999;
+
+    font-size: 11px;
+}
+
+.page-footer span {
+    display: block;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   MOBILE SIDEBAR
+========================================= */
+
+.sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.4);
+
+    z-index: 900;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 950px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+
+        transition: transform 0.25s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .menu-button {
+        display: block;
+    }
+
+    .topbar {
+        padding: 0 22px;
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .topbar {
+        height: 70px;
+
+        padding: 0 15px;
+    }
+
+    .topbar-title h1 {
+        font-size: 18px;
+    }
+
+    .topbar-title p,
+    .top-profile-info {
+        display: none;
+    }
+
+    .page-container {
+        padding: 25px 14px;
+    }
+
+    .page-heading h2 {
+        font-size: 23px;
+    }
+
+    .settings-list {
+        padding: 0 16px;
+    }
+
+    .setting-row {
+        gap: 10px;
+    }
+
+    .setting-icon {
+        width: 36px;
+        height: 36px;
+
+        font-size: 15px;
+    }
+
+    .setting-info strong {
+        font-size: 12px;
+    }
+
+    .setting-info span {
+        font-size: 9px;
+    }
+
+    .setting-button {
+        padding: 7px 10px;
+
+        font-size: 9px;
+    }
+
+    .theme-select {
+        padding: 7px 8px;
+
+        font-size: 10px;
+    }
+
+    .danger-content {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .danger-button {
+        width: 100%;
+    }
+
+    .page-footer {
+        padding: 18px 15px;
+    }
+}

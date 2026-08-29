@@ -1,0 +1,759 @@
+/* =========================================
+   DOMINEXUS STUDENT QR PAGE
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    background: #f5f5f5;
+
+    color: #222;
+
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 250px;
+    height: 100vh;
+
+    background: #8b0000;
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 1000;
+}
+
+
+.sidebar-logo {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 28px 22px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.logo-circle {
+    width: 48px;
+    height: 48px;
+
+    border: 2px solid #d4af37;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    color: #d4af37;
+
+    font-size: 23px;
+
+    font-weight: 800;
+}
+
+
+.sidebar-logo h2 {
+    font-size: 18px;
+
+    letter-spacing: 1px;
+}
+
+
+.sidebar-logo span {
+    display: block;
+
+    font-size: 11px;
+
+    color: rgba(255, 255, 255, 0.7);
+
+    margin-top: 2px;
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.sidebar-nav {
+    padding: 25px 15px;
+
+    flex: 1;
+}
+
+
+.nav-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 13px 15px;
+
+    margin-bottom: 7px;
+
+    border-radius: 8px;
+
+    color: rgba(255, 255, 255, 0.8);
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.10);
+
+    color: white;
+}
+
+
+.nav-item.active {
+    background: white;
+
+    color: #8b0000;
+
+    font-weight: 700;
+}
+
+
+.nav-icon {
+    width: 22px;
+
+    text-align: center;
+
+    font-size: 17px;
+}
+
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+.sidebar-bottom {
+    padding: 20px 15px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.logout-button {
+    width: 100%;
+
+    border: none;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    color: white;
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    text-align: left;
+
+    transition: 0.2s;
+}
+
+
+.logout-button:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main-content {
+    margin-left: 250px;
+
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================
+   TOP BAR
+========================================= */
+
+.topbar {
+    height: 85px;
+
+    background: white;
+
+    border-bottom: 1px solid #e5e5e5;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 35px;
+}
+
+
+.topbar-title h1 {
+    font-size: 22px;
+
+    color: #333;
+}
+
+
+.topbar-title p {
+    font-size: 12px;
+
+    color: #888;
+
+    margin-top: 3px;
+}
+
+
+.topbar-profile {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.profile-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background: #8b0000;
+
+    color: white;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    font-weight: 700;
+
+    font-size: 14px;
+}
+
+
+.top-profile-info strong {
+    display: block;
+
+    font-size: 13px;
+}
+
+
+.top-profile-info span {
+    display: block;
+
+    font-size: 11px;
+
+    color: #888;
+
+    margin-top: 2px;
+}
+
+
+.menu-button {
+    display: none;
+
+    border: none;
+
+    background: transparent;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+    color: #8b0000;
+}
+
+
+/* =========================================
+   PAGE CONTAINER
+========================================= */
+
+.page-container {
+    flex: 1;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-start;
+
+    padding: 45px 25px;
+}
+
+
+/* =========================================
+   QR CARD
+========================================= */
+
+.qr-page-card {
+    width: 100%;
+
+    max-width: 550px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 35px;
+
+    text-align: center;
+
+    border: 1px solid #eee;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.qr-header {
+    margin-bottom: 25px;
+}
+
+
+.qr-label {
+    display: inline-block;
+
+    color: #8b0000;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 8px;
+}
+
+
+.qr-header h2 {
+    font-size: 28px;
+
+    color: #333;
+
+    margin-bottom: 8px;
+}
+
+
+.qr-header p {
+    color: #888;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    max-width: 420px;
+
+    margin: auto;
+}
+
+
+/* =========================================
+   QR CODE
+========================================= */
+
+.qr-wrapper {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    margin: 25px 0;
+}
+
+
+.qr-code {
+    width: 340px;
+
+    height: 340px;
+
+    background: white;
+
+    padding: 10px;
+
+    border: 1px solid #eee;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.10);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+
+.qr-code canvas {
+    width: 300px !important;
+    height: 300px !important;
+    display: block;
+}
+
+
+
+/* =========================================
+   STUDENT INFO
+========================================= */
+
+.student-info {
+    margin-top: 10px;
+}
+
+
+.student-info h3 {
+    font-size: 20px;
+
+    color: #333;
+
+    margin-bottom: 10px;
+}
+
+
+.student-info p {
+    font-size: 13px;
+
+    color: #777;
+
+    margin: 5px 0;
+}
+
+
+.student-info strong {
+    color: #333;
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+.qr-status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 18px;
+
+    padding: 7px 13px;
+
+    border-radius: 20px;
+
+    background: #eaf7ee;
+
+    color: #198754;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+
+.status-dot {
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #198754;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.qr-actions {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+
+.qr-actions button {
+    flex: 1;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+
+.primary-button {
+    border: 1px solid #8b0000;
+
+    background: #8b0000;
+
+    color: white;
+}
+
+
+.primary-button:hover {
+    background: #6f0000;
+}
+
+
+.secondary-button {
+    border: 1px solid #8b0000;
+
+    background: white;
+
+    color: #8b0000;
+}
+
+
+.secondary-button:hover {
+    background: #fff5f5;
+}
+
+
+/* =========================================
+   NOTE
+========================================= */
+
+.qr-note {
+    margin-top: 25px;
+
+    padding: 15px;
+
+    background: #fffaf0;
+
+    border-left: 3px solid #d4af37;
+
+    text-align: left;
+
+    border-radius: 6px;
+}
+
+
+.qr-note strong {
+    font-size: 12px;
+
+    color: #856404;
+}
+
+
+.qr-note p {
+    color: #777;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.page-footer {
+    padding: 20px;
+
+    text-align: center;
+
+    color: #999;
+
+    font-size: 11px;
+}
+
+
+.page-footer span {
+    display: block;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   MOBILE OVERLAY
+========================================= */
+
+.sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.4);
+
+    z-index: 900;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 950px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+
+        transition: 0.25s;
+    }
+
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+
+
+    .main-content {
+        margin-left: 0;
+    }
+
+
+    .menu-button {
+        display: block;
+    }
+
+
+    .topbar {
+        padding: 0 22px;
+    }
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .topbar {
+        height: 70px;
+
+        padding: 0 15px;
+    }
+
+
+    .topbar-title h1 {
+        font-size: 18px;
+    }
+
+
+    .topbar-title p {
+        display: none;
+    }
+
+
+    .top-profile-info {
+        display: none;
+    }
+
+
+    .page-container {
+        padding: 25px 14px;
+    }
+
+
+    .qr-page-card {
+        padding: 25px 18px;
+
+        border-radius: 14px;
+    }
+
+
+    .qr-header h2 {
+        font-size: 24px;
+    }
+
+
+   .qr-code {
+    width: 330px;
+    height: 330px;
+    }
+
+
+    .qr-actions {
+        flex-direction: column;
+    }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 380px) {
+
+    .qr-code {
+        width: 200px;
+
+        height: 200px;
+    }
+
+}

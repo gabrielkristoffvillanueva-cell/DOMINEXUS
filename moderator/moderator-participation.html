@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Participation Monitoring | DOMINEXUS</title>
+
+    <link
+        rel="stylesheet"
+        href="moderator-participation.css"
+    >
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">D</div>
+
+            <div>
+                <div class="brand-name">DOMINEXUS</div>
+
+                <span class="brand-role">
+                    MODERATOR PORTAL
+                </span>
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <div class="nav-title">
+                MODERATOR
+            </div>
+
+            <a
+                href="moderator-dashboard.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▦</span>
+                Dashboard
+            </a>
+
+            <a
+                href="moderator-meetings.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">◫</span>
+                Meeting Management
+            </a>
+
+            <a
+                href="moderator-scanner.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▣</span>
+                QR Scanner
+            </a>
+
+            <a
+                href="moderator-live-attendance.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">●</span>
+                Live Attendance
+            </a>
+
+            <a
+                href="moderator-students.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">♙</span>
+                Student Records
+            </a>
+
+            <a
+                href="moderator-history.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▤</span>
+                Attendance History
+            </a>
+
+            <a
+                href="moderator-participation.html"
+                class="nav-item active"
+            >
+                <span class="nav-icon">◔</span>
+                Participation
+            </a>
+
+            <a
+                href="moderator-alerts.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">!</span>
+                Notifications
+            </a>
+
+            <a
+                href="moderator-reports.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▥</span>
+                Reports
+            </a>
+
+        </nav>
+
+
+        <button
+            type="button"
+            class="logout-button"
+            id="logoutButton"
+        >
+            Log Out
+        </button>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div class="page-title">
+                Participation Monitoring
+            </div>
+
+
+            <div class="profile">
+
+                <div
+                    class="avatar"
+                    id="moderatorAvatar"
+                >
+                    M
+                </div>
+
+                <div>
+
+                    <div
+                        class="profile-name"
+                        id="moderatorName"
+                    >
+                        System Moderator
+                    </div>
+
+                    <span class="profile-role">
+                        Moderator
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+
+            <div class="page-heading">
+
+                <h1>
+                    Participation Monitoring
+                </h1>
+
+                <p>
+                    Monitor student attendance across
+                    general meetings.
+                </p>
+
+            </div>
+
+
+            <!-- OVERVIEW -->
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span>
+                        ACTIVE
+                    </span>
+
+                    <strong id="activeCount">
+                        0
+                    </strong>
+
+                    <small>
+                        75% or higher attendance
+                    </small>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        LOW ATTENDANCE
+                    </span>
+
+                    <strong id="lowCount">
+                        0
+                    </strong>
+
+                    <small>
+                        50%–74% attendance
+                    </small>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        INACTIVE
+                    </span>
+
+                    <strong id="inactiveCount">
+                        0
+                    </strong>
+
+                    <small>
+                        Below 50% attendance
+                    </small>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        TOTAL STUDENTS
+                    </span>
+
+                    <strong id="totalCount">
+                        0
+                    </strong>
+
+                    <small>
+                        Registered students
+                    </small>
+
+                </div>
+
+            </section>
+
+
+            <!-- FILTER -->
+
+            <section class="card filter-card">
+
+                <div class="filter-group">
+
+                    <label for="organizationFilter">
+                        ORGANIZATION
+                    </label>
+
+                    <select
+                        id="organizationFilter"
+                    >
+
+                        <option value="">
+                            All Organizations
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-group">
+
+                    <label for="statusFilter">
+                        PARTICIPATION STATUS
+                    </label>
+
+                    <select
+                        id="statusFilter"
+                    >
+
+                        <option value="">
+                            All Statuses
+                        </option>
+
+                        <option value="active">
+                            Active
+                        </option>
+
+                        <option value="low">
+                            Low Attendance
+                        </option>
+
+                        <option value="inactive">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-group search-group">
+
+                    <label for="searchInput">
+                        SEARCH STUDENT
+                    </label>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Name, Student ID, or Unique ID..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- PARTICIPATION TABLE -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            Student Participation
+                        </h2>
+
+                        <p>
+                            Attendance performance based
+                            on recorded meetings.
+                        </p>
+
+                    </div>
+
+
+                    <div class="record-count">
+
+                        <span id="recordCount">
+                            0
+                        </span>
+
+                        Students
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    STUDENT
+                                </th>
+
+                                <th>
+                                    STUDENT ID
+                                </th>
+
+                                <th>
+                                    ORGANIZATION
+                                </th>
+
+                                <th>
+                                    MEETINGS
+                                </th>
+
+                                <th>
+                                    PRESENT
+                                </th>
+
+                                <th>
+                                    ATTENDANCE
+                                </th>
+
+                                <th>
+                                    STATUS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="participationTableBody"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div
+                    id="emptyState"
+                    class="empty-state hidden"
+                >
+                    No student participation records found.
+                </div>
+
+            </section>
+
+
+        </section>
+
+    </main>
+
+
+    <script src="moderator-participation.js"></script>
+
+</body>
+
+</html>

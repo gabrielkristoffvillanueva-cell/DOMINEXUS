@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-dashboard.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Student Portal</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-item active">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="student-qr.html" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>My QR Code</span>
+            </a>
+
+            <a href="student-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="student-profile.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>My Profile</span>
+            </a>
+
+            <a href="student-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="student-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="student-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button id="logoutButton" class="logout-button">
+                <span>↪</span>
+                Logout
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- MOBILE OVERLAY -->
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <button class="menu-button" id="menuButton" aria-label="Open menu">
+                ☰
+            </button>
+
+            <div class="topbar-title">
+                <h1>Student Dashboard</h1>
+                <p>Welcome back to DOMINEXUS</p>
+            </div>
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+                    ST
+                </div>
+
+                <div class="top-profile-info">
+                    <strong id="topStudentName">Student</strong>
+                    <span id="topStudentId">Student ID</span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- =========================
+             DASHBOARD
+        ========================== -->
+
+        <div class="dashboard-container">
+
+            <!-- WELCOME CARD -->
+
+            <section class="welcome-card">
+
+                <div class="welcome-text">
+
+                    <span class="welcome-label">
+                        STUDENT PORTAL
+                    </span>
+
+                    <h2>
+                        Welcome,
+                        <span id="welcomeName">Student</span>!
+                    </h2>
+
+                    <p>
+                        View your attendance and stay updated
+                        with your organization meetings.
+                    </p>
+
+                </div>
+
+                <div class="welcome-decoration">
+                    <div class="decoration-circle">
+                        D
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- =========================
+                 SUMMARY CARDS
+            ========================== -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ✓
+                    </div>
+
+                    <div>
+                        <span>Total Attendance</span>
+                        <strong id="totalAttendance">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        %
+                    </div>
+
+                    <div>
+                        <span>Attendance Rate</span>
+                        <strong id="attendanceRate">0%</strong>
+                    </div>
+
+                </div>
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        #
+                    </div>
+
+                    <div>
+                        <span>Meetings Attended</span>
+                        <strong id="meetingsAttended">0</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =========================
+                 RECENT ATTENDANCE
+            ========================== -->
+
+            <section class="dashboard-card attendance-card" id="attendance-section">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Recent Attendance</h3>
+
+                        <p>
+                            Your latest organization attendance records.
+                        </p>
+                    </div>
+
+                    <span class="attendance-count">
+                        <span id="recordCount">0</span> Records
+                    </span>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Meeting</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="attendanceTable">
+                            <!-- JavaScript will add records here -->
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div id="noAttendance" class="no-attendance">
+                    No attendance records yet.
+                </div>
+
+            </section>
+
+            <!-- FOOTER -->
+
+            <footer class="dashboard-footer">
+
+                <p>
+                    © 2026 DOMINEXUS
+                </p>
+
+                <span>
+                    Student Organization Attendance Management System
+                </span>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+    <script src="student-dashboard.js"></script>
+
+</body>
+
+</html>

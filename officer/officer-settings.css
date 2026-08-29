@@ -1,0 +1,766 @@
+/* =========================================
+   DOMINEXUS OFFICER SETTINGS
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    width: 250px;
+    height: 100vh;
+
+    background: #8b0000;
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    z-index: 1000;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 28px 22px;
+
+    border-bottom: 1px solid rgba(255,255,255,.15);
+}
+
+.logo-circle {
+    width: 48px;
+    height: 48px;
+
+    border: 2px solid #d4af37;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #d4af37;
+
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.sidebar-logo h2 {
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.sidebar-logo span {
+    display: block;
+
+    color: rgba(255,255,255,.7);
+
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.sidebar-nav {
+    padding: 25px 15px;
+    flex: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    padding: 13px 15px;
+
+    margin-bottom: 7px;
+
+    border-radius: 8px;
+
+    color: rgba(255,255,255,.8);
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    transition: .2s;
+}
+
+.nav-item:hover {
+    background: rgba(255,255,255,.1);
+    color: white;
+}
+
+.nav-item.active {
+    background: white;
+    color: #8b0000;
+    font-weight: 700;
+}
+
+.nav-icon {
+    width: 22px;
+    text-align: center;
+    font-size: 17px;
+}
+
+.sidebar-bottom {
+    padding: 20px 15px;
+
+    border-top: 1px solid rgba(255,255,255,.15);
+}
+
+.logout-button {
+    width: 100%;
+
+    border: none;
+
+    background: rgba(255,255,255,.08);
+
+    color: white;
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    text-align: left;
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main-content {
+    margin-left: 250px;
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   TOPBAR
+========================================= */
+
+.topbar {
+    height: 85px;
+
+    background: white;
+
+    border-bottom: 1px solid #e5e5e5;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 35px;
+}
+
+.topbar-title h1 {
+    font-size: 22px;
+    color: #333;
+}
+
+.topbar-title p {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+}
+
+.topbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-avatar {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    background: #8b0000;
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.top-profile-info strong {
+    display: block;
+    font-size: 13px;
+}
+
+.top-profile-info span {
+    display: block;
+
+    font-size: 11px;
+    color: #888;
+
+    margin-top: 2px;
+}
+
+.menu-button {
+    display: none;
+
+    border: none;
+    background: transparent;
+
+    font-size: 24px;
+    color: #8b0000;
+
+    cursor: pointer;
+}
+
+
+/* =========================================
+   PAGE
+========================================= */
+
+.page-container {
+    max-width: 1100px;
+
+    margin: auto;
+
+    padding: 30px 35px;
+}
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-label {
+    color: #8b0000;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.7px;
+}
+
+.page-header h2 {
+    font-size: 28px;
+
+    color: #333;
+
+    margin-top: 5px;
+}
+
+.page-header p {
+    color: #888;
+
+    font-size: 13px;
+
+    margin-top: 5px;
+}
+
+
+/* =========================================
+   SETTINGS CARD
+========================================= */
+
+.settings-card {
+    background: white;
+
+    border: 1px solid #eee;
+
+    border-radius: 12px;
+
+    padding: 25px;
+
+    margin-bottom: 20px;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,.04);
+}
+
+.card-heading {
+    margin-bottom: 22px;
+}
+
+.card-heading h3 {
+    color: #333;
+    font-size: 16px;
+}
+
+.card-heading p {
+    color: #999;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.profile-section {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding-bottom: 22px;
+
+    margin-bottom: 22px;
+
+    border-bottom: 1px solid #eee;
+}
+
+.large-avatar {
+    width: 65px;
+    height: 65px;
+
+    border-radius: 50%;
+
+    background: #8b0000;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+
+    font-weight: 700;
+}
+
+.profile-section h3 {
+    color: #333;
+    font-size: 17px;
+}
+
+.profile-section p {
+    color: #999;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.role-badge {
+    display: inline-block;
+
+    background: #fff3f3;
+
+    color: #8b0000;
+
+    font-size: 10px;
+
+    padding: 4px 9px;
+
+    border-radius: 20px;
+
+    margin-top: 6px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.form-group label {
+    color: #666;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+
+    height: 42px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 7px;
+
+    padding: 0 12px;
+
+    font-size: 12px;
+
+    color: #333;
+
+    outline: none;
+
+    transition: .2s;
+}
+
+.form-group input:focus {
+    border-color: #8b0000;
+}
+
+.form-group input:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.password-grid {
+    grid-template-columns:
+        repeat(3, 1fr);
+}
+
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.card-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 22px;
+}
+
+.primary-button {
+    border: none;
+
+    background: #8b0000;
+
+    color: white;
+
+    padding: 11px 18px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.primary-button:hover {
+    background: #700000;
+}
+
+
+/* =========================================
+   PREFERENCES
+========================================= */
+
+.preference-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 17px 0;
+
+    border-top: 1px solid #eee;
+}
+
+.preference-row strong {
+    display: block;
+
+    color: #444;
+
+    font-size: 12px;
+}
+
+.preference-row span {
+    display: block;
+
+    color: #999;
+
+    font-size: 10px;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   SWITCH
+========================================= */
+
+.switch {
+    position: relative;
+
+    width: 42px;
+    height: 23px;
+
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+
+    cursor: pointer;
+
+    inset: 0;
+
+    background: #ccc;
+
+    border-radius: 30px;
+
+    transition: .2s;
+}
+
+.slider::before {
+    content: "";
+
+    position: absolute;
+
+    width: 17px;
+    height: 17px;
+
+    left: 3px;
+    top: 3px;
+
+    background: white;
+
+    border-radius: 50%;
+
+    transition: .2s;
+}
+
+.switch input:checked + .slider {
+    background: #8b0000;
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(19px);
+}
+
+
+/* =========================================
+   DANGER
+========================================= */
+
+.danger-card {
+    border-color: #f0dada;
+}
+
+.danger-button {
+    border: 1px solid #d99;
+
+    background: #fff5f5;
+
+    color: #a33;
+
+    padding: 10px 18px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.danger-button:hover {
+    background: #fceaea;
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+.toast {
+    position: fixed;
+
+    right: 25px;
+    bottom: 25px;
+
+    background: #333;
+
+    color: white;
+
+    padding: 13px 18px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    opacity: 0;
+
+    transform: translateY(15px);
+
+    pointer-events: none;
+
+    transition: .25s;
+
+    z-index: 3000;
+}
+
+.toast.show {
+    opacity: 1;
+
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.page-footer {
+    text-align: center;
+
+    color: #999;
+
+    font-size: 11px;
+
+    padding: 30px;
+}
+
+.page-footer span {
+    display: block;
+
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+.sidebar-overlay {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,.4);
+
+    z-index: 900;
+}
+
+
+@media (max-width: 950px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: .25s;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .menu-button {
+        display: block;
+    }
+
+    .topbar {
+        padding: 0 22px;
+    }
+
+    .page-container {
+        padding: 25px 22px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .form-grid,
+    .password-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .top-profile-info {
+        display: none;
+    }
+
+    .topbar-title h1 {
+        font-size: 18px;
+    }
+
+    .topbar-title p {
+        display: none;
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .page-container {
+        padding: 18px 14px;
+    }
+
+    .topbar {
+        height: 70px;
+        padding: 0 15px;
+    }
+
+    .settings-card {
+        padding: 18px;
+    }
+
+    .profile-section {
+        align-items: flex-start;
+    }
+
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Notifications & Alerts | DOMINEXUS</title>
+
+    <link
+        rel="stylesheet"
+        href="moderator-alerts.css"
+    >
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">D</div>
+
+            <div>
+                <div class="brand-name">DOMINEXUS</div>
+
+                <span class="brand-role">
+                    MODERATOR PORTAL
+                </span>
+            </div>
+
+        </div>
+
+
+        <nav class="nav">
+
+            <div class="nav-title">
+                MODERATOR
+            </div>
+
+            <a
+                href="moderator-dashboard.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▦</span>
+                Dashboard
+            </a>
+
+            <a
+                href="moderator-meetings.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">◫</span>
+                Meeting Management
+            </a>
+
+            <a
+                href="moderator-scanner.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▣</span>
+                QR Scanner
+            </a>
+
+            <a
+                href="moderator-live-attendance.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">●</span>
+                Live Attendance
+            </a>
+
+            <a
+                href="moderator-students.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">♙</span>
+                Student Records
+            </a>
+
+            <a
+                href="moderator-history.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▤</span>
+                Attendance History
+            </a>
+
+            <a
+                href="moderator-participation.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">◔</span>
+                Participation
+            </a>
+
+            <a
+                href="moderator-alerts.html"
+                class="nav-item active"
+            >
+                <span class="nav-icon">!</span>
+                Notifications
+            </a>
+
+            <a
+                href="moderator-reports.html"
+                class="nav-item"
+            >
+                <span class="nav-icon">▥</span>
+                Reports
+            </a>
+
+        </nav>
+
+
+        <button
+            type="button"
+            class="logout-button"
+            id="logoutButton"
+        >
+            Log Out
+        </button>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div class="page-title">
+                Notifications & Alerts
+            </div>
+
+
+            <div class="profile">
+
+                <div
+                    class="avatar"
+                    id="moderatorAvatar"
+                >
+                    M
+                </div>
+
+                <div>
+
+                    <div
+                        class="profile-name"
+                        id="moderatorName"
+                    >
+                        System Moderator
+                    </div>
+
+                    <span class="profile-role">
+                        Moderator
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+            <div class="page-heading">
+
+                <h1>
+                    Notifications & Alerts
+                </h1>
+
+                <p>
+                    Review attendance-related issues
+                    detected by DOMINEXUS.
+                </p>
+
+            </div>
+
+
+            <!-- SUMMARY -->
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span>
+                        TOTAL ALERTS
+                    </span>
+
+                    <strong id="totalAlerts">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        LOW ATTENDANCE
+                    </span>
+
+                    <strong id="lowAttendanceAlerts">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        DUPLICATE RECORDS
+                    </span>
+
+                    <strong id="duplicateAlerts">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        INVALID RECORDS
+                    </span>
+
+                    <strong id="invalidAlerts">
+                        0
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- FILTER -->
+
+            <section class="card filter-card">
+
+                <div class="filter-group">
+
+                    <label for="typeFilter">
+                        ALERT TYPE
+                    </label>
+
+                    <select id="typeFilter">
+
+                        <option value="">
+                            All Alerts
+                        </option>
+
+                        <option value="low">
+                            Low Attendance
+                        </option>
+
+                        <option value="duplicate">
+                            Duplicate Record
+                        </option>
+
+                        <option value="invalid">
+                            Invalid Record
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="filter-group search-group">
+
+                    <label for="searchInput">
+                        SEARCH
+                    </label>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search student, ID, or meeting..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </section>
+
+
+            <!-- ALERTS -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            System Alerts
+                        </h2>
+
+                        <p>
+                            Automatically detected attendance
+                            issues.
+                        </p>
+
+                    </div>
+
+
+                    <div class="alert-count">
+
+                        <span id="displayedAlerts">
+                            0
+                        </span>
+
+                        Alerts
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="alertsContainer"
+                    class="alerts-container"
+                ></div>
+
+
+                <div
+                    id="emptyState"
+                    class="empty-state hidden"
+                >
+                    No alerts detected.
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <script src="moderator-alerts.js"></script>
+
+</body>
+
+</html>

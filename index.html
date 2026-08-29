@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+<html lang="en" style=" scroll-behavior: smooth;">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>
+        DOMINEXUS | Attendance Management System
+    </title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="front-page.css" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#584400",
+                        "inverse-surface": "#e5e2e1",
+                        "inverse-primary": "#bb1627",
+                        "on-tertiary": "#68000e",
+                        "primary": "#ffb3af",
+                        "text-muted": "#707070",
+                        "surface-bright": "#3a3939",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary": "#ffb3af",
+                        "primary-fixed-dim": "#ffb3af",
+                        "on-tertiary-fixed-variant": "#930018",
+                        "on-primary-fixed": "#410005",
+                        "on-background": "#e5e2e1",
+                        "surface-white": "#FFFFFF",
+                        "outline": "#ab8986",
+                        "surface-dim": "#131313",
+                        "on-primary": "#68000e",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#ffdad7",
+                        "secondary": "#e8c354",
+                        "outline-variant": "#5b403e",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "surface-container-high": "#2a2a2a",
+                        "secondary-container": "#ae8d22",
+                        "tertiary-container": "#c52f36",
+                        "primary-container": "#cb2531",
+                        "inverse-on-surface": "#313030",
+                        "on-surface": "#e5e2e1",
+                        "secondary-fixed-dim": "#e8c354",
+                        "on-surface-variant": "#e4bebb",
+                        "on-primary-fixed-variant": "#930018",
+                        "on-secondary-container": "#352800",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#ffe08b",
+                        "deep-crimson": "#7F101B",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-tertiary-container": "#ffe4e2",
+                        "on-error": "#690005",
+                        "surface-variant": "#353534",
+                        "surface-tint": "#ffb3af",
+                        "background": "#131313",
+                        "on-tertiary-fixed": "#410005",
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#353534",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-primary-container": "#ffe4e2",
+                        "surface": "#131313",
+                        "surface-container": "#201f1f",
+                        "on-secondary": "#3d2f00",
+                        "glass-stroke": "rgba(255, 255, 255, 0.08)",
+                        "on-secondary-fixed": "#241a00"
+                    },
+                    "backgroundImage": {
+                        "hero-gradient": "linear-gradient(135deg, #A91825 0%, #CB2531 40%, #080808 100%)",
+                        "red-glow": "radial-gradient(circle at 50% 0%, rgba(203,37,49,0.15) 0%, rgba(255,255,255,0) 70%)",
+                        "red-glow-bottom": "radial-gradient(circle at 50% 100%, rgba(203,37,49,0.1) 0%, rgba(255,255,255,0) 70%)"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-mobile": "48px",
+                        "md": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "xl": "48px",
+                        "section-desktop": "80px"
+                    },
+                    "fontFamily": {
+                        "display": [
+                            "Inter"
+                        ],
+                        "body-lg": [
+                            "Inter"
+                        ],
+                        "display-mobile": [
+                            "Inter"
+                        ],
+                        "label-caps": [
+                            "Inter"
+                        ],
+                        "button": [
+                            "Inter"
+                        ],
+                        "headline-md": [
+                            "Inter"
+                        ],
+                        "headline-lg": [
+                            "Inter"
+                        ],
+                        "body-md": [
+                            "Inter"
+                        ]
+                    },
+                    "fontSize": {
+                        "display": [
+                            "55px",
+                            {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.03em",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "body-lg": [
+                            "16px",
+                            {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "display-mobile": [
+                            "40px",
+                            {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "label-caps": [
+                            "10px",
+                            {
+                                "lineHeight": "1",
+                                "letterSpacing": "0.15em",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "button": [
+                            "12px",
+                            {
+                                "lineHeight": "1",
+                                "letterSpacing": "0.02em",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "headline-md": [
+                            "24px",
+                            {
+                                "lineHeight": "1.3",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "headline-lg": [
+                            "32px",
+                            {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "body-md": [
+                            "14px",
+                            {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                            }
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+
+</head>
+
+<body
+    class="bg-surface-white text-surface-dim font-sans antialiased selection:bg-primary-container selection:text-white">
+    <!-- =====================================
+         HEADER
+    ====================================== -->
+    <header class="header sticky top-0 z-50 glass-panel border-b-0" style="margin: 16px 24px; border-radius: 16px;">
+        <div class="header-container max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- DOMINEXUS LOGO -->
+            <a class="logo-container flex items-center gap-4 group" href="index.html">
+                <div
+                    class="logo w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-primary-container/20 transition-transform group-hover:scale-105">
+                    <img src="assets/logos/DOMINEXUS_LOGO.png">
+                    
+                </div>
+                <div class="logo-text">
+                    <h1 class="font-extrabold text-xl tracking-tight leading-none mb-1 text-surface-dim">
+                        DOMINEXUS
+                    </h1>
+                    <p class="text-[10px] text-text-muted font-bold uppercase tracking-[0.15em]">
+                        Attendance Management System
+                    </p>
+                </div>
+            </a>
+            <!-- NAVIGATION -->
+            <nav class="navigation hidden md:flex items-center gap-8">
+                <a class="active text-sm font-bold text-primary-container transition-colors hover:text-primary-container tracking-wide"
+                    href="index.html">
+                    Home
+                </a>
+                <a class="text-sm font-semibold text-text-muted transition-colors hover:text-surface-dim hover:text-primary-container tracking-wide"
+                    href="school.html">
+                    About School
+                </a>
+                <a class="text-sm font-semibold text-text-muted transition-colors hover:text-surface-dim hover:text-primary-container tracking-wide"
+                    href="creators.html">
+                    Creators
+                </a>
+            </nav>
+            <!-- OFFLINE STATUS -->
+            <div
+                class="offline-status flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-white/50 backdrop-blur-md border border-glass-stroke text-xs font-semibold text-text-muted shadow-sm text-surface-dim text-[10px]">
+                <span class="status-dot w-2 h-2 rounded-full bg-[#C9A63A]"></span>
+
+                Offline Ready
+
+            </div>
+        </div>
+    </header>
+    <!-- =====================================
+         MAIN CONTENT
+    ====================================== -->
+    <main>
+        <!-- =================================
+             HERO / WELCOME
+        ================================== -->
+        <section class="hero relative pt-36 pb-48 px-6 overflow-hidden"
+            style="background-color: #CB2531; background-image: radial-gradient(circle at top right, rgba(0,0,0,0.2) 0%, transparent 60%), radial-gradient(circle at bottom left, #8B0000 0%, transparent 80%), radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.6) 120%);">
+            <div class="absolute inset-0 bg-red-glow-subtle pointer-events-none z-0"></div>
+            <div class="hero-content max-w-3xl mx-auto text-center relative z-10 mb-28">
+                <p class="school-name text-white/80 font-bold text-sm tracking-[0.25em] uppercase mb-10">
+
+                    ST. DOMINIC COLLEGE OF ASIA
+
+                </p>
+                <h2
+                    class="text-6xl md:text-8xl font-black tracking-tighter mb-12 text-white drop-shadow-2xl leading-tight">
+
+                    Welcome to
+
+                    <span class="text-white block mt-2 text-7xl md:text-9xl">
+                        DOMINEXUS
+                    </span>
+                </h2>
+                <p
+                    class="description text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl mx-auto mb-14 font-medium">
+
+                    An Offline General Meeting Attendance
+                    Management System designed to help
+                    student organizations manage attendance,
+                    participation, and meeting records in a
+                    simple and organized way.
+
+                </p>
+
+                <!-- ACCESS BUTTONS -->
+
+                <div class="access-buttons">
+
+                    <!-- STUDENT ACCESS -->
+                    <a class="student-button inline-flex items-center justify-center px-10 py-5 text-sm font-bold text-white glass-panel-red rounded-xl hover:bg-white/20 transition-all hover:-translate-y-1 active:translate-y-0"
+                        href="student/student-signup.html">
+                        Student Access
+                    </a>
+
+
+                    <!-- STAFF ACCESS -->
+                    <a href="staff-login.html" class="staff-access-button">
+                        Staff Access
+                    </a>
+
+                </div>
+
+
+                <p class="login-note mt-10 text-sm text-white/60">
+
+                    Login or create your DOMINEXUS account
+                    to continue.
+
+                </p>
+
+
+                <!-- SYSTEM PREVIEW -->
+                <div class="relative max-w-5xl mx-auto">
+                    <div class="absolute inset-0 red-atmospheric-bleed z-0 pointer-events-none"></div>
+                    <div class="system-preview text-white rounded-2xl p-10 md:p-14 relative z-10 glass-panel-dark">
+                        <div
+                            class="preview-top flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12 pb-8 border-b border-white/10">
+                            <div><small
+                                    class="text-white/40 font-bold text-[10px] tracking-[0.2em] uppercase block mb-2">DOMINEXUS</small>
+                                <h3 class="text-3xl font-extrabold text-white tracking-tight">Attendance Management</h3>
+                            </div>
+                            <span
+                                class="preview-status inline-flex items-center gap-2 px-4 py-1.5 rounded-full inner-glass-dark text-white/80 text-[10px] font-bold uppercase tracking-wider"><span
+                                    class="w-1.5 h-1.5 rounded-full bg-[#C9A63A]"></span>Offline</span>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-8">
+                            <!-- PREVIEW CARD 1 -->
+                            <div
+                                class="preview-box rounded-xl inner-glass-dark hover:bg-white/15 transition-colors p-10">
+                                <div
+                                    class="preview-icon w-14 h-14 rounded-xl bg-primary-container/80 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center font-bold mb-8 shadow-lg shadow-primary-container/20">
+                                    QR</div>
+                                <div><strong class="block text-xl mb-3 font-bold text-white">Personal QR Code</strong>
+                                    <p class="text-sm text-white/60 leading-relaxed">Every student has a unique
+                                        attendance
+                                        identifier.</p>
+                                </div>
+                            </div>
+                            <!-- PREVIEW CARD 2 -->
+                            <div
+                                class="preview-box rounded-xl inner-glass-dark hover:bg-white/15 transition-colors p-10">
+                                <div
+                                    class="preview-icon w-14 h-14 rounded-xl bg-primary-container/80 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center font-bold mb-8 text-xl shadow-lg shadow-primary-container/20">
+                                    ✓</div>
+                                <div><strong class="block text-xl mb-3 font-bold text-white">Attendance Records</strong>
+                                    <p class="text-sm text-white/60 leading-relaxed">Organized meeting attendance and
+                                        participation records.</p>
+                                </div>
+                            </div>
+                            <!-- PREVIEW CARD 3 -->
+                            <div
+                                class="preview-box rounded-xl inner-glass-dark hover:bg-white/15 transition-colors p-10">
+                                <div
+                                    class="preview-icon w-14 h-14 rounded-xl bg-primary-container/80 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center font-bold mb-8 text-xl shadow-lg shadow-primary-container/20">
+                                    ★</div>
+                                <div><strong class="block text-xl mb-3 font-bold text-white">Participation
+                                        Monitoring</strong>
+                                    <p class="text-sm text-white/60 leading-relaxed">Monitor student participation
+                                        within
+                                        organizations.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- HERO BOTTOM GRADIENT -->
+                <div class="hero-bottom-gradient" aria-hidden="true"></div>
+
+        </section>
+        <!-- END HERO -->
+        <!-- =================================
+             ABOUT DOMINEXUS
+        ================================== -->
+        <section class="about-section py-32 px-6 bg-surface-white relative" id="about">
+            <div class="absolute inset-0 bg-red-glow pointer-events-none opacity-60"></div>
+            <div class="content-container max-w-7xl mx-auto relative z-10">
+                <div class="section-title mb-20 text-center">
+                    <p class="text-primary-container font-extrabold text-sm tracking-[0.2em] uppercase mb-4">
+                        ABOUT THE SYSTEM
+                    </p>
+                    <h2 class="text-5xl md:text-6xl font-extrabold text-surface-dim tracking-tight">
+                        What is DOMINEXUS?
+                    </h2>
+                </div>
+                <div class="about-content grid lg:grid-cols-2 gap-20 items-center">
+                    <!-- DESCRIPTION -->
+                    <div class="about-text space-y-8 text-text-muted leading-relaxed text-xl">
+                        <p class="">
+
+                            DOMINEXUS is an Offline General Meeting
+                            Attendance Management System developed
+                            for student organizations of St. Dominic
+                            College of Asia.
+
+                        </p>
+                        <p class="">
+
+                            The system aims to provide a more
+                            organized and convenient way of managing
+                            attendance during general meetings.
+
+                            Instead of relying entirely on manual
+                            attendance sheets, DOMINEXUS allows
+                            attendance information to be recorded,
+                            organized, and monitored digitally.
+
+                        </p>
+                        <p class="">
+
+                            Each registered student can have a
+                            permanent Unique ID connected to their
+                            personal QR code, which can be used
+                            during organization meetings.
+
+                        </p>
+                    </div>
+                    <!-- PURPOSE CARD -->
+                    <div class="relative">
+                        <div class="absolute inset-0 red-atmospheric-bleed z-0 pointer-events-none"></div>
+                        <div class="purpose-card glass-panel-light p-12 rounded-3xl relative overflow-hidden z-10">
+                            <div class="absolute inset-0 bg-red-glow-subtle pointer-events-none -z-10"></div>
+                            <div
+                                class="purpose-icon w-16 h-16 bg-primary-container text-white rounded-xl flex items-center justify-center font-bold text-3xl mb-10 shadow-lg shadow-primary-container/30">
+                                <img src="assets/logos/DOMINEXUS_LOGO.png">
+                            </div>
+                            <h3 class="text-3xl font-extrabold mb-6 text-surface-dim tracking-tight">
+                                Purpose
+                            </h3>
+                            <p class="text-text-muted mb-10 leading-relaxed text-lg">
+
+                                To provide student organizations with
+                                a simple, organized, and accessible
+                                system for managing general meeting
+                                attendance and participation.
+
+                            </p>
+                            <div class="purpose-list space-y-6">
+                                <span class="flex items-center gap-4 text-base font-semibold text-surface-dim">
+                                    <span class="text-primary-container text-xl font-bold">✓</span> Organized attendance
+                                </span>
+                                <span class="flex items-center gap-4 text-base font-semibold text-surface-dim">
+                                    <span class="text-primary-container text-xl font-bold">✓</span> QR-based
+                                    identification
+                                </span>
+                                <span class="flex items-center gap-4 text-base font-semibold text-surface-dim">
+                                    <span class="text-primary-container text-xl font-bold">✓</span> Attendance history
+                                </span>
+                                <span class="flex items-center gap-4 text-base font-semibold text-surface-dim">
+                                    <span class="text-primary-container text-xl font-bold">✓</span> Participation
+                                    monitoring
+                                </span>
+                                <span class="flex items-center gap-4 text-base font-semibold text-surface-dim">
+                                    <span class="text-primary-container text-xl font-bold">✓</span> Offline-ready design
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =================================
+             KEY FEATURES
+        ================================== -->
+        <section class="features py-32 px-6 bg-[#F7F7F7] relative">
+            <div class="absolute inset-0 bg-red-glow pointer-events-none opacity-50"></div>
+            <div class="content-container max-w-7xl mx-auto relative z-10">
+                <div class="section-title mb-20 text-center">
+                    <p class="text-primary-container font-extrabold text-sm tracking-[0.2em] uppercase mb-4">
+                        KEY FEATURES
+                    </p>
+                    <h2 class="text-5xl md:text-6xl font-extrabold text-surface-dim tracking-tight">
+                        What DOMINEXUS provides
+                    </h2>
+                </div>
+                <div class="feature-grid grid md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
+                    <div class="absolute inset-0 bg-red-glow-subtle pointer-events-none -z-10 opacity-30"></div>
+                    <!-- FEATURE 1 -->
+                    <div
+                        class="feature-card p-10 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300">
+                        <div
+                            class="feature-icon w-14 h-14 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold mb-8 text-lg">
+                            QR
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                            Personal QR Code
+                        </h3>
+                        <p class="text-text-muted text-base leading-relaxed">
+
+                            Each student can have a permanent
+                            Unique ID connected to their QR code.
+
+                        </p>
+                    </div>
+                    <!-- FEATURE 2 -->
+                    <div
+                        class="feature-card p-10 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300">
+                        <div
+                            class="feature-icon w-14 h-14 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold mb-8 text-2xl">
+                            ✓
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                            Attendance History
+                        </h3>
+                        <p class="text-text-muted text-base leading-relaxed">
+
+                            Students can view their previous
+                            meeting attendance and remarks.
+
+                        </p>
+                    </div>
+                    <!-- FEATURE 3 -->
+                    <div
+                        class="feature-card p-10 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300">
+                        <div
+                            class="feature-icon w-14 h-14 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold mb-8 text-2xl">
+                            ★
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                            Participation
+                        </h3>
+                        <p class="text-text-muted text-base leading-relaxed">
+
+                            Monitor participation levels
+                            within student organizations.
+
+                        </p>
+                    </div>
+                    <!-- FEATURE 4 -->
+                    <div
+                        class="feature-card p-10 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300">
+                        <div
+                            class="feature-icon w-14 h-14 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold mb-8 text-2xl">
+                            📅
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                            Meeting Information
+                        </h3>
+                        <p class="text-text-muted text-base leading-relaxed">
+
+                            Access upcoming meetings and
+                            relevant organization information.
+
+                        </p>
+                    </div>
+                    <!-- FEATURE 5 -->
+                    <div
+                        class="feature-card p-10 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300">
+                        <div
+                            class="feature-icon w-14 h-14 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold mb-8 text-2xl">
+                            📋
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                            Organized Records
+                        </h3>
+                        <p class="text-text-muted text-base leading-relaxed">
+
+                            Keep important attendance information
+                            organized in one system.
+
+                        </p>
+                    </div>
+                    <!-- FEATURE 6 -->
+                    <div
+                        class="feature-card p-10 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300">
+                        <div
+                            class="feature-icon w-14 h-14 rounded-xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold mb-8 text-base">
+                            OFF
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                            Offline Ready
+                        </h3>
+                        <p class="text-text-muted text-base leading-relaxed">
+
+                            Designed to support attendance
+                            management even without internet.
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =================================
+             HOW IT WORKS
+        ================================== -->
+        <section class="how-it-works py-32 px-6 bg-surface-white relative">
+            <div class="content-container max-w-7xl mx-auto relative z-10">
+                <div class="section-title mb-24 text-center">
+                    <p class="text-primary-container font-extrabold text-sm tracking-[0.2em] uppercase mb-4">
+                        HOW IT WORKS
+                    </p>
+                    <h2 class="text-5xl md:text-6xl font-extrabold text-surface-dim tracking-tight">
+                        Simple and organized
+                    </h2>
+                </div>
+                <div class="steps grid md:grid-cols-2 lg:grid-cols-4 gap-12 relative">
+                    <div class="absolute inset-0 bg-red-glow-subtle pointer-events-none -z-10 opacity-20"></div>
+                    <!-- Connecting Line for lg screens -->
+                    <div class="hidden lg:block absolute top-12 left-16 right-16 h-[2px] bg-primary-container/20 z-0">
+                    </div>
+                    <!-- STEP 1 -->
+                    <div class="step relative z-10 glass-panel-light p-8 rounded-3xl">
+                        <div
+                            class="step-number w-24 h-24 rounded-full bg-surface-white border-4 border-[#F7F7F7] text-primary-container font-extrabold text-3xl flex items-center justify-center mb-8 mx-auto lg:mx-0 shadow-lg shadow-primary-container/10">
+                            01
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-center lg:text-left text-surface-dim tracking-tight">
+                            Create an Account
+                        </h3>
+                        <p class="text-text-muted text-base text-center lg:text-left leading-relaxed">
+
+                            Register your information and
+                            organization details.
+
+                        </p>
+                    </div>
+                    <!-- STEP 2 -->
+                    <div class="step relative z-10 glass-panel-light p-8 rounded-3xl">
+                        <div
+                            class="step-number w-24 h-24 rounded-full bg-surface-white border-4 border-[#F7F7F7] text-primary-container font-extrabold text-3xl flex items-center justify-center mb-8 mx-auto lg:mx-0 shadow-lg shadow-primary-container/10">
+                            02
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-center lg:text-left text-surface-dim tracking-tight">
+                            Get Your Unique ID
+                        </h3>
+                        <p class="text-text-muted text-base text-center lg:text-left leading-relaxed">
+
+                            DOMINEXUS assigns a permanent
+                            student identification number.
+
+                        </p>
+                    </div>
+                    <!-- STEP 3 -->
+                    <div class="step relative z-10 glass-panel-light p-8 rounded-3xl">
+                        <div
+                            class="step-number w-24 h-24 rounded-full bg-surface-white border-4 border-[#F7F7F7] text-primary-container font-extrabold text-3xl flex items-center justify-center mb-8 mx-auto lg:mx-0 shadow-lg shadow-primary-container/10">
+                            03
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-center lg:text-left text-surface-dim tracking-tight">
+                            Attend Meetings
+                        </h3>
+                        <p class="text-text-muted text-base text-center lg:text-left leading-relaxed">
+
+                            Present your personal QR code
+                            during organization meetings.
+
+                        </p>
+                    </div>
+                    <!-- STEP 4 -->
+                    <div class="step relative z-10 glass-panel-light p-8 rounded-3xl">
+                        <div
+                            class="step-number w-24 h-24 rounded-full bg-surface-white border-4 border-[#F7F7F7] text-primary-container font-extrabold text-3xl flex items-center justify-center mb-8 mx-auto lg:mx-0 shadow-lg shadow-primary-container/10">
+                            04
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-center lg:text-left text-surface-dim tracking-tight">
+                            View Your Records
+                        </h3>
+                        <p class="text-text-muted text-base text-center lg:text-left leading-relaxed">
+
+                            Check your attendance history,
+                            meetings, and participation.
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =================================
+             INFORMATION PAGES
+        ================================== -->
+        <section class="information-section py-32 px-6 bg-[#F7F7F7] relative">
+            <div class="absolute inset-0 bg-red-glow-bottom pointer-events-none opacity-50"></div>
+            <div class="content-container max-w-5xl mx-auto relative z-10">
+                <div class="section-title mb-20 text-center">
+                    <p class="text-primary-container font-extrabold text-sm tracking-[0.2em] uppercase mb-4">
+                        LEARN MORE
+                    </p>
+                    <h2 class="text-5xl md:text-6xl font-extrabold text-surface-dim tracking-tight">
+                        About the people and school behind DOMINEXUS
+                    </h2>
+                </div>
+                <div class="information-grid grid md:grid-cols-2 gap-10 relative">
+                    <div class="absolute inset-0 red-atmospheric-bleed pointer-events-none -z-10 opacity-40"></div>
+                    <!-- SCHOOL -->
+                    <div
+                        class="information-card p-12 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300 flex flex-col md:flex-row gap-8 relative z-10">
+                        <div
+                            class="information-icon w-20 h-20 rounded-2xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold text-base shrink-0">
+                            SDCA
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                                About Our School
+                            </h3>
+                            <p class="text-text-muted text-base leading-relaxed mb-8">
+
+                                Learn more about St. Dominic
+                                College of Asia and its student
+                                community.
+
+                            </p>
+                            <a class="learn-more inline-flex items-center text-primary-container font-bold text-base hover:text-primary-container/80 transition-colors"
+                                href="school.html">
+
+                                Learn More →
+
+                            </a>
+                        </div>
+                    </div>
+                    <!-- CREATORS -->
+                    <div
+                        class="information-card p-12 rounded-3xl glass-panel-light hover:-translate-y-1 transition-transform duration-300 flex flex-col md:flex-row gap-8 relative z-10">
+                        <div
+                            class="information-icon w-20 h-20 rounded-2xl bg-primary-container/10 text-primary-container flex items-center justify-center font-bold text-base shrink-0">
+                            TEAM
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-surface-dim tracking-tight">
+                                Meet the Creators
+                            </h3>
+                            <p class="text-text-muted text-base leading-relaxed mb-8">
+
+                                Get to know the researchers and
+                                developers behind the DOMINEXUS
+                                project.
+
+                            </p>
+                            <a class="learn-more inline-flex items-center text-primary-container font-bold text-base hover:text-primary-container/80 transition-colors"
+                                href="creators.html">
+
+                                Meet the Team →
+
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- =================================
+             STUDENT ACCESS CTA
+        ================================== -->
+        <section class="student-access-section py-32 px-6 relative overflow-hidden bg-hero-gradient">
+            <div class="absolute inset-0 red-atmospheric-bleed z-0 pointer-events-none"></div>
+            <div class="content-container max-w-5xl mx-auto relative z-10">
+                <div
+                    class="student-access-card glass-panel-dark p-14 md:p-20 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
+                    <div>
+                        <p class="small-title text-primary font-extrabold text-sm tracking-[0.2em] uppercase mb-6">
+                            STUDENT ACCESS
+                        </p>
+                        <h2 class="text-5xl md:text-6xl font-extrabold mb-6 text-white tracking-tight">
+                            Ready to access DOMINEXUS?
+                        </h2>
+                        <p class="text-white/70 text-xl max-w-lg font-medium">
+
+                            Login to your account or create
+                            your student account to continue.
+
+                        </p>
+                    </div>
+                    <a class="student-button shrink-0 inline-flex items-center justify-center px-12 py-6 text-base font-bold text-white glass-panel-red rounded-xl shadow-xl hover:bg-white/20 transition-all hover:-translate-y-1 active:translate-y-0"
+                        href="student/student-login.html">
+
+                        Student Access
+
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- =====================================
+         FOOTER
+    ====================================== -->
+    <footer class="footer bg-[#080808] text-surface-white pt-24 pb-12 px-6">
+        <div class="footer-container max-w-7xl mx-auto grid md:grid-cols-4 gap-16 mb-20">
+            <!-- BRAND -->
+            <div class="footer-brand md:col-span-2">
+                <div class="flex items-center gap-4 mb-8">
+                    <div
+                        class="footer-logo w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-primary-container/20">
+                        <img src="assets/logos/DOMINEXUS_LOGO.png">
+                    </div>
+                    <h3 class="font-extrabold text-2xl tracking-tight text-surface-white">
+                        DOMINEXUS
+                    </h3>
+                </div>
+                <p class="text-surface-white/60 text-base leading-relaxed max-w-md font-medium">
+
+                    Offline General Meeting Attendance
+                    Management System
+
+                </p>
+            </div>
+            <!-- SCHOOL -->
+            <div class="footer-column">
+                <h4 class="font-extrabold text-xs tracking-[0.2em] uppercase mb-8 text-surface-white/80">
+                    School
+                </h4>
+                <div class="space-y-5 text-base text-surface-white/60 font-medium">
+                    <p class="">
+                        St. Dominic College of Asia
+                    </p>
+                    <p class="">
+                        Bacoor, Cavite
+                    </p>
+                </div>
+            </div>
+            <!-- PROJECT -->
+            <div class="footer-column">
+                <h4 class="font-extrabold text-xs tracking-[0.2em] uppercase mb-8 text-surface-white/80">
+                    Project
+                </h4>
+                <div class="space-y-5 text-base text-surface-white/60 font-medium">
+                    <p class="">
+                        Research Proposal
+                    </p>
+                    <p class="">
+                        Academic Year 2026
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- FOOTER BOTTOM -->
+        <div
+            class="footer-bottom max-w-7xl mx-auto pt-10 border-t border-surface-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-surface-white/40 font-medium">
+            <p class="">
+                © 2026 DOMINEXUS. All rights reserved.
+            </p>
+            <p class="">
+                Developed for academic and research purposes.
+            </p>
+        </div>
+    </footer>
+    <!-- JAVASCRIPT -->
+    <script src="front-page.js"></script>
+
+</body>
+
+</html>

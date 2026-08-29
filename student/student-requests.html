@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests | DOMINEXUS</title>
+    <link rel="stylesheet" href="student-requests.css">
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-circle">D</div>
+        <div><h2>DOMINEXUS</h2><span>Student Portal</span></div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="student-dashboard.html" class="nav-item"><span>⌂</span>Dashboard</a>
+        <a href="student-qr.html" class="nav-item"><span>▣</span>My QR Code</a>
+        <a href="student-attendance.html" class="nav-item"><span>✓</span>Attendance</a>
+        <a href="student-profile.html" class="nav-item"><span>●</span>My Profile</a>
+        <a href="student-meetings.html" class="nav-item"><span>▦</span>Meetings</a>
+        <a href="student-requests.html" class="nav-item active"><span>✎</span>Requests</a>
+        <a href="student-settings.html" class="nav-item"><span>⚙</span>Settings</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <button id="logoutButton" class="logout-button">↪ &nbsp; Logout</button>
+    </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<main class="main-content">
+    <header class="topbar">
+        <button class="menu-button" id="menuButton">☰</button>
+        <div>
+            <h1>Requests</h1>
+            <p>Submit and track attendance requests</p>
+        </div>
+        <div class="topbar-profile">
+            <div class="profile-avatar" id="topAvatar">ST</div>
+            <div class="top-profile-info">
+                <strong id="topStudentName">Student</strong>
+                <span id="topStudentId">Student ID</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <section class="page-heading">
+            <span>ATTENDANCE REQUESTS</span>
+            <h2>Excuse & Remark Requests</h2>
+            <p>Submit a request for an attendance record that needs review.</p>
+        </section>
+
+        <div class="info-box">
+            <strong>Important</strong>
+            <p>Your request will be saved on this device and can later be connected to the Officer/Moderator system.</p>
+        </div>
+
+        <section class="card">
+            <h3>Submit a Request</h3>
+            <p class="muted">Complete all required fields.</p>
+
+            <form id="requestForm">
+                <label>Request Type
+                    <select id="requestType" required>
+                        <option value="">Select request type</option>
+                        <option>Excuse for Absence</option>
+                        <option>Attendance Correction</option>
+                        <option>Late Attendance Remark</option>
+                        <option>Other</option>
+                    </select>
+                </label>
+
+                <label>Meeting
+                    <select id="meetingSelect" required>
+                        <option value="">Select meeting</option>
+                    </select>
+                </label>
+
+                <label>Meeting Date
+                    <input type="date" id="requestDate" required>
+                </label>
+
+                <label>Reason
+                    <textarea id="requestReason" maxlength="500"
+                        placeholder="Explain your reason..." required></textarea>
+                </label>
+
+                <label>Supporting Document <small>(optional)</small>
+                    <input type="file" id="supportingDocument"
+                        accept=".jpg,.jpeg,.png,.pdf">
+                </label>
+
+                <button class="submit-button" type="submit">Submit Request</button>
+            </form>
+        </section>
+
+        <section class="history">
+            <h3>My Requests</h3>
+            <p class="muted">Track your submitted requests.</p>
+            <div id="requestList"></div>
+            <div class="empty-state" id="emptyState">
+                <div>✎</div>
+                <h3>No Requests Yet</h3>
+                <p>Your submitted requests will appear here.</p>
+            </div>
+        </section>
+    </div>
+
+    <footer>© 2026 DOMINEXUS — Student Organization Attendance Management System</footer>
+</main>
+
+<script src="student-requests.js"></script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Officer Dashboard | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="officer-dashboard.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">
+                D
+            </div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Officer Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="officer-dashboard.html" class="nav-item active">
+
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="officer-meetings.html" class="nav-item">
+
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+
+            </a>
+
+
+            <a href="officer-attendance.html" class="nav-item">
+
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+
+            </a>
+
+
+            <a href="officer-members.html" class="nav-item">
+
+                <span class="nav-icon">●</span>
+                <span>Members</span>
+
+            </a>
+
+
+            <a href="officer-requests.html" class="nav-item">
+
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+
+            </a>
+
+
+            <a href="officer-settings.html" class="nav-item">
+
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+
+    <div class="sidebar-overlay" id="sidebarOverlay">
+    </div>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <button class="menu-button" id="menuButton" aria-label="Open menu">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>
+                    Officer Dashboard
+                </h1>
+
+                <p>
+                    Organization management overview
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+
+                    OF
+
+                </div>
+
+
+                <div class="top-profile-info">
+
+                    <strong id="topOfficerName">
+                        Officer
+                    </strong>
+
+                    <span id="topOfficerId">
+                        Officer ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             DASHBOARD CONTAINER
+        ========================== -->
+
+        <div class="dashboard-container">
+
+
+            <!-- WELCOME -->
+
+            <section class="welcome-card">
+
+                <div class="welcome-text">
+
+                    <span class="welcome-label">
+                        OFFICER PORTAL
+                    </span>
+
+
+                    <h2>
+
+                        Welcome,
+                        <span id="welcomeName">
+                            Officer
+                        </span>!
+
+                    </h2>
+
+
+                    <p>
+
+                        Manage your organization's
+                        meetings, members, attendance,
+                        and requests from one place.
+
+                    </p>
+
+                </div>
+
+
+                <div class="welcome-decoration">
+
+                    <div class="decoration-circle">
+                        D
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 SUMMARY
+            ========================== -->
+
+            <section class="summary-grid">
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ▦
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Meetings
+                        </span>
+
+                        <strong id="totalMeetings">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ●
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Members
+                        </span>
+
+                        <strong id="totalMembers">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        %
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Attendance Rate
+                        </span>
+
+                        <strong id="attendanceRate">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 TWO COLUMN AREA
+            ========================== -->
+
+            <section class="dashboard-grid">
+
+
+                <!-- UPCOMING MEETING -->
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Upcoming Meeting
+                            </h3>
+
+                            <p>
+                                Your organization's next meeting.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="upcomingMeeting" class="upcoming-meeting">
+
+                        <div class="meeting-icon">
+                            ▦
+                        </div>
+
+
+                        <div class="meeting-info">
+
+                            <strong>
+                                No upcoming meeting
+                            </strong>
+
+                            <span>
+                                Create a meeting to see it here.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- QUICK ACTIONS -->
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Quick Actions
+                            </h3>
+
+                            <p>
+                                Common officer actions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="quick-actions">
+
+                        <a href="officer-meetings.html" class="quick-action">
+
+                            <span>▦</span>
+
+                            <div>
+                                <strong>
+                                    Manage Meetings
+                                </strong>
+
+                                <small>
+                                    Create and manage meetings
+                                </small>
+                            </div>
+
+                        </a>
+
+
+                        <a href="officer-attendance.html" class="quick-action">
+
+                            <span>✓</span>
+
+                            <div>
+                                <strong>
+                                    Attendance
+                                </strong>
+
+                                <small>
+                                    View attendance records
+                                </small>
+                            </div>
+
+                        </a>
+
+
+                        <a href="officer-members.html" class="quick-action">
+
+                            <span>●</span>
+
+                            <div>
+                                <strong>
+                                    Members
+                                </strong>
+
+                                <small>
+                                    View organization members
+                                </small>
+                            </div>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 RECENT MEETINGS
+            ========================== -->
+
+            <section class="dashboard-card recent-card">
+
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Recent Meetings
+                        </h3>
+
+                        <p>
+                            Latest organization meetings.
+                        </p>
+
+                    </div>
+
+
+                    <a href="officer-meetings.html" class="view-all">
+
+                        View All
+
+                    </a>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Meeting
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Time
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="meetingsTable">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="noMeetings" class="no-data">
+
+                    No meetings recorded yet.
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+
+            <footer class="dashboard-footer">
+
+                <p>
+                    © 2026 DOMINEXUS
+                </p>
+
+                <span>
+                    Student Organization Attendance Management System
+                </span>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+
+    <script src="officer-dashboard.js"></script>
+
+</body>
+
+</html>

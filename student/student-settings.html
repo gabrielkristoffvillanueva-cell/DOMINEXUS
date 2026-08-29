@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Settings | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-settings.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Student Portal</span>
+            </div>
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="student-qr.html" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>My QR Code</span>
+            </a>
+
+            <a href="student-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="student-profile.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>My Profile</span>
+            </a>
+
+            <a href="student-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="student-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="student-settings.html" class="nav-item active">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                class="logout-button"
+                id="logoutButton">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay">
+    </div>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                id="menuButton">
+
+                ☰
+
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Settings</h1>
+
+                <p>
+                    Manage your student portal preferences
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div
+                    class="profile-avatar"
+                    id="topAvatar">
+
+                    JO
+
+                </div>
+
+
+                <div class="top-profile-info">
+
+                    <strong id="topStudentName">
+                        Jaerist Kholean J. Orbita
+                    </strong>
+
+                    <span>
+                        SDCA-001
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE -->
+        <div class="page-container">
+
+
+            <!-- PAGE HEADING -->
+            <section class="page-heading">
+
+                <span class="section-label">
+                    ACCOUNT SETTINGS
+                </span>
+
+                <h2>
+                    Student Settings
+                </h2>
+
+                <p>
+                    Manage your preferences and account options.
+                </p>
+
+            </section>
+
+
+            <!-- ACCOUNT SETTINGS -->
+            <section class="settings-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        Account
+                    </h3>
+
+                    <p>
+                        Basic account-related options.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            ●
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                My Profile
+                            </strong>
+
+                            <span>
+                                View your student information.
+                            </span>
+
+                        </div>
+
+                        <a
+                            href="student-profile.html"
+                            class="setting-button">
+
+                            View
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            ▣
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                My QR Code
+                            </strong>
+
+                            <span>
+                                View your personal attendance QR code.
+                            </span>
+
+                        </div>
+
+                        <a
+                            href="student-qr.html"
+                            class="setting-button">
+
+                            View
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            🔒
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                Password
+                            </strong>
+
+                            <span>
+                                Password management will be connected
+                                to the backend later.
+                            </span>
+
+                        </div>
+
+                        <button
+                            class="setting-button disabled-button"
+                            type="button">
+
+                            Coming Soon
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- APPEARANCE -->
+            <section class="settings-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        Appearance
+                    </h3>
+
+                    <p>
+                        Customize how the student portal looks.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            ☀
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                Theme
+                            </strong>
+
+                            <span id="themeDescription">
+                                Choose between light and dark mode.
+                            </span>
+
+                        </div>
+
+
+                        <select
+                            id="themeSelect"
+                            class="theme-select">
+
+                            <option value="light">
+                                Light
+                            </option>
+
+                            <option value="dark">
+                                Dark
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- NOTIFICATIONS -->
+            <section class="settings-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        Notifications
+                    </h3>
+
+                    <p>
+                        Control the notifications shown in the portal.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            🔔
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                Meeting Reminders
+                            </strong>
+
+                            <span>
+                                Show reminders for upcoming meetings.
+                            </span>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input
+                                type="checkbox"
+                                id="meetingNotifications"
+                                checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            ✓
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                Attendance Updates
+                            </strong>
+
+                            <span>
+                                Show updates about your attendance records.
+                            </span>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input
+                                type="checkbox"
+                                id="attendanceNotifications"
+                                checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-icon">
+                            ✎
+                        </div>
+
+                        <div class="setting-info">
+
+                            <strong>
+                                Request Updates
+                            </strong>
+
+                            <span>
+                                Show updates when your requests are reviewed.
+                            </span>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input
+                                type="checkbox"
+                                id="requestNotifications"
+                                checked>
+
+                            <span class="slider"></span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PRIVACY -->
+            <section class="settings-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        Privacy & Security
+                    </h3>
+
+                    <p>
+                        Information about your account security.
+                    </p>
+
+                </div>
+
+
+                <div class="security-box">
+
+                    <div class="security-icon">
+                        🔒
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Your student information is protected.
+                        </strong>
+
+                        <p>
+                            DOMINEXUS is designed so that student
+                            attendance information is only accessible
+                            to authorized users.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- DANGER ZONE -->
+            <section class="settings-card danger-card">
+
+                <div class="card-header">
+
+                    <h3>
+                        Account Actions
+                    </h3>
+
+                    <p>
+                        Actions that affect your current session.
+                    </p>
+
+                </div>
+
+
+                <div class="danger-content">
+
+                    <div>
+
+                        <strong>
+                            Log Out
+                        </strong>
+
+                        <p>
+                            End your current DOMINEXUS student session.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        class="danger-button"
+                        id="logoutSettingsButton">
+
+                        Log Out
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+    <script src="student-settings.js"></script>
+
+</body>
+
+</html>

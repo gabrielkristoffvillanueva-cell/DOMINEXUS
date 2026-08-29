@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Requests | Officer | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="officer-requests.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Officer Portal</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="officer-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="officer-meetings.html" class="nav-item">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="officer-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="officer-members.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>Members</span>
+            </a>
+
+            <a href="officer-requests.html" class="nav-item active">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="officer-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+
+                <span>↪</span>
+                Logout
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <div class="sidebar-overlay" id="sidebarOverlay">
+    </div>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <button id="menuButton" class="menu-button">
+                ☰
+            </button>
+
+
+            <div class="topbar-title">
+
+                <h1>Requests</h1>
+
+                <p>
+                    Manage student requests
+                </p>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+                    OF
+                </div>
+
+                <div class="top-profile-info">
+
+                    <strong id="topOfficerName">
+                        Officer
+                    </strong>
+
+                    <span id="topOfficerId">
+                        Officer ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE -->
+
+        <div class="page-container">
+
+
+            <section class="page-header">
+
+                <div>
+
+                    <span class="page-label">
+                        ORGANIZATION
+                    </span>
+
+                    <h2>
+                        Student Requests
+                    </h2>
+
+                    <p>
+                        Review and manage requests submitted by members.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- SUMMARY -->
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+
+                    <div class="summary-icon">
+                        ✉
+                    </div>
+
+                    <div>
+
+                        <span>Total Requests</span>
+
+                        <strong id="totalRequests">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon pending">
+                        !
+                    </div>
+
+                    <div>
+
+                        <span>Pending</span>
+
+                        <strong id="pendingRequests">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon approved">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>Approved</span>
+
+                        <strong id="approvedRequests">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- REQUEST CARD -->
+
+            <section class="requests-card">
+
+
+                <!-- TOOLBAR -->
+
+                <div class="requests-toolbar">
+
+                    <div class="search-box">
+
+                        <span>⌕</span>
+
+                        <input type="text" id="searchInput" placeholder="Search requests...">
+
+                    </div>
+
+
+                    <select id="statusFilter">
+
+                        <option value="all">
+                            All Status
+                        </option>
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="Approved">
+                            Approved
+                        </option>
+
+                        <option value="Rejected">
+                            Rejected
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- REQUEST LIST -->
+
+                <div class="request-list" id="requestList">
+                </div>
+
+
+                <!-- EMPTY -->
+
+                <div class="empty-state" id="emptyState">
+
+                    <div class="empty-icon">
+                        ✉
+                    </div>
+
+                    <h3>
+                        No requests found
+                    </h3>
+
+                    <p>
+                        There are no requests matching your search or filter.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- REQUEST DETAILS MODAL -->
+
+    <div class="modal-overlay" id="requestModal">
+
+        <div class="request-modal">
+
+            <button class="modal-close" id="closeModal">
+                ×
+            </button>
+
+
+            <span class="modal-label">
+                REQUEST DETAILS
+            </span>
+
+
+            <h2 id="modalTitle">
+                Request
+            </h2>
+
+
+            <div class="modal-student">
+
+                <div class="modal-avatar" id="modalAvatar">
+                    JD
+                </div>
+
+                <div>
+
+                    <strong id="modalStudentName">
+                        Student
+                    </strong>
+
+                    <span id="modalStudentId">
+                        Student ID
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <span>Request Type</span>
+
+                <strong id="modalType">
+                    -
+                </strong>
+
+            </div>
+
+            <div class="detail-row">
+
+                <span>Meeting / Date</span>
+
+                <strong id="modalDate">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="message-box">
+
+                <span>Message</span>
+
+                <p id="modalMessage">
+                    -
+                </p>
+
+            </div>
+
+
+            <div class="modal-actions" id="modalActions">
+
+                <button class="reject-button" id="rejectButton">
+                    Reject
+                </button>
+
+                <button class="approve-button" id="approveButton">
+                    Approve
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="officer-requests.js"></script>
+
+</body>
+
+</html>

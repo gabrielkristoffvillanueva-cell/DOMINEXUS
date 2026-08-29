@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Meetings | DOMINEXUS</title>
+
+    <link rel="stylesheet" href="student-meetings.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-circle">D</div>
+
+            <div>
+                <h2>DOMINEXUS</h2>
+                <span>Student Portal</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="student-qr.html" class="nav-item">
+                <span class="nav-icon">▣</span>
+                <span>My QR Code</span>
+            </a>
+
+            <a href="student-attendance.html" class="nav-item">
+                <span class="nav-icon">✓</span>
+                <span>Attendance</span>
+            </a>
+
+            <a href="student-profile.html" class="nav-item">
+                <span class="nav-icon">●</span>
+                <span>My Profile</span>
+            </a>
+
+            <a href="student-meetings.html" class="nav-item active">
+                <span class="nav-icon">▦</span>
+                <span>Meetings</span>
+            </a>
+
+            <a href="student-requests.html" class="nav-item">
+                <span class="nav-icon">✎</span>
+                <span>Requests</span>
+            </a>
+
+            <a href="student-settings.html" class="nav-item">
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <button id="logoutButton" class="logout-button">
+                <span>↪</span>
+                Logout
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <button class="menu-button" id="menuButton" aria-label="Open menu">
+                ☰
+            </button>
+
+            <div class="topbar-title">
+
+                <h1>Meetings</h1>
+
+                <p>
+                    View upcoming and previous organization meetings
+                </p>
+
+            </div>
+
+            <div class="topbar-profile">
+
+                <div class="profile-avatar" id="topAvatar">
+                    ST
+                </div>
+
+                <div class="top-profile-info">
+
+                    <strong id="topStudentName">
+                        Student
+                    </strong>
+
+                    <span id="topStudentId">
+                        Student ID
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+        <div class="page-container">
+
+            <!-- INTRO -->
+            <section class="page-heading">
+
+                <span class="section-label">
+                    ORGANIZATION MEETINGS
+                </span>
+
+                <h2>
+                    Meeting Schedule
+                </h2>
+
+                <p>
+                    Check your upcoming and previous organization meetings.
+                </p>
+
+            </section>
+
+
+            <!-- UPCOMING MEETING -->
+            <section class="section-block">
+
+                <div class="section-header">
+
+                    <div>
+                        <h3>Upcoming Meetings</h3>
+                        <p>Meetings you may need to attend.</p>
+                    </div>
+
+                </div>
+
+
+                <div class="meeting-list" id="upcomingMeetings">
+
+                    <!-- JavaScript will insert meetings -->
+
+                </div>
+
+
+                <div class="empty-state" id="upcomingEmpty">
+
+                    <div class="empty-icon">
+                        📅
+                    </div>
+
+                    <h3>
+                        No Upcoming Meetings
+                    </h3>
+
+                    <p>
+                        There are currently no upcoming meetings.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- PREVIOUS MEETINGS -->
+            <section class="section-block">
+
+                <div class="section-header">
+
+                    <div>
+                        <h3>Previous Meetings</h3>
+                        <p>Review meetings that have already taken place.</p>
+                    </div>
+
+                </div>
+
+
+                <div class="meeting-list" id="previousMeetings">
+
+                    <!-- JavaScript will insert meetings -->
+
+                </div>
+
+
+                <div class="empty-state" id="previousEmpty">
+
+                    <div class="empty-icon">
+                        ✓
+                    </div>
+
+                    <h3>
+                        No Previous Meetings
+                    </h3>
+
+                    <p>
+                        No previous meetings have been recorded yet.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+
+            <p>
+                © 2026 DOMINEXUS
+            </p>
+
+            <span>
+                Student Organization Attendance Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <script src="student-meetings.js"></script>
+
+</body>
+
+</html>
