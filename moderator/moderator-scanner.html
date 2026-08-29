@@ -17,7 +17,7 @@
         href="moderator-scanner.css"
     >
 
-    <!-- QR LIBRARY -->
+    <!-- QR SCANNER LIBRARY -->
     <script
         src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"
         defer
@@ -32,7 +32,6 @@
 
 
 <body>
-
 
     <!-- SIDEBAR -->
 
@@ -66,82 +65,55 @@
             </div>
 
 
-            <a
-                href="moderator-dashboard.html"
-                class="nav-item"
-            >
+            <a href="moderator-dashboard.html" class="nav-item">
                 <span class="nav-icon">▦</span>
                 Dashboard
             </a>
 
 
-            <a
-                href="moderator-meetings.html"
-                class="nav-item"
-            >
+            <a href="moderator-meetings.html" class="nav-item">
                 <span class="nav-icon">◫</span>
                 Meeting Management
             </a>
 
 
-            <a
-                href="moderator-scanner.html"
-                class="nav-item active"
-            >
+            <a href="moderator-scanner.html" class="nav-item active">
                 <span class="nav-icon">▣</span>
                 QR Scanner
             </a>
 
 
-            <a
-                href="moderator-live-attendance.html"
-                class="nav-item"
-            >
+            <a href="moderator-live-attendance.html" class="nav-item">
                 <span class="nav-icon">●</span>
                 Live Attendance
             </a>
 
 
-            <a
-                href="moderator-students.html"
-                class="nav-item"
-            >
+            <a href="moderator-students.html" class="nav-item">
                 <span class="nav-icon">♙</span>
                 Student Records
             </a>
 
 
-            <a
-                href="moderator-history.html"
-                class="nav-item"
-            >
+            <a href="moderator-history.html" class="nav-item">
                 <span class="nav-icon">▤</span>
                 Attendance History
             </a>
 
 
-            <a
-                href="moderator-participation.html"
-                class="nav-item"
-            >
+            <a href="moderator-participation.html" class="nav-item">
                 <span class="nav-icon">◔</span>
                 Participation
             </a>
 
 
-            <a
-                href="moderator-alerts.html"
-                class="nav-item"
-            >
+            <a href="moderator-alerts.html" class="nav-item">
                 <span class="nav-icon">!</span>
                 Notifications
             </a>
 
 
-            <a
-                href="moderator-reports.html"
-                class="nav-item"
-            >
+            <a href="moderator-reports.html" class="nav-item">
                 <span class="nav-icon">▥</span>
                 Reports
             </a>
@@ -277,13 +249,9 @@
                             id="scannerIndicator"
                         >
 
-                            <span
-                                class="indicator-dot"
-                            ></span>
+                            <span class="indicator-dot"></span>
 
-                            <span
-                                id="scannerIndicatorText"
-                            >
+                            <span id="scannerIndicatorText">
                                 Scanner Off
                             </span>
 
@@ -301,18 +269,16 @@
 
                         <div
                             id="qr-reader"
+                            aria-label="QR camera preview"
                         ></div>
 
 
-                        <div
-                            class="scan-frame"
-                        >
+                        <div class="scan-frame">
 
                             <span class="corner top-left"></span>
                             <span class="corner top-right"></span>
                             <span class="corner bottom-left"></span>
                             <span class="corner bottom-right"></span>
-
 
                             <div
                                 class="scan-line"
@@ -336,7 +302,6 @@
 
                     <div class="scanner-controls">
 
-
                         <button
                             type="button"
                             id="startScannerButton"
@@ -355,7 +320,6 @@
                             Stop Scanner
                         </button>
 
-
                     </div>
 
 
@@ -365,7 +329,6 @@
                 <!-- MANUAL BACKUP -->
 
                 <div class="card manual-card">
-
 
                     <h2>
                         Manual ID Backup
@@ -406,7 +369,6 @@
                         id="manualStatus"
                     ></div>
 
-
                 </div>
 
 
@@ -419,7 +381,6 @@
                 class="card student-card hidden"
                 id="studentCard"
             >
-
 
                 <div class="student-header">
 
@@ -449,16 +410,13 @@
 
                 <div class="student-details">
 
-
                     <div class="detail">
 
                         <span>
                             STUDENT NAME
                         </span>
 
-                        <strong
-                            id="studentName"
-                        >
+                        <strong id="studentName">
                             —
                         </strong>
 
@@ -471,9 +429,7 @@
                             STUDENT ID
                         </span>
 
-                        <strong
-                            id="studentId"
-                        >
+                        <strong id="studentId">
                             —
                         </strong>
 
@@ -486,14 +442,11 @@
                             UNIQUE ID
                         </span>
 
-                        <strong
-                            id="studentUniqueId"
-                        >
+                        <strong id="studentUniqueId">
                             —
                         </strong>
 
                     </div>
-
 
                 </div>
 
@@ -511,7 +464,6 @@
                 >
                     Confirm Attendance
                 </button>
-
 
             </section>
 

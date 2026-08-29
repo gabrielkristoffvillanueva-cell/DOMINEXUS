@@ -9,9 +9,7 @@
 ========================================================= */
 
 if (
-    sessionStorage.getItem(
-        "moderatorLoggedIn"
-    ) !== "true"
+    sessionStorage.getItem("moderatorLoggedIn") !== "true"
 ) {
 
     window.location.href =
@@ -25,136 +23,93 @@ if (
 ========================================================= */
 
 const meetingSelect =
-    document.getElementById(
-        "meetingSelect"
-    );
-
+    document.getElementById("meetingSelect");
 
 const meetingStatus =
-    document.getElementById(
-        "meetingStatus"
-    );
-
+    document.getElementById("meetingStatus");
 
 const startScannerButton =
-    document.getElementById(
-        "startScannerButton"
-    );
-
+    document.getElementById("startScannerButton");
 
 const stopScannerButton =
-    document.getElementById(
-        "stopScannerButton"
-    );
-
+    document.getElementById("stopScannerButton");
 
 const scannerIndicator =
-    document.getElementById(
-        "scannerIndicator"
-    );
-
+    document.getElementById("scannerIndicator");
 
 const scannerIndicatorText =
-    document.getElementById(
-        "scannerIndicatorText"
-    );
-
+    document.getElementById("scannerIndicatorText");
 
 const scannerMessage =
-    document.getElementById(
-        "scannerMessage"
-    );
-
+    document.getElementById("scannerMessage");
 
 const manualUniqueId =
-    document.getElementById(
-        "manualUniqueId"
-    );
-
+    document.getElementById("manualUniqueId");
 
 const manualSearchButton =
-    document.getElementById(
-        "manualSearchButton"
-    );
-
+    document.getElementById("manualSearchButton");
 
 const manualStatus =
-    document.getElementById(
-        "manualStatus"
-    );
-
+    document.getElementById("manualStatus");
 
 const studentCard =
-    document.getElementById(
-        "studentCard"
-    );
-
+    document.getElementById("studentCard");
 
 const studentName =
-    document.getElementById(
-        "studentName"
-    );
-
+    document.getElementById("studentName");
 
 const studentId =
-    document.getElementById(
-        "studentId"
-    );
-
+    document.getElementById("studentId");
 
 const studentUniqueId =
-    document.getElementById(
-        "studentUniqueId"
-    );
-
+    document.getElementById("studentUniqueId");
 
 const studentMessage =
-    document.getElementById(
-        "studentMessage"
-    );
+    document.getElementById("studentMessage");
 
+const confirmAttendanceButton =
+    document.getElementById("confirmAttendanceButton");
 
 const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
+    document.getElementById("logoutButton");
+
+const moderatorNameElement =
+    document.getElementById("moderatorName");
+
+const moderatorAvatar =
+    document.getElementById("moderatorAvatar");
 
 
 /* =========================================================
    SCANNER VARIABLES
 ========================================================= */
 
-let html5QrCode =
-    null;
+let html5QrCode = null;
 
+let scannerRunning = false;
 
-let scannerRunning =
-    false;
+let lastDecodedValue = "";
+
+let lastDecodedAt = 0;
+
+let currentStudent = null;
 
 
 /* =========================================================
-   LOAD MODERATOR INFORMATION
+   MODERATOR INFORMATION
 ========================================================= */
 
 const moderatorName =
-    sessionStorage.getItem(
-        "moderatorName"
-    ) ||
+    sessionStorage.getItem("moderatorName") ||
     "System Moderator";
 
 
-document.getElementById(
-    "moderatorName"
-).textContent =
+moderatorNameElement.textContent =
     moderatorName;
 
 
-document.getElementById(
-    "moderatorAvatar"
-).textContent =
-    getInitials(
-        moderatorName
-    );
+moderatorAvatar.textContent =
+    getInitials(moderatorName);
 
 
 /* =========================================================
@@ -167,11 +122,9 @@ loadMeetings();
 function loadMeetings() {
 
     meetingSelect.innerHTML = `
-
         <option value="">
             Select a meeting
         </option>
-
     `;
 
 
@@ -189,15 +142,11 @@ function loadMeetings() {
         if (raw) {
 
             const parsed =
-                JSON.parse(
-                    raw
-                );
+                JSON.parse(raw);
 
 
             if (
-                Array.isArray(
-                    parsed
-                )
+                Array.isArray(parsed)
             ) {
 
                 meetings =
@@ -221,9 +170,7 @@ function loadMeetings() {
         function(meeting) {
 
             const option =
-                document.createElement(
-                    "option"
-                );
+                document.createElement("option");
 
 
             option.value =
@@ -231,9 +178,7 @@ function loadMeetings() {
 
 
             option.textContent =
-                buildMeetingLabel(
-                    meeting
-                );
+                buildMeetingLabel(meeting);
 
 
             meetingSelect.appendChild(
@@ -245,19 +190,17 @@ function loadMeetings() {
 
 
     if (
-        meetings.length ===
-        0
+        meetings.length === 0
     ) {
 
         const option =
-            document.createElement(
-                "option"
-            );
+            document.createElement("option");
 
+
+        option.value = "";
 
         option.textContent =
             "No meetings available";
-
 
         option.disabled =
             true;
@@ -289,6 +232,9 @@ meetingSelect.addEventListener(
             meetingStatus.textContent =
                 "Please select a meeting before starting the scanner.";
 
+            meetingStatus.style.color =
+                "#888";
+
             return;
 
         }
@@ -296,6 +242,9 @@ meetingSelect.addEventListener(
 
         meetingStatus.textContent =
             "Meeting selected. The scanner can now be started.";
+
+        meetingStatus.style.color =
+            "#198754";
 
     }
 );
@@ -329,23 +278,13 @@ startScannerButton.addEventListener(
         }
 
 
-        /*
-         * Check that the library exists.
-         */
-
         if (
             typeof Html5Qrcode ===
             "undefined"
         ) {
 
             scannerMessage.textContent =
-                "QR scanner library did not load.";
-
-
-            console.error(
-                "DOMINEXUS: Html5Qrcode is undefined."
-            );
-
+                "QR scanner library did not load. Check your internet connection.";
 
             return;
 
@@ -355,12 +294,11 @@ startScannerButton.addEventListener(
         try {
 
             scannerMessage.textContent =
-                "Starting camera...";
+                "Requesting camera permission...";
 
 
-            setScannerActive(
-                true
-            );
+            startScannerButton.disabled =
+                true;
 
 
             html5QrCode =
@@ -369,38 +307,83 @@ startScannerButton.addEventListener(
                 );
 
 
+            const cameras =
+                await Html5Qrcode.getCameras();
+
+
+            if (
+                !cameras ||
+                cameras.length === 0
+            ) {
+
+                throw new Error(
+                    "No camera was found."
+                );
+
+            }
+
+
             /*
-             * Use the browser's
-             * environment-facing camera.
-             *
-             * This is better for a
-             * webcam/phone rear camera.
+             * Use the first available camera
+             * by default.
              */
+
+            let cameraId =
+                cameras[0].id;
+
+
+            /*
+             * Prefer the rear camera
+             * on phones.
+             */
+
+            const rearCamera =
+                cameras.find(
+                    function(camera) {
+
+                        const label =
+                            String(
+                                camera.label ||
+                                ""
+                            ).toLowerCase();
+
+
+                        return (
+                            label.includes("back") ||
+                            label.includes("rear") ||
+                            label.includes("environment")
+                        );
+
+                    }
+                );
+
+
+            if (rearCamera) {
+
+                cameraId =
+                    rearCamera.id;
+
+            }
+
 
             await html5QrCode.start(
 
-                {
-                    facingMode:
-                        "environment"
-                },
+                cameraId,
 
                 {
-                    fps:
-                        10,
 
-                    qrbox:
-                        {
-                            width: 230,
-                            height: 230
-                        },
+                    fps: 10,
 
-                    aspectRatio:
-                        1.0,
+                    qrbox: {
+                        width: 230,
+                        height: 230
+                    },
 
-                    formatsToSupport:
-                        [
-                            Html5QrcodeSupportedFormats.QR_CODE
-                        ]
+                    aspectRatio: 1.0,
+
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.QR_CODE
+                    ]
 
                 },
 
@@ -415,18 +398,21 @@ startScannerButton.addEventListener(
                 true;
 
 
-            scannerMessage.textContent =
-                "Scanner is active. Position the QR code inside the frame.";
+            setScannerActive(
+                true
+            );
 
-            startScannerButton.disabled =
-                true;
+
+            scannerMessage.textContent =
+                "Scanner is active. Position the student's QR code inside the frame.";
 
 
             stopScannerButton.disabled =
                 false;
 
+        }
 
-        } catch (error) {
+        catch (error) {
 
             console.error(
                 "DOMINEXUS: Scanner failed to start:",
@@ -443,8 +429,58 @@ startScannerButton.addEventListener(
             );
 
 
+            startScannerButton.disabled =
+                false;
+
+
+            stopScannerButton.disabled =
+                true;
+
+
+            let message =
+                "Unable to start the camera.";
+
+
+            const errorText =
+                String(
+                    error?.message ||
+                    error ||
+                    ""
+                ).toLowerCase();
+
+
+            if (
+                errorText.includes(
+                    "permission"
+                )
+            ) {
+
+                message =
+                    "Camera permission was denied. Allow camera access and try again.";
+
+            }
+
+            else if (
+                errorText.includes(
+                    "no camera"
+                )
+            ) {
+
+                message =
+                    "No camera was found on this device.";
+
+            }
+
+            else {
+
+                message =
+                    "Unable to start the camera. Check your camera permission and try again.";
+
+            }
+
+
             scannerMessage.textContent =
-                "Unable to start the camera. Check browser camera permission.";
+                message;
 
         }
 
@@ -460,27 +496,59 @@ function onQrSuccess(
     decodedText
 ) {
 
+    const now =
+        Date.now();
+
+
+    const value =
+        String(
+            decodedText ||
+            ""
+        ).trim();
+
+
+    if (!value) {
+
+        return;
+
+    }
+
+
+    /*
+     * Prevent repeated detection of the
+     * same QR code within 3 seconds.
+     */
+
+    if (
+        value === lastDecodedValue &&
+        now - lastDecodedAt < 3000
+    ) {
+
+        return;
+
+    }
+
+
+    lastDecodedValue =
+        value;
+
+
+    lastDecodedAt =
+        now;
+
+
     console.log(
         "DOMINEXUS QR DECODED:",
-        decodedText
+        value
     );
 
 
     scannerMessage.textContent =
-        "QR detected: " +
-        decodedText;
+        "QR detected. Verifying student...";
 
-
-    /*
-     * Show decoded value
-     * temporarily.
-     *
-     * Student lookup and attendance
-     * will be connected in the next step.
-     */
 
     findStudent(
-        decodedText
+        value
     );
 
 }
@@ -495,11 +563,9 @@ function onQrError(
 ) {
 
     /*
-     * Do NOT display every frame's
-     * decode failure to the user.
-     *
-     * html5-qrcode calls this constantly
-     * while searching.
+     * Ignore temporary scanning errors.
+     * The library calls this repeatedly while
+     * searching for a QR code.
      */
 
 }
@@ -515,9 +581,9 @@ function findStudent(
 
     const cleanedId =
         String(
-            uniqueId
-        )
-        .trim();
+            uniqueId ||
+            ""
+        ).trim();
 
 
     if (!cleanedId) {
@@ -541,15 +607,11 @@ function findStudent(
         if (raw) {
 
             const parsed =
-                JSON.parse(
-                    raw
-                );
+                JSON.parse(raw);
 
 
             if (
-                Array.isArray(
-                    parsed
-                )
+                Array.isArray(parsed)
             ) {
 
                 students =
@@ -559,7 +621,9 @@ function findStudent(
 
         }
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(
             "DOMINEXUS: Student data error:",
@@ -573,15 +637,18 @@ function findStudent(
         students.find(
             function(item) {
 
-                return (
+                const storedUniqueId =
                     String(
                         item.uniqueId ||
                         ""
                     )
                     .trim()
-                    .toUpperCase() ===
-                    cleanedId
-                    .toUpperCase()
+                    .toUpperCase();
+
+
+                return (
+                    storedUniqueId ===
+                    cleanedId.toUpperCase()
                 );
 
             }
@@ -589,6 +656,10 @@ function findStudent(
 
 
     if (!student) {
+
+        currentStudent =
+            null;
+
 
         studentCard.classList.add(
             "hidden"
@@ -618,6 +689,10 @@ function findStudent(
 function displayStudent(
     student
 ) {
+
+    currentStudent =
+        student;
+
 
     studentName.textContent =
         student.fullName ||
@@ -653,9 +728,7 @@ function displayStudent(
 
 
     /*
-     * Stop the scanner after a successful
-     * detection so the same QR isn't
-     * repeatedly decoded.
+     * Stop the camera after successful detection.
      */
 
     stopScanner();
@@ -692,20 +765,20 @@ manualSearchButton.addEventListener(
         }
 
 
+        manualStatus.textContent =
+            "Searching...";
+
+
         findStudent(
             value
         );
-
-
-        manualStatus.textContent =
-            "Searching...";
 
     }
 );
 
 
 /* =========================================================
-   ENTER KEY FOR MANUAL ID
+   ENTER KEY
 ========================================================= */
 
 manualUniqueId.addEventListener(
@@ -728,38 +801,113 @@ manualUniqueId.addEventListener(
 
 
 /* =========================================================
+   CONFIRM ATTENDANCE
+========================================================= */
+
+confirmAttendanceButton.addEventListener(
+    "click",
+    function() {
+
+        if (!meetingSelect.value) {
+
+            studentMessage.textContent =
+                "Please select a meeting first.";
+
+            studentMessage.style.color =
+                "#7b1113";
+
+            return;
+
+        }
+
+
+        if (!currentStudent) {
+
+            studentMessage.textContent =
+                "No student is currently selected.";
+
+            studentMessage.style.color =
+                "#7b1113";
+
+            return;
+
+        }
+
+
+        /*
+         * Backend/database connection will be added later.
+         */
+
+        studentMessage.textContent =
+            "Attendance confirmed for this student.";
+
+        studentMessage.style.color =
+            "#198754";
+
+
+        console.log(
+            "DOMINEXUS ATTENDANCE:",
+            {
+                meetingId:
+                    meetingSelect.value,
+
+                student:
+                    currentStudent
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
    STOP SCANNER
 ========================================================= */
 
 async function stopScanner() {
 
-    if (
-        !html5QrCode ||
-        !scannerRunning
-    ) {
+    if (html5QrCode) {
 
-        setScannerActive(
-            false
-        );
+        try {
 
-        return;
+            if (scannerRunning) {
+
+                await html5QrCode.stop();
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "DOMINEXUS: Scanner stop warning:",
+                error
+            );
+
+        }
+
+
+        try {
+
+            await html5QrCode.clear();
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "DOMINEXUS: Scanner clear warning:",
+                error
+            );
+
+        }
 
     }
 
 
-    try {
-
-        await html5QrCode.stop();
-
-
-    } catch (error) {
-
-        console.warn(
-            "DOMINEXUS: Scanner stop warning:",
-            error
-        );
-
-    }
+    html5QrCode =
+        null;
 
 
     scannerRunning =
@@ -777,10 +925,6 @@ async function stopScanner() {
     setScannerActive(
         false
     );
-
-
-    scannerMessage.textContent =
-        "Scanner stopped.";
 
 }
 
@@ -836,7 +980,7 @@ function setScannerActive(
 
 logoutButton.addEventListener(
     "click",
-    function() {
+    async function() {
 
         const confirmed =
             confirm(
@@ -851,7 +995,7 @@ logoutButton.addEventListener(
         }
 
 
-        stopScanner();
+        await stopScanner();
 
 
         sessionStorage.removeItem(
@@ -893,9 +1037,7 @@ function buildMeetingLabel(
         title;
 
 
-    if (
-        meeting.date
-    ) {
+    if (meeting.date) {
 
         label +=
             " — " +
@@ -906,9 +1048,7 @@ function buildMeetingLabel(
     }
 
 
-    if (
-        meeting.time
-    ) {
+    if (meeting.time) {
 
         label +=
             " • " +
@@ -956,15 +1096,9 @@ function formatDate(
     return parsed.toLocaleDateString(
         "en-PH",
         {
-            year:
-                "numeric",
-
-            month:
-                "long",
-
-            day:
-                "numeric"
-
+            year: "numeric",
+            month: "long",
+            day: "numeric"
         }
     );
 
@@ -987,8 +1121,7 @@ function formatTime(
 
 
     if (
-        parts.length <
-        2
+        parts.length < 2
     ) {
 
         return time;
@@ -1034,14 +1167,26 @@ function getInitials(
 ) {
 
     const parts =
-        name
-            .trim()
-            .split(/\s+/);
+        String(
+            name ||
+            ""
+        )
+        .trim()
+        .split(/\s+/);
 
 
     if (
-        parts.length ===
-        1
+        parts.length === 0 ||
+        !parts[0]
+    ) {
+
+        return "M";
+
+    }
+
+
+    if (
+        parts.length === 1
     ) {
 
         return parts[0]
