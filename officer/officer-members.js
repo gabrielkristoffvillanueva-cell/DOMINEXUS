@@ -1,15 +1,26 @@
-/* =========================================
-   DOMINEXUS OFFICER MEMBERS
-   Connected to Student Registration
-========================================= */
+/* =========================================================
+   DOMINEXUS — OFFICER MEMBERS
+   Laravel / MySQL Connected
+========================================================= */
 
 
-/* =========================================
-   CHECK OFFICER LOGIN
-========================================= */
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
+
+
+/* =========================================================
+   OFFICER LOGIN
+========================================================= */
 
 const loggedIn =
-    sessionStorage.getItem("officerLoggedIn");
+    sessionStorage.getItem(
+        "officerLoggedIn"
+    );
+
 
 if (loggedIn !== "true") {
 
@@ -19,184 +30,324 @@ if (loggedIn !== "true") {
 }
 
 
-/* =========================================
-   OFFICER INFORMATION
-========================================= */
-
 const officerName =
-    sessionStorage.getItem("officerName")
-    || "Officer";
+    sessionStorage.getItem(
+        "officerName"
+    ) || "Officer";
+
 
 const officerId =
-    sessionStorage.getItem("officerId")
-    || "Officer ID";
+    sessionStorage.getItem(
+        "officerId"
+    ) || "";
 
 
-/* =========================================
+/* =========================================================
    ELEMENTS
-========================================= */
+========================================================= */
 
 const topOfficerName =
-    document.getElementById("topOfficerName");
+    document.getElementById(
+        "topOfficerName"
+    );
 
 const topOfficerId =
-    document.getElementById("topOfficerId");
+    document.getElementById(
+        "topOfficerId"
+    );
 
 const topAvatar =
-    document.getElementById("topAvatar");
+    document.getElementById(
+        "topAvatar"
+    );
+
 
 const totalMembers =
-    document.getElementById("totalMembers");
+    document.getElementById(
+        "totalMembers"
+    );
 
 const activeMembers =
-    document.getElementById("activeMembers");
+    document.getElementById(
+        "activeMembers"
+    );
 
 const totalOfficers =
-    document.getElementById("totalOfficers");
+    document.getElementById(
+        "totalOfficers"
+    );
+
 
 const membersTable =
-    document.getElementById("membersTable");
+    document.getElementById(
+        "membersTable"
+    );
 
 const emptyState =
-    document.getElementById("emptyState");
+    document.getElementById(
+        "emptyState"
+    );
+
 
 const searchInput =
-    document.getElementById("searchInput");
+    document.getElementById(
+        "searchInput"
+    );
 
 const roleFilter =
-    document.getElementById("roleFilter");
+    document.getElementById(
+        "roleFilter"
+    );
+
 
 const logoutButton =
-    document.getElementById("logoutButton");
+    document.getElementById(
+        "logoutButton"
+    );
+
 
 const menuButton =
-    document.getElementById("menuButton");
+    document.getElementById(
+        "menuButton"
+    );
 
 const sidebar =
-    document.getElementById("sidebar");
+    document.getElementById(
+        "sidebar"
+    );
 
 const sidebarOverlay =
-    document.getElementById("sidebarOverlay");
+    document.getElementById(
+        "sidebarOverlay"
+    );
 
 
-/* =========================================
+/* =========================================================
    MEMBER MODAL
-========================================= */
+========================================================= */
 
 const memberModal =
-    document.getElementById("memberModal");
+    document.getElementById(
+        "memberModal"
+    );
 
 const closeModal =
-    document.getElementById("closeModal");
+    document.getElementById(
+        "closeModal"
+    );
 
 const closeProfileButton =
-    document.getElementById("closeProfileButton");
+    document.getElementById(
+        "closeProfileButton"
+    );
 
 const modalAvatar =
-    document.getElementById("modalAvatar");
+    document.getElementById(
+        "modalAvatar"
+    );
 
 const modalName =
-    document.getElementById("modalName");
+    document.getElementById(
+        "modalName"
+    );
 
 const modalStudentId =
-    document.getElementById("modalStudentId");
+    document.getElementById(
+        "modalStudentId"
+    );
 
 const modalSection =
-    document.getElementById("modalSection");
+    document.getElementById(
+        "modalSection"
+    );
 
 const modalRole =
-    document.getElementById("modalRole");
+    document.getElementById(
+        "modalRole"
+    );
 
 const modalStatus =
-    document.getElementById("modalStatus");
+    document.getElementById(
+        "modalStatus"
+    );
 
 const modalAttendance =
-    document.getElementById("modalAttendance");
+    document.getElementById(
+        "modalAttendance"
+    );
 
 
-/* =========================================
+/* =========================================================
+   DATA
+========================================================= */
+
+let members = [];
+
+
+/* =========================================================
    DISPLAY OFFICER
-========================================= */
+========================================================= */
 
 if (topOfficerName) {
+
     topOfficerName.textContent =
         officerName;
+
 }
+
 
 if (topOfficerId) {
+
     topOfficerId.textContent =
-        officerId;
+        officerId ||
+        "Officer ID";
+
 }
+
 
 if (topAvatar) {
+
     topAvatar.textContent =
-        getInitials(officerName);
+        getInitials(
+            officerName
+        );
+
 }
 
 
-/* =========================================
-   GET REGISTERED STUDENTS
-========================================= */
+/* =========================================================
+   LOAD MEMBERS FROM LARAVEL
+========================================================= */
 
-function getRegisteredStudents() {
+async function loadMembers() {
+
+    if (!officerId) {
+
+        console.error(
+            "Officer ID is missing."
+        );
+
+        showLoadError(
+            "Officer ID is missing."
+        );
+
+        return;
+
+    }
+
+
+    if (membersTable) {
+
+        membersTable.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="
+                        text-align:center;
+                        padding:40px;
+                    "
+                >
+
+                    Loading members...
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
 
     try {
 
-        const savedStudents =
-            localStorage.getItem(
-                "dominexus_students"
+        const response =
+            await fetch(
+                `${API_BASE}/officer-members?officer_id=${encodeURIComponent(
+                    officerId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
             );
 
-        if (!savedStudents) {
-            return [];
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "DOMINEXUS MEMBERS RESPONSE:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                `Unable to load members (${response.status}).`
+            );
+
         }
 
-        const parsedStudents =
-            JSON.parse(savedStudents);
 
-        if (!Array.isArray(parsedStudents)) {
-            return [];
-        }
+        members =
+            Array.isArray(
+                data.members
+            )
+                ? data.members
+                : [];
 
-        return parsedStudents;
+
+        updateStatistics(
+            data.statistics
+        );
+
+
+        displayMembers();
+
 
     } catch (error) {
 
         console.error(
-            "Unable to load registered students:",
+            "MEMBERS LOAD ERROR:",
             error
         );
 
-        return [];
+
+        members = [];
+
+
+        updateStatistics({
+            total_members: 0,
+            active_members: 0,
+            total_officers: 0
+        });
+
+
+        showLoadError(
+            error.message ||
+            "Unable to load members."
+        );
 
     }
 
 }
 
 
-/* =========================================
-   LOAD MEMBERS
-========================================= */
-
-let members =
-    getRegisteredStudents();
-
-
-/* =========================================
+/* =========================================================
    DISPLAY MEMBERS
-========================================= */
+========================================================= */
 
 function displayMembers() {
-
-    /*
-       IMPORTANT:
-       Reload the students every time
-       instead of keeping an old copy.
-    */
-
-    members =
-        getRegisteredStudents();
-
 
     const search =
         searchInput
@@ -213,369 +364,348 @@ function displayMembers() {
 
 
     const filtered =
-        members.filter(member => {
+        members.filter(
+            function(member) {
 
-            const name =
-                member.fullName ||
-                member.name ||
-                "Unnamed Student";
-
-
-            const studentId =
-                member.studentId ||
-                "";
+                const name =
+                    String(
+                        member.name ||
+                        ""
+                    ).toLowerCase();
 
 
-            const section =
-                member.section ||
-                "";
+                const studentId =
+                    String(
+                        member.student_id ||
+                        ""
+                    ).toLowerCase();
 
 
-            const role =
-                member.clubRole ||
-                member.role ||
-                "Member";
+                const section =
+                    String(
+                        member.section ||
+                        ""
+                    ).toLowerCase();
 
 
-            const matchesSearch =
-
-                name
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                studentId
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                section
-                    .toLowerCase()
-                    .includes(search);
+                const role =
+                    String(
+                        member.club_role ||
+                        "Member"
+                    ).toLowerCase();
 
 
-            const matchesRole =
-                selectedRole === "all" ||
-                role.toLowerCase() ===
-                selectedRole.toLowerCase();
+                const matchesSearch =
+                    !search ||
+
+                    name.includes(
+                        search
+                    ) ||
+
+                    studentId.includes(
+                        search
+                    ) ||
+
+                    section.includes(
+                        search
+                    );
 
 
-            return (
-                matchesSearch &&
-                matchesRole
-            );
+                const matchesRole =
+                    selectedRole ===
+                        "all" ||
 
-        });
+                    role ===
+                        selectedRole.toLowerCase();
 
 
-    /*
-       Clear old table
-    */
+                return (
+                    matchesSearch &&
+                    matchesRole
+                );
+
+            }
+        );
+
 
     if (membersTable) {
-        membersTable.innerHTML = "";
+
+        membersTable.innerHTML =
+            "";
+
     }
 
 
-    /*
-       Empty state
-    */
-
-    if (filtered.length === 0) {
+    if (
+        filtered.length === 0
+    ) {
 
         if (emptyState) {
+
             emptyState.style.display =
                 "block";
+
         }
 
-    } else {
 
-        if (emptyState) {
-            emptyState.style.display =
-                "none";
-        }
+        return;
 
     }
 
 
-    /*
-       Create rows
-    */
+    if (emptyState) {
 
-    filtered.forEach(member => {
+        emptyState.style.display =
+            "none";
 
-        if (!membersTable) {
-            return;
-        }
+    }
 
 
-        const row =
-            document.createElement("tr");
+    filtered.forEach(
+        function(member) {
 
-
-        const name =
-            member.fullName ||
-            member.name ||
-            "Unnamed Student";
-
-
-        const studentId =
-            member.studentId ||
-            "No ID";
-
-
-        const section =
-            member.section ||
-            "No Section";
-
-
-        const role =
-            member.clubRole ||
-            member.role ||
-            "Member";
-
-
-        const status =
-            member.status ||
-            "Active";
-
-
-        const attendance =
-            calculateAttendance(
+            createMemberRow(
                 member
             );
 
-
-        row.innerHTML = `
-
-            <td>
-
-                <div class="member-name-cell">
-
-                    <div class="member-avatar">
-
-                        ${escapeHTML(
-                            getInitials(name)
-                        )}
-
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            ${escapeHTML(name)}
-                        </strong>
-
-                        <span>
-                            ${escapeHTML(studentId)}
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </td>
-
-
-            <td>
-                ${escapeHTML(section)}
-            </td>
-
-
-            <td>
-
-                <span class="
-                    role-badge
-                    ${getRoleClass(role)}
-                ">
-
-                    ${escapeHTML(role)}
-
-                </span>
-
-            </td>
-
-
-            <td>
-
-                <span class="
-                    status-badge
-                    ${getStatusClass(status)}
-                ">
-
-                    ${escapeHTML(status)}
-
-                </span>
-
-            </td>
-
-
-            <td>
-
-                <span class="attendance-value">
-
-                    ${attendance}%
-
-                </span>
-
-            </td>
-
-
-            <td>
-
-                <button
-                    class="view-button"
-                    data-student-id="${escapeHTML(
-                        studentId
-                    )}">
-
-                    View
-
-                </button>
-
-            </td>
-
-        `;
-
-
-        membersTable.appendChild(row);
-
-    });
-
-
-    updateStatistics();
-
-}
-
-
-/* =========================================
-   UPDATE STATISTICS
-========================================= */
-
-function updateStatistics() {
-
-    /*
-       Always get the newest data.
-    */
-
-    members =
-        getRegisteredStudents();
-
-
-    const total =
-        members.length;
-
-
-    const active =
-        members.filter(member => {
-
-            const status =
-                member.status ||
-                "Active";
-
-            return (
-                status.toLowerCase() ===
-                "active"
-            );
-
-        }).length;
-
-
-    const officers =
-        members.filter(member => {
-
-            const role =
-                member.clubRole ||
-                member.role ||
-                "Member";
-
-            return (
-                role.toLowerCase() ===
-                "officer"
-            );
-
-        }).length;
-
-
-    if (totalMembers) {
-        totalMembers.textContent =
-            total;
-    }
-
-
-    if (activeMembers) {
-        activeMembers.textContent =
-            active;
-    }
-
-
-    if (totalOfficers) {
-        totalOfficers.textContent =
-            officers;
-    }
-
-}
-
-
-/* =========================================
-   CALCULATE ATTENDANCE
-========================================= */
-
-function calculateAttendance(member) {
-
-    const history =
-        Array.isArray(
-            member.attendanceHistory
-        )
-            ? member.attendanceHistory
-            : [];
-
-
-    if (history.length === 0) {
-
-        return 0;
-
-    }
-
-
-    const present =
-        history.filter(record => {
-
-            const status =
-                record.status ||
-                "";
-
-            return (
-                status.toLowerCase() ===
-                    "present"
-
-                ||
-
-                status.toLowerCase() ===
-                    "late"
-            );
-
-        }).length;
-
-
-    return Math.round(
-        (present / history.length) * 100
+        }
     );
 
 }
 
 
-/* =========================================
+/* =========================================================
+   CREATE MEMBER ROW
+========================================================= */
+
+function createMemberRow(
+    member
+) {
+
+    if (!membersTable) {
+        return;
+    }
+
+
+    const row =
+        document.createElement(
+            "tr"
+        );
+
+
+    const name =
+        member.name ||
+        "Unnamed Student";
+
+
+    const studentId =
+        member.student_id ||
+        "No ID";
+
+
+    const section =
+        member.section ||
+        "No Section";
+
+
+    const role =
+        member.club_role ||
+        "Member";
+
+
+    const status =
+        member.status ||
+        "Active";
+
+
+    const attendance =
+        Number(
+            member.attendance
+        ) || 0;
+
+
+    row.innerHTML = `
+
+        <td>
+
+            <div class="member-name-cell">
+
+                <div class="member-avatar">
+
+                    ${escapeHTML(
+                        getInitials(
+                            name
+                        )
+                    )}
+
+                </div>
+
+                <div>
+
+                    <strong>
+                        ${escapeHTML(
+                            name
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapeHTML(
+                            studentId
+                        )}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </td>
+
+
+        <td>
+            ${escapeHTML(
+                section
+            )}
+        </td>
+
+
+        <td>
+
+            <span class="
+                role-badge
+                ${getRoleClass(
+                    role
+                )}
+            ">
+
+                ${escapeHTML(
+                    role
+                )}
+
+            </span>
+
+        </td>
+
+
+        <td>
+
+            <span class="
+                status-badge
+                ${getStatusClass(
+                    status
+                )}
+            ">
+
+                ${escapeHTML(
+                    status
+                )}
+
+            </span>
+
+        </td>
+
+
+        <td>
+
+            <span class="attendance-value">
+
+                ${attendance}%
+
+            </span>
+
+        </td>
+
+
+        <td>
+
+            <button
+                type="button"
+                class="view-button"
+                data-member-id="${escapeHTML(
+                    member.id
+                )}"
+            >
+
+                View
+
+            </button>
+
+        </td>
+
+    `;
+
+
+    membersTable.appendChild(
+        row
+    );
+
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+function updateStatistics(
+    statistics
+) {
+
+    const stats =
+        statistics || {};
+
+
+    const total =
+        Number(
+            stats.total_members
+        ) || 0;
+
+
+    const active =
+        Number(
+            stats.active_members
+        ) || 0;
+
+
+    const officers =
+        Number(
+            stats.total_officers
+        ) || 0;
+
+
+    if (totalMembers) {
+
+        totalMembers.textContent =
+            total;
+
+    }
+
+
+    if (activeMembers) {
+
+        activeMembers.textContent =
+            active;
+
+    }
+
+
+    if (totalOfficers) {
+
+        totalOfficers.textContent =
+            officers;
+
+    }
+
+}
+
+
+/* =========================================================
    VIEW MEMBER
-========================================= */
+========================================================= */
 
 if (membersTable) {
 
     membersTable.addEventListener(
         "click",
-        event => {
+        function(event) {
 
             const button =
                 event.target.closest(
@@ -588,30 +718,28 @@ if (membersTable) {
             }
 
 
-            const studentId =
-                button.dataset.studentId;
+            const memberId =
+                button.dataset.memberId;
 
 
-            const student =
-                getRegisteredStudents()
-                    .find(member => {
+            const member =
+                members.find(
+                    function(item) {
 
-                        return (
-                            String(
-                                member.studentId
-                            ).toLowerCase() ===
-                            String(
-                                studentId
-                            ).toLowerCase()
+                        return String(
+                            item.id
+                        ) === String(
+                            memberId
                         );
 
-                    });
+                    }
+                );
 
 
-            if (student) {
+            if (member) {
 
                 showMemberProfile(
-                    student
+                    member
                 );
 
             }
@@ -622,49 +750,51 @@ if (membersTable) {
 }
 
 
-/* =========================================
+/* =========================================================
    SHOW MEMBER PROFILE
-========================================= */
+========================================================= */
 
-function showMemberProfile(student) {
+function showMemberProfile(
+    member
+) {
 
     const name =
-        student.fullName ||
-        student.name ||
+        member.name ||
         "Unnamed Student";
 
 
     const studentId =
-        student.studentId ||
+        member.student_id ||
         "No ID";
 
 
     const section =
-        student.section ||
+        member.section ||
         "No Section";
 
 
     const role =
-        student.clubRole ||
-        student.role ||
+        member.club_role ||
         "Member";
 
 
     const status =
-        student.status ||
+        member.status ||
         "Active";
 
 
     const attendance =
-        calculateAttendance(
-            student
-        );
+        Number(
+            member.attendance
+        ) || 0;
 
 
     if (modalAvatar) {
 
         modalAvatar.textContent =
-            getInitials(name);
+            getInitials(
+                name
+            );
 
     }
 
@@ -728,9 +858,9 @@ function showMemberProfile(student) {
 }
 
 
-/* =========================================
-   CLOSE MEMBER MODAL
-========================================= */
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
 
 function closeMemberModal() {
 
@@ -769,7 +899,7 @@ if (memberModal) {
 
     memberModal.addEventListener(
         "click",
-        event => {
+        function(event) {
 
             if (
                 event.target ===
@@ -786,9 +916,9 @@ if (memberModal) {
 }
 
 
-/* =========================================
+/* =========================================================
    SEARCH
-========================================= */
+========================================================= */
 
 if (searchInput) {
 
@@ -800,9 +930,9 @@ if (searchInput) {
 }
 
 
-/* =========================================
+/* =========================================================
    ROLE FILTER
-========================================= */
+========================================================= */
 
 if (roleFilter) {
 
@@ -814,168 +944,96 @@ if (roleFilter) {
 }
 
 
-/* =========================================
-   REFRESH WHEN PAGE BECOMES ACTIVE
-========================================= */
+/* =========================================================
+   MOBILE MENU
+========================================================= */
 
-window.addEventListener(
-    "storage",
-    event => {
+if (
+    menuButton &&
+    sidebar &&
+    sidebarOverlay
+) {
 
-        if (
-            event.key ===
-            "dominexus_students"
-        ) {
+    menuButton.addEventListener(
+        "click",
+        function() {
 
-            displayMembers();
+            sidebar.classList.add(
+                "open"
+            );
 
-        }
-
-    }
-);
-
-
-/*
-   This also checks again whenever
-   the Officer Members page becomes
-   visible.
-*/
-
-document.addEventListener(
-    "visibilitychange",
-    () => {
-
-        if (
-            document.visibilityState ===
-            "visible"
-        ) {
-
-            displayMembers();
+            sidebarOverlay.classList.add(
+                "show"
+            );
 
         }
-
-    }
-);
+    );
 
 
-/* =========================================
-   GET INITIALS
-========================================= */
-
-function getInitials(name) {
-
-    if (!name) {
-        return "ST";
-    }
+    sidebarOverlay.addEventListener(
+        "click",
+        closeSidebar
+    );
 
 
-    const parts =
-        name
-            .trim()
-            .split(/\s+/);
+    document
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(
+            function(link) {
 
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
 
-    if (parts.length === 1) {
-
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-
-    return (
-        parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
+            }
+        );
 
 }
 
 
-/* =========================================
-   ROLE CLASS
-========================================= */
+function closeSidebar() {
 
-function getRoleClass(role) {
+    if (sidebar) {
 
-    const value =
-        String(role)
-            .toLowerCase();
+        sidebar.classList.remove(
+            "open"
+        );
 
-
-    if (value === "officer") {
-        return "role-officer";
     }
 
 
-    if (value === "moderator") {
-        return "role-moderator";
+    if (sidebarOverlay) {
+
+        sidebarOverlay.classList.remove(
+            "show"
+        );
+
     }
-
-
-    return "role-member";
 
 }
 
 
-/* =========================================
-   STATUS CLASS
-========================================= */
-
-function getStatusClass(status) {
-
-    const value =
-        String(status)
-            .toLowerCase();
-
-
-    if (value === "inactive") {
-        return "status-inactive";
-    }
-
-
-    return "status-active";
-
-}
-
-
-/* =========================================
-   ESCAPE HTML
-========================================= */
-
-function escapeHTML(value) {
-
-    const div =
-        document.createElement("div");
-
-
-    div.textContent =
-        value ?? "";
-
-
-    return div.innerHTML;
-
-}
-
-
-/* =========================================
+/* =========================================================
    LOGOUT
-========================================= */
+========================================================= */
 
 if (logoutButton) {
 
     logoutButton.addEventListener(
         "click",
-        () => {
+        function() {
 
-            const confirmLogout =
-                confirm(
+            if (
+                !confirm(
                     "Are you sure you want to log out?"
-                );
+                )
+            ) {
 
-
-            if (!confirmLogout) {
                 return;
+
             }
 
 
@@ -1005,67 +1063,172 @@ if (logoutButton) {
 }
 
 
-/* =========================================
-   MOBILE MENU
-========================================= */
+/* =========================================================
+   LOAD ERROR
+========================================================= */
 
-if (
-    menuButton &&
-    sidebar &&
-    sidebarOverlay
+function showLoadError(
+    message
 ) {
 
-    menuButton.addEventListener(
-        "click",
-        () => {
+    if (membersTable) {
 
-            sidebar.classList.add(
-                "open"
-            );
+        membersTable.innerHTML = `
 
-            sidebarOverlay.classList.add(
-                "show"
-            );
+            <tr>
 
-        }
-    );
+                <td
+                    colspan="6"
+                    style="
+                        text-align:center;
+                        padding:40px;
+                    "
+                >
 
+                    ${escapeHTML(
+                        message
+                    )}
 
-    sidebarOverlay.addEventListener(
-        "click",
-        closeSidebar
-    );
+                </td>
 
+            </tr>
 
-    function closeSidebar() {
-
-        sidebar.classList.remove(
-            "open"
-        );
-
-        sidebarOverlay.classList.remove(
-            "show"
-        );
+        `;
 
     }
 
 
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(link => {
+    if (emptyState) {
 
-            link.addEventListener(
-                "click",
-                closeSidebar
-            );
+        emptyState.style.display =
+            "none";
 
-        });
+    }
 
 }
 
 
-/* =========================================
-   INITIALIZE
-========================================= */
+/* =========================================================
+   HELPERS
+========================================================= */
 
-displayMembers();
+function getInitials(
+    name
+) {
+
+    if (!name) {
+        return "ST";
+    }
+
+
+    const parts =
+        String(name)
+            .trim()
+            .split(/\s+/);
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[
+            parts.length - 1
+        ].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+function getRoleClass(
+    role
+) {
+
+    const value =
+        String(
+            role || ""
+        ).toLowerCase();
+
+
+    if (
+        value ===
+        "officer"
+    ) {
+
+        return "role-officer";
+
+    }
+
+
+    if (
+        value ===
+        "moderator"
+    ) {
+
+        return "role-moderator";
+
+    }
+
+
+    return "role-member";
+
+}
+
+
+function getStatusClass(
+    status
+) {
+
+    const value =
+        String(
+            status || ""
+        ).toLowerCase();
+
+
+    if (
+        value ===
+        "inactive"
+    ) {
+
+        return "status-inactive";
+
+    }
+
+
+    return "status-active";
+
+}
+
+
+function escapeHTML(
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value ?? "";
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+loadMembers();
