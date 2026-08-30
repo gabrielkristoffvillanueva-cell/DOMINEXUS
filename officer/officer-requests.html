@@ -18,7 +18,9 @@
 
         <div class="sidebar-logo">
 
-            <div class="logo-circle">D</div>
+            <div class="logo-circle">
+                D
+            </div>
 
             <div>
                 <h2>DOMINEXUS</h2>
@@ -65,11 +67,13 @@
 
         <div class="sidebar-bottom">
 
-            <button id="logoutButton" class="logout-button">
-
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
                 <span>↪</span>
                 Logout
-
             </button>
 
         </div>
@@ -77,8 +81,12 @@
     </aside>
 
 
-    <div class="sidebar-overlay" id="sidebarOverlay">
-    </div>
+    <!-- MOBILE OVERLAY -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
 
 
     <!-- MAIN -->
@@ -90,14 +98,21 @@
 
         <header class="topbar">
 
-            <button id="menuButton" class="menu-button">
+            <button
+                id="menuButton"
+                class="menu-button"
+                type="button"
+                aria-label="Open menu"
+            >
                 ☰
             </button>
 
 
             <div class="topbar-title">
 
-                <h1>Requests</h1>
+                <h1>
+                    Requests
+                </h1>
 
                 <p>
                     Manage student requests
@@ -108,9 +123,13 @@
 
             <div class="topbar-profile">
 
-                <div class="profile-avatar" id="topAvatar">
+                <div
+                    class="profile-avatar"
+                    id="topAvatar"
+                >
                     OF
                 </div>
+
 
                 <div class="top-profile-info">
 
@@ -133,6 +152,8 @@
 
         <div class="page-container">
 
+
+            <!-- PAGE HEADER -->
 
             <section class="page-header">
 
@@ -159,6 +180,7 @@
 
             <section class="summary-grid">
 
+
                 <div class="summary-card">
 
                     <div class="summary-icon">
@@ -167,7 +189,9 @@
 
                     <div>
 
-                        <span>Total Requests</span>
+                        <span>
+                            Total Requests
+                        </span>
 
                         <strong id="totalRequests">
                             0
@@ -186,7 +210,9 @@
 
                     <div>
 
-                        <span>Pending</span>
+                        <span>
+                            Pending
+                        </span>
 
                         <strong id="pendingRequests">
                             0
@@ -205,7 +231,9 @@
 
                     <div>
 
-                        <span>Approved</span>
+                        <span>
+                            Approved
+                        </span>
 
                         <strong id="approvedRequests">
                             0
@@ -214,6 +242,7 @@
                     </div>
 
                 </div>
+
 
             </section>
 
@@ -227,11 +256,18 @@
 
                 <div class="requests-toolbar">
 
+
                     <div class="search-box">
 
-                        <span>⌕</span>
+                        <span>
+                            ⌕
+                        </span>
 
-                        <input type="text" id="searchInput" placeholder="Search requests...">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search requests..."
+                        >
 
                     </div>
 
@@ -261,13 +297,18 @@
 
                 <!-- REQUEST LIST -->
 
-                <div class="request-list" id="requestList">
-                </div>
+                <div
+                    class="request-list"
+                    id="requestList"
+                ></div>
 
 
                 <!-- EMPTY -->
 
-                <div class="empty-state" id="emptyState">
+                <div
+                    class="empty-state"
+                    id="emptyState"
+                >
 
                     <div class="empty-icon">
                         ✉
@@ -283,7 +324,9 @@
 
                 </div>
 
+
             </section>
+
 
         </div>
 
@@ -302,16 +345,30 @@
 
         </footer>
 
+
     </main>
 
 
-    <!-- REQUEST DETAILS MODAL -->
+    <!-- =====================================================
+         REQUEST DETAILS MODAL
+    ====================================================== -->
 
-    <div class="modal-overlay" id="requestModal">
+    <div
+        class="modal-overlay"
+        id="requestModal"
+    >
 
         <div class="request-modal">
 
-            <button class="modal-close" id="closeModal">
+
+            <!-- CLOSE -->
+
+            <button
+                class="modal-close"
+                id="closeModal"
+                type="button"
+                aria-label="Close"
+            >
                 ×
             </button>
 
@@ -326,11 +383,17 @@
             </h2>
 
 
+            <!-- STUDENT -->
+
             <div class="modal-student">
 
-                <div class="modal-avatar" id="modalAvatar">
-                    JD
+                <div
+                    class="modal-avatar"
+                    id="modalAvatar"
+                >
+                    ST
                 </div>
+
 
                 <div>
 
@@ -347,9 +410,13 @@
             </div>
 
 
+            <!-- REQUEST TYPE -->
+
             <div class="detail-row">
 
-                <span>Request Type</span>
+                <span>
+                    Request Type
+                </span>
 
                 <strong id="modalType">
                     -
@@ -357,9 +424,14 @@
 
             </div>
 
+
+            <!-- MEETING / DATE -->
+
             <div class="detail-row">
 
-                <span>Meeting / Date</span>
+                <span>
+                    Meeting / Date
+                </span>
 
                 <strong id="modalDate">
                     -
@@ -368,9 +440,13 @@
             </div>
 
 
+            <!-- REASON -->
+
             <div class="message-box">
 
-                <span>Message</span>
+                <span>
+                    Reason
+                </span>
 
                 <p id="modalMessage">
                     -
@@ -379,22 +455,102 @@
             </div>
 
 
-            <div class="modal-actions" id="modalActions">
+            <!-- SUPPORTING DOCUMENT -->
 
-                <button class="reject-button" id="rejectButton">
+            <div
+                class="message-box"
+                id="supportingDocumentBox"
+                style="display:none;"
+            >
+
+                <span>
+                    Supporting Document
+                </span>
+
+                <p id="modalSupportingDocument">
+                    -
+                </p>
+
+            </div>
+
+
+            <!-- OFFICER REMARKS -->
+
+            <div
+                class="remarks-box"
+                id="remarksBox"
+            >
+
+                <label for="officerRemarks">
+                    Officer Remarks
+                </label>
+
+                <textarea
+                    id="officerRemarks"
+                    rows="4"
+                    maxlength="500"
+                    placeholder="Enter remarks for this request..."
+                ></textarea>
+
+                <small>
+                    Maximum 500 characters.
+                </small>
+
+            </div>
+
+
+            <!-- EXISTING REMARKS -->
+
+            <div
+                class="message-box"
+                id="existingRemarksBox"
+                style="display:none;"
+            >
+
+                <span>
+                    Officer Remarks
+                </span>
+
+                <p id="modalExistingRemarks">
+                    -
+                </p>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div
+                class="modal-actions"
+                id="modalActions"
+            >
+
+                <button
+                    class="reject-button"
+                    id="rejectButton"
+                    type="button"
+                >
                     Reject
                 </button>
 
-                <button class="approve-button" id="approveButton">
+
+                <button
+                    class="approve-button"
+                    id="approveButton"
+                    type="button"
+                >
                     Approve
                 </button>
 
             </div>
 
+
         </div>
 
     </div>
 
+
+    <!-- JAVASCRIPT -->
 
     <script src="officer-requests.js"></script>
 
