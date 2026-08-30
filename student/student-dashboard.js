@@ -3,19 +3,51 @@
    Laravel Connected
 ========================================= */
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================
    CHECK LOGIN
 ========================================= */
 
+const studentLoggedIn =
+    sessionStorage.getItem(
+        "studentLoggedIn"
+    );
+
+const studentMustChangePassword =
+    sessionStorage.getItem(
+        "studentMustChangePassword"
+    );
+
+
+/*
+ * Student must be logged in.
+ */
+
 if (
-    sessionStorage.getItem("studentLoggedIn") !== "true"
+    studentLoggedIn !== "true"
 ) {
 
     window.location.href =
         "student-login.html";
+
+}
+
+
+/*
+ * Student with a temporary password
+ * must change it before accessing
+ * the dashboard.
+ */
+
+if (
+    studentMustChangePassword === "true"
+) {
+
+    window.location.href =
+        "student-change-password.html";
 
 }
 
@@ -25,7 +57,9 @@ if (
 ========================================= */
 
 const currentStudentId =
-    sessionStorage.getItem("studentId");
+    sessionStorage.getItem(
+        "studentId"
+    );
 
 
 /* =========================================
@@ -33,46 +67,87 @@ const currentStudentId =
 ========================================= */
 
 const welcomeName =
-    document.getElementById("welcomeName");
+    document.getElementById(
+        "welcomeName"
+    );
+
 
 const topStudentName =
-    document.getElementById("topStudentName");
+    document.getElementById(
+        "topStudentName"
+    );
+
 
 const topStudentId =
-    document.getElementById("topStudentId");
+    document.getElementById(
+        "topStudentId"
+    );
+
 
 const topAvatar =
-    document.getElementById("topAvatar");
+    document.getElementById(
+        "topAvatar"
+    );
+
 
 const attendanceTable =
-    document.getElementById("attendanceTable");
+    document.getElementById(
+        "attendanceTable"
+    );
+
 
 const noAttendance =
-    document.getElementById("noAttendance");
+    document.getElementById(
+        "noAttendance"
+    );
+
 
 const recordCount =
-    document.getElementById("recordCount");
+    document.getElementById(
+        "recordCount"
+    );
+
 
 const totalAttendance =
-    document.getElementById("totalAttendance");
+    document.getElementById(
+        "totalAttendance"
+    );
+
 
 const attendanceRate =
-    document.getElementById("attendanceRate");
+    document.getElementById(
+        "attendanceRate"
+    );
+
 
 const meetingsAttended =
-    document.getElementById("meetingsAttended");
+    document.getElementById(
+        "meetingsAttended"
+    );
+
 
 const logoutButton =
-    document.getElementById("logoutButton");
+    document.getElementById(
+        "logoutButton"
+    );
+
 
 const menuButton =
-    document.getElementById("menuButton");
+    document.getElementById(
+        "menuButton"
+    );
+
 
 const sidebar =
-    document.getElementById("sidebar");
+    document.getElementById(
+        "sidebar"
+    );
+
 
 const sidebarOverlay =
-    document.getElementById("sidebarOverlay");
+    document.getElementById(
+        "sidebarOverlay"
+    );
 
 
 /* =========================================
@@ -120,9 +195,12 @@ async function loadStudent() {
                     method: "GET",
 
                     headers: {
+
                         "Accept":
                             "application/json"
+
                     }
+
                 }
             );
 
@@ -147,7 +225,9 @@ async function loadStudent() {
             data;
 
 
-        displayStudent(student);
+        displayStudent(
+            student
+        );
 
 
     } catch (error) {
@@ -179,7 +259,9 @@ async function loadStudent() {
    DISPLAY STUDENT
 ========================================= */
 
-function displayStudent(student) {
+function displayStudent(
+    student
+) {
 
     const name =
         student.name ||
@@ -194,7 +276,9 @@ function displayStudent(student) {
     if (welcomeName) {
 
         welcomeName.textContent =
-            getFirstName(name);
+            getFirstName(
+                name
+            );
 
     }
 
@@ -218,7 +302,9 @@ function displayStudent(student) {
     if (topAvatar) {
 
         topAvatar.textContent =
-            getInitials(name);
+            getInitials(
+                name
+            );
 
     }
 
@@ -296,9 +382,12 @@ async function loadAttendance() {
                     method: "GET",
 
                     headers: {
+
                         "Accept":
                             "application/json"
+
                     }
+
                 }
             );
 
@@ -360,15 +449,20 @@ function displayAttendance(
 ) {
 
     if (!attendanceTable) {
+
         return;
+
     }
 
 
-    attendanceTable.innerHTML = "";
+    attendanceTable.innerHTML =
+        "";
 
 
     if (
-        !Array.isArray(attendanceRecords) ||
+        !Array.isArray(
+            attendanceRecords
+        ) ||
         attendanceRecords.length === 0
     ) {
 
@@ -380,7 +474,10 @@ function displayAttendance(
         }
 
 
-        updateAttendanceSummary([]);
+        updateAttendanceSummary(
+            []
+        );
+
 
         return;
 
@@ -418,7 +515,10 @@ function displayAttendance(
      */
 
     const recentRecords =
-        sortedRecords.slice(0, 5);
+        sortedRecords.slice(
+            0,
+            5
+        );
 
 
     recentRecords.forEach(
@@ -490,7 +590,9 @@ function displayAttendance(
 
 
             dateCell.textContent =
-                formatDate(date);
+                formatDate(
+                    date
+                );
 
 
             /*
@@ -529,7 +631,9 @@ function displayAttendance(
 
             statusBadge.className =
                 "attendance-status " +
-                getStatusClass(status);
+                getStatusClass(
+                    status
+                );
 
 
             statusCell.appendChild(
@@ -650,7 +754,9 @@ function updateAttendanceSummary(
    STATUS HELPERS
 ========================================= */
 
-function formatStatus(status) {
+function formatStatus(
+    status
+) {
 
     if (!status) {
 
@@ -667,25 +773,36 @@ function formatStatus(status) {
 }
 
 
-function getStatusClass(status) {
+function getStatusClass(
+    status
+) {
 
     switch (
         String(status).toLowerCase()
     ) {
 
         case "present":
+
             return "status-present";
 
+
         case "late":
+
             return "status-late";
 
+
         case "excused":
+
             return "status-excused";
 
+
         case "absent":
+
             return "status-absent";
 
+
         default:
+
             return "status-present";
 
     }
@@ -697,7 +814,9 @@ function getStatusClass(status) {
    DATE HELPERS
 ========================================= */
 
-function getRecordDate(record) {
+function getRecordDate(
+    record
+) {
 
     if (record.scanned_at) {
 
@@ -735,7 +854,9 @@ function getRecordDate(record) {
 }
 
 
-function formatDate(value) {
+function formatDate(
+    value
+) {
 
     if (!value) {
 
@@ -745,7 +866,9 @@ function formatDate(value) {
 
 
     const date =
-        new Date(value);
+        new Date(
+            value
+        );
 
 
     if (
@@ -762,16 +885,23 @@ function formatDate(value) {
     return date.toLocaleDateString(
         "en-US",
         {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
+            month:
+                "short",
+
+            day:
+                "numeric",
+
+            year:
+                "numeric"
         }
     );
 
 }
 
 
-function formatTime(value) {
+function formatTime(
+    value
+) {
 
     if (!value) {
 
@@ -781,7 +911,9 @@ function formatTime(value) {
 
 
     const date =
-        new Date(value);
+        new Date(
+            value
+        );
 
 
     if (
@@ -798,8 +930,11 @@ function formatTime(value) {
     return date.toLocaleTimeString(
         "en-US",
         {
-            hour: "numeric",
-            minute: "2-digit"
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit"
         }
     );
 
@@ -810,7 +945,9 @@ function formatTime(value) {
    NAME HELPERS
 ========================================= */
 
-function getFirstName(name) {
+function getFirstName(
+    name
+) {
 
     if (!name) {
 
@@ -826,7 +963,9 @@ function getFirstName(name) {
 }
 
 
-function getInitials(name) {
+function getInitials(
+    name
+) {
 
     if (!name) {
 
@@ -846,7 +985,10 @@ function getInitials(name) {
     ) {
 
         return parts[0]
-            .substring(0, 2)
+            .substring(
+                0,
+                2
+            )
             .toUpperCase();
 
     }
@@ -869,7 +1011,9 @@ function getInitials(name) {
 function setupLogout() {
 
     if (!logoutButton) {
+
         return;
+
     }
 
 
@@ -884,7 +1028,9 @@ function setupLogout() {
 
 
             if (!confirmed) {
+
                 return;
+
             }
 
 
@@ -925,6 +1071,7 @@ function setupMobileMenu() {
                 "open"
             );
 
+
             sidebarOverlay.classList.add(
                 "show"
             );
@@ -940,7 +1087,9 @@ function setupMobileMenu() {
 
 
     document
-        .querySelectorAll(".nav-item")
+        .querySelectorAll(
+            ".nav-item"
+        )
         .forEach(
             function (link) {
 
