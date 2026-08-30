@@ -187,7 +187,7 @@ if (topOfficerName) {
 if (topOfficerId) {
 
     topOfficerId.textContent =
-        officerId;
+        officerId || "Officer ID";
 
 }
 
@@ -221,9 +221,28 @@ async function loadMeetings() {
 
     try {
 
+        if (!officerId) {
+
+            throw new Error(
+                "Officer ID is missing."
+            );
+
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Include officer_id so Laravel
+         * only returns meetings belonging
+         * to this officer's organization.
+         */
+
         const response =
             await fetch(
-                `${API_BASE}/meetings`,
+                `${API_BASE}/meetings?officer_id=${encodeURIComponent(
+                    officerId
+                )}`,
                 {
                     method: "GET",
 
@@ -237,7 +256,14 @@ async function loadMeetings() {
 
         if (!response.ok) {
 
+            const errorData =
+                await response.json()
+                    .catch(
+                        () => ({})
+                    );
+
             throw new Error(
+                errorData.message ||
                 `Failed to load meetings (${response.status})`
             );
 
@@ -632,16 +658,6 @@ async function handleScannedStudent(
         }
 
 
-        /*
-         * IMPORTANT:
-         *
-         * DO NOT stop the camera.
-         *
-         * The scanner stays active so
-         * another student can be scanned
-         * after attendance is recorded.
-         */
-
     } catch (error) {
 
         console.error(
@@ -703,12 +719,6 @@ async function handleScannedStudent(
 
         }
 
-
-        /*
-         * No alert here.
-         *
-         * The scanner remains available.
-         */
 
         processingScan =
             false;
@@ -800,10 +810,6 @@ async function startQRScanner() {
     }
 
 
-    /* -----------------------------------------
-       CREATE SCANNER AREA
-    ----------------------------------------- */
-
     qrScannerContainer.innerHTML = `
 
         <div
@@ -855,10 +861,6 @@ async function startQRScanner() {
     `;
 
 
-    /* -----------------------------------------
-       CREATE SCANNER
-    ----------------------------------------- */
-
     dominexusQRScanner =
         new Html5Qrcode(
             "dominexus-qr-reader"
@@ -889,10 +891,6 @@ async function startQRScanner() {
         }
 
 
-        /* -------------------------------------
-           CAMERA SELECTION
-        ------------------------------------- */
-
         let selectedCamera =
             cameras.find(
                 function(camera) {
@@ -914,11 +912,6 @@ async function startQRScanner() {
             );
 
 
-        /*
-         * Desktop computers normally have
-         * one Integrated Webcam, so use it.
-         */
-
         if (!selectedCamera) {
 
             selectedCamera =
@@ -932,10 +925,6 @@ async function startQRScanner() {
             selectedCamera
         );
 
-
-        /* -------------------------------------
-           SCANNER CONFIG
-        ------------------------------------- */
 
         const scanConfig = {
 
@@ -953,20 +942,12 @@ async function startQRScanner() {
         };
 
 
-        /* -------------------------------------
-           START CAMERA
-        ------------------------------------- */
-
         await dominexusQRScanner.start(
 
             selectedCamera.id,
 
             scanConfig,
 
-
-            /* ---------------------------------
-               QR SUCCESS CALLBACK
-            --------------------------------- */
 
             function(
                 decodedText,
@@ -1019,15 +1000,10 @@ async function startQRScanner() {
             },
 
 
-            /* ---------------------------------
-               QR FAILURE CALLBACK
-            --------------------------------- */
-
             function(errorMessage) {
 
                 /*
-                 * Ignore normal frames where
-                 * no QR code is detected.
+                 * Normal no-QR frames are ignored.
                  */
 
             }
@@ -1219,9 +1195,21 @@ async function loadAttendance(
 
     try {
 
+        /*
+         * IMPORTANT:
+         *
+         * officer_id is included so the
+         * backend verifies that this meeting
+         * belongs to the officer's organization.
+         */
+
         const response =
             await fetch(
-                `${API_BASE}/attendances?meeting_id=${encodeURIComponent(meetingId)}`,
+                `${API_BASE}/attendances?meeting_id=${encodeURIComponent(
+                    meetingId
+                )}&officer_id=${encodeURIComponent(
+                    officerId
+                )}`,
                 {
                     method: "GET",
 
@@ -1467,6 +1455,12 @@ function updateStatistics(
             : 0;
 
 
+    /*
+     * Total members for this meeting
+     * is not returned by the attendance
+     * endpoint yet.
+     */
+
     if (totalMembers) {
 
         totalMembers.textContent =
@@ -1673,15 +1667,6 @@ async function confirmStudentAttendance() {
         );
 
 
-        /*
-         * 201 = successfully recorded
-         *
-         * 409 = already recorded
-         *
-         * Both are handled without
-         * browser alert popups.
-         */
-
         if (
             response.status === 201 ||
             response.status === 409
@@ -1713,9 +1698,7 @@ async function confirmStudentAttendance() {
 
 
             /*
-             * IMPORTANT:
-             *
-             * Scanner remains running.
+             * Scanner stays running.
              */
 
             processingScan =
