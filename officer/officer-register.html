@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Officer Registration | DOMINEXUS</title>
+
+    <link
+        rel="stylesheet"
+        href="officer-register.css">
+
+</head>
+
+
+<body>
+
+    <main class="register-page">
+
+        <section class="register-card">
+
+
+            <div class="register-header">
+
+                <div class="logo">
+                    D
+                </div>
+
+                <span class="label">
+                    OFFICER PORTAL
+                </span>
+
+                <h1>
+                    Officer Registration
+                </h1>
+
+                <p>
+                    Submit your officer application
+                    for organization approval.
+                </p>
+
+            </div>
+
+
+            <form
+                id="officerRegisterForm"
+                novalidate>
+
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter your full name"
+                        required>
+
+                    <small
+                        id="nameError"
+                        class="error">
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="officerId">
+                        Officer ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="officerId"
+                        placeholder="Enter your Officer ID"
+                        required>
+
+                    <small
+                        id="officerIdError"
+                        class="error">
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="section">
+                        Section
+                    </label>
+
+                    <input
+                        type="text"
+                        id="section"
+                        placeholder="Example: 12 STEM A"
+                        required>
+
+                    <small
+                        id="sectionError"
+                        class="error">
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="organization">
+                        Organization
+                    </label>
+
+                    <select
+                        id="organization"
+                        required>
+
+                        <option
+                            value=""
+                            selected
+                            disabled>
+
+                            Select your organization
+
+                        </option>
+
+                    </select>
+
+                    <small
+                        id="organizationError"
+                        class="error">
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="clubRole">
+                        Officer Position
+                    </label>
+
+                    <select
+                        id="clubRole"
+                        required>
+
+                        <option
+                            value=""
+                            selected
+                            disabled>
+
+                            Select your position
+
+                        </option>
+
+                        <option value="President">
+                            President
+                        </option>
+
+                        <option value="Vice President">
+                            Vice President
+                        </option>
+
+                        <option value="Secretary">
+                            Secretary
+                        </option>
+
+                        <option value="Treasurer">
+                            Treasurer
+                        </option>
+
+                        <option value="Auditor">
+                            Auditor
+                        </option>
+
+                        <option value="Public Information Officer">
+                            Public Information Officer
+                        </option>
+
+                        <option value="Other Officer">
+                            Other Officer
+                        </option>
+
+                    </select>
+
+                    <small
+                        id="clubRoleError"
+                        class="error">
+                    </small>
+
+                </div>
+
+
+                <div class="form-row">
+
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Create password"
+                            minlength="8"
+                            required>
+
+                        <small>
+                            At least 8 characters
+                        </small>
+
+                        <small
+                            id="passwordError"
+                            class="error">
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirmPassword">
+                            Confirm Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm password"
+                            required>
+
+                        <small
+                            id="confirmPasswordError"
+                            class="error">
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="notice">
+
+                    <strong>
+                        Approval Required
+                    </strong>
+
+                    <p>
+                        Your registration will be submitted
+                        for review. You will only be able to
+                        log in after your application has been
+                        approved by an authorized administrator.
+                    </p>
+
+                </div>
+
+
+                <p
+                    id="registerMessage"
+                    class="message">
+                </p>
+
+
+                <button
+                    type="submit"
+                    id="registerButton">
+
+                    Submit Officer Application
+
+                </button>
+
+
+            </form>
+
+
+            <div
+                id="successBox"
+                class="success-box"
+                hidden>
+
+                <div class="success-icon">
+                    ✓
+                </div>
+
+                <h2>
+                    Application Submitted
+                </h2>
+
+                <p>
+                    Your Officer application has been
+                    submitted successfully.
+                </p>
+
+                <div class="pending-box">
+
+                    <span>
+                        APPLICATION STATUS
+                    </span>
+
+                    <strong>
+                        Pending Approval
+                    </strong>
+
+                </div>
+
+                <a href="officer-login.html">
+                    Return to Officer Login
+                </a>
+
+            </div>
+
+
+            <p class="login-link">
+
+                Already have an Officer account?
+
+                <a href="officer-login.html">
+                    Log in
+                </a>
+
+            </p>
+
+
+        </section>
+
+    </main>
+
+
+    <script src="officer-register.js"></script>
+
+</body>
+
+</html>
