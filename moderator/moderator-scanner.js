@@ -1,7 +1,17 @@
 /* =========================================================
    DOMINEXUS
    MODERATOR QR SCANNER
+   Laravel / MySQL Connected
+   Organization-Isolated
 ========================================================= */
+
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -9,8 +19,28 @@
 ========================================================= */
 
 if (
-    sessionStorage.getItem("moderatorLoggedIn") !== "true"
+    sessionStorage.getItem(
+        "moderatorLoggedIn"
+    ) !== "true"
 ) {
+
+    window.location.href =
+        "moderator-login.html";
+
+}
+
+
+const moderatorId =
+    sessionStorage.getItem(
+        "moderatorId"
+    );
+
+
+if (!moderatorId) {
+
+    alert(
+        "Moderator session not found. Please log in again."
+    );
 
     window.location.href =
         "moderator-login.html";
@@ -23,19 +53,29 @@ if (
 ========================================================= */
 
 const meetingSelect =
-    document.getElementById("meetingSelect");
+    document.getElementById(
+        "meetingSelect"
+    );
 
 const meetingStatus =
-    document.getElementById("meetingStatus");
+    document.getElementById(
+        "meetingStatus"
+    );
 
 const startScannerButton =
-    document.getElementById("startScannerButton");
+    document.getElementById(
+        "startScannerButton"
+    );
 
 const stopScannerButton =
-    document.getElementById("stopScannerButton");
+    document.getElementById(
+        "stopScannerButton"
+    );
 
 const scannerIndicator =
-    document.getElementById("scannerIndicator");
+    document.getElementById(
+        "scannerIndicator"
+    );
 
 const scannerIndicatorText =
     document.getElementById(
@@ -43,10 +83,14 @@ const scannerIndicatorText =
     );
 
 const scannerMessage =
-    document.getElementById("scannerMessage");
+    document.getElementById(
+        "scannerMessage"
+    );
 
 const manualUniqueId =
-    document.getElementById("manualUniqueId");
+    document.getElementById(
+        "manualUniqueId"
+    );
 
 const manualSearchButton =
     document.getElementById(
@@ -54,16 +98,24 @@ const manualSearchButton =
     );
 
 const manualStatus =
-    document.getElementById("manualStatus");
+    document.getElementById(
+        "manualStatus"
+    );
 
 const studentCard =
-    document.getElementById("studentCard");
+    document.getElementById(
+        "studentCard"
+    );
 
 const studentName =
-    document.getElementById("studentName");
+    document.getElementById(
+        "studentName"
+    );
 
 const studentId =
-    document.getElementById("studentId");
+    document.getElementById(
+        "studentId"
+    );
 
 const studentUniqueId =
     document.getElementById(
@@ -81,7 +133,9 @@ const confirmAttendanceButton =
     );
 
 const logoutButton =
-    document.getElementById("logoutButton");
+    document.getElementById(
+        "logoutButton"
+    );
 
 const moderatorNameElement =
     document.getElementById(
@@ -95,20 +149,6 @@ const moderatorAvatar =
 
 
 /* =========================================================
-   STORAGE KEYS
-========================================================= */
-
-const MEETINGS_KEY =
-    "dominexus_meetings";
-
-const STUDENTS_KEY =
-    "dominexus_students";
-
-const ATTENDANCE_KEY =
-    "dominexus_attendance";
-
-
-/* =========================================================
    VARIABLES
 ========================================================= */
 
@@ -117,6 +157,8 @@ let html5QrCode = null;
 let scannerRunning = false;
 
 let currentStudent = null;
+
+let meetings = [];
 
 let lastDecodedValue = "";
 
@@ -131,17 +173,29 @@ const moderatorName =
     sessionStorage.getItem(
         "moderatorName"
     ) ||
-    "System Moderator";
+    "Moderator";
 
 
-moderatorNameElement.textContent =
-    moderatorName;
+if (
+    moderatorNameElement
+) {
+
+    moderatorNameElement.textContent =
+        moderatorName;
+
+}
 
 
-moderatorAvatar.textContent =
-    getInitials(
-        moderatorName
-    );
+if (
+    moderatorAvatar
+) {
+
+    moderatorAvatar.textContent =
+        getInitials(
+            moderatorName
+        );
+
+}
 
 
 /* =========================================================
@@ -153,22 +207,128 @@ loadMeetings();
 
 /* =========================================================
    LOAD MEETINGS
+   ONLY THIS MODERATOR'S ORGANIZATION
 ========================================================= */
 
-function loadMeetings() {
+async function loadMeetings() {
 
-    const previousValue =
-        meetingSelect.value;
+    if (
+        !meetingSelect
+    ) {
 
+        return;
+
+    }
+
+
+    meetingSelect.innerHTML = `
+
+        <option value="">
+            Loading meetings...
+        </option>
+
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/meetings?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "MODERATOR SCANNER MEETINGS:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load meetings."
+            );
+
+        }
+
+
+        meetings =
+            Array.isArray(data)
+                ? data
+                : (
+                    data.meetings ||
+                    data.data ||
+                    []
+                );
+
+
+        populateMeetingSelect();
+
+
+    } catch (error) {
+
+        console.error(
+            "MEETING LOAD ERROR:",
+            error
+        );
+
+
+        meetingSelect.innerHTML = `
+
+            <option value="">
+                Unable to load meetings
+            </option>
+
+        `;
+
+
+        meetingStatus.textContent =
+            error.message ||
+            "Unable to load meetings.";
+
+        meetingStatus.classList.add(
+            "warning"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   POPULATE MEETING SELECT
+========================================================= */
+
+function populateMeetingSelect() {
 
     meetingSelect.innerHTML = "";
 
 
     const defaultOption =
-        document.createElement("option");
+        document.createElement(
+            "option"
+        );
 
 
-    defaultOption.value = "";
+    defaultOption.value =
+        "";
+
 
     defaultOption.textContent =
         "Select a meeting";
@@ -177,10 +337,6 @@ function loadMeetings() {
     meetingSelect.appendChild(
         defaultOption
     );
-
-
-    const meetings =
-        getMeetings();
 
 
     if (
@@ -193,10 +349,13 @@ function loadMeetings() {
             );
 
 
-        emptyOption.value = "";
+        emptyOption.value =
+            "";
+
 
         emptyOption.textContent =
-            "No meetings available — create one first";
+            "No meetings available";
+
 
         emptyOption.disabled =
             true;
@@ -208,8 +367,7 @@ function loadMeetings() {
 
 
         meetingStatus.textContent =
-            "No meetings found on this browser. Create a meeting first.";
-
+            "No meetings found for your organization.";
 
         meetingStatus.classList.add(
             "warning"
@@ -224,196 +382,99 @@ function loadMeetings() {
     meetingStatus.textContent =
         "Select a meeting to record attendance.";
 
-
     meetingStatus.classList.remove(
         "warning"
     );
 
 
-    meetings
+    /*
+     * Sort newest/latest meetings first.
+     */
+
+    const sortedMeetings =
+        [...meetings]
         .sort(
             function(a, b) {
 
-                return (
+                const dateA =
                     new Date(
-                        b.createdAt ||
-                        0
-                    ) -
-                    new Date(
-                        a.createdAt ||
-                        0
-                    )
-                );
-
-            }
-        )
-        .forEach(
-            function(meeting) {
-
-                const option =
-                    document.createElement(
-                        "option"
+                        `${a.date || ""}T${
+                            a.start_time ||
+                            "00:00"
+                        }`
                     );
 
 
-                option.value =
-                    meeting.id;
-
-
-                option.textContent =
-                    buildMeetingLabel(
-                        meeting
+                const dateB =
+                    new Date(
+                        `${b.date || ""}T${
+                            b.start_time ||
+                            "00:00"
+                        }`
                     );
 
 
-                meetingSelect.appendChild(
-                    option
-                );
+                return dateB - dateA;
 
             }
         );
 
 
-    if (
-        previousValue &&
-        meetings.some(
-            function(meeting) {
+    sortedMeetings.forEach(
+        function(meeting) {
 
-                return (
-                    String(
-                        meeting.id
-                    ) ===
-                    String(
-                        previousValue
-                    )
+            const option =
+                document.createElement(
+                    "option"
                 );
 
-            }
-        )
-    ) {
 
-        meetingSelect.value =
-            previousValue;
+            option.value =
+                meeting.id;
 
-    }
+
+            option.textContent =
+                buildMeetingLabel(
+                    meeting
+                );
+
+
+            meetingSelect.appendChild(
+                option
+            );
+
+        }
+    );
 
 }
 
 
 /* =========================================================
-   GET MEETINGS
-========================================================= */
-
-function getMeetings() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                MEETINGS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        /*
-         * Normal DOMINEXUS format:
-         * Array
-         */
-
-        if (
-            Array.isArray(
-                parsed
-            )
-        ) {
-
-            return parsed;
-
-        }
-
-
-        /*
-         * Extra compatibility in case
-         * the backend later changes the
-         * storage structure.
-         */
-
-        if (
-            parsed &&
-            Array.isArray(
-                parsed.meetings
-            )
-        ) {
-
-            return parsed.meetings;
-
-        }
-
-
-        if (
-            parsed &&
-            Array.isArray(
-                parsed.data
-            )
-        ) {
-
-            return parsed.data;
-
-        }
-
-
-        return [];
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "DOMINEXUS: Could not read meetings.",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   MEETING CHANGE
+   MEETING SELECTION
 ========================================================= */
 
 meetingSelect.addEventListener(
     "change",
     function() {
 
+        const selectedId =
+            meetingSelect.value;
+
+
         if (
-            !meetingSelect.value
+            !selectedId
         ) {
 
             meetingStatus.textContent =
                 "Select a meeting to record attendance.";
 
+            meetingStatus.classList.remove(
+                "warning"
+            );
+
             return;
 
         }
-
-
-        const meetings =
-            getMeetings();
 
 
         const meeting =
@@ -425,7 +486,7 @@ meetingSelect.addEventListener(
                             item.id
                         ) ===
                         String(
-                            meetingSelect.value
+                            selectedId
                         )
                     );
 
@@ -433,15 +494,38 @@ meetingSelect.addEventListener(
             );
 
 
-        if (meeting) {
+        if (!meeting) {
 
             meetingStatus.textContent =
-                "Selected: " +
-                buildMeetingLabel(
-                    meeting
-                );
+                "Selected meeting could not be found.";
+
+            meetingStatus.classList.add(
+                "warning"
+            );
+
+            return;
 
         }
+
+
+        meetingStatus.textContent =
+            "Selected: " +
+            buildMeetingLabel(
+                meeting
+            );
+
+
+        meetingStatus.classList.remove(
+            "warning"
+        );
+
+
+        /*
+         * Clear previously found student
+         * when changing the meeting.
+         */
+
+        clearStudent();
 
     }
 );
@@ -459,12 +543,6 @@ startScannerButton.addEventListener(
 
 async function startScanner() {
 
-    /*
-     * IMPORTANT:
-     * A meeting is NOT required just to
-     * start the camera.
-     */
-
     if (
         scannerRunning
     ) {
@@ -480,13 +558,7 @@ async function startScanner() {
     ) {
 
         scannerMessage.textContent =
-            "QR scanner library did not load. Make sure you are connected to the internet.";
-
-
-        console.error(
-            "Html5Qrcode is undefined."
-        );
-
+            "QR scanner library did not load. Check your internet connection and refresh the page.";
 
         return;
 
@@ -503,6 +575,32 @@ async function startScanner() {
             "Requesting camera permission...";
 
 
+        /*
+         * Clear old scanner instance.
+         */
+
+        if (
+            html5QrCode
+        ) {
+
+            try {
+
+                await html5QrCode.clear();
+
+            }
+
+            catch (error) {
+
+                console.warn(
+                    "Old scanner cleanup warning:",
+                    error
+                );
+
+            }
+
+        }
+
+
         html5QrCode =
             new Html5Qrcode(
                 "qr-reader"
@@ -510,8 +608,7 @@ async function startScanner() {
 
 
         /*
-         * First try the rear/environment
-         * camera.
+         * Try rear/environment camera first.
          */
 
         try {
@@ -543,16 +640,18 @@ async function startScanner() {
 
         }
 
-        catch (environmentError) {
+        catch (
+            environmentError
+        ) {
 
             console.warn(
-                "Environment camera failed. Trying available camera.",
+                "Environment camera failed:",
                 environmentError
             );
 
 
             /*
-             * Fallback for laptops/desktops.
+             * Desktop/laptop fallback.
              */
 
             const cameras =
@@ -565,18 +664,22 @@ async function startScanner() {
             ) {
 
                 throw new Error(
-                    "No camera was found."
+                    "No camera was found on this device."
                 );
 
             }
 
+
+            /*
+             * Prefer the first available
+             * camera.
+             */
 
             await html5QrCode.start(
 
                 cameras[0].id,
 
                 {
-
                     fps: 10,
 
                     qrbox: {
@@ -607,7 +710,7 @@ async function startScanner() {
 
 
         scannerMessage.textContent =
-            "Camera is active. Point it at a QR code.";
+            "Camera is active. Point it at a student's QR code.";
 
 
         stopScannerButton.disabled =
@@ -649,7 +752,8 @@ async function startScanner() {
                 error?.message ||
                 error ||
                 ""
-            ).toLowerCase();
+            )
+            .toLowerCase();
 
 
         if (
@@ -662,7 +766,7 @@ async function startScanner() {
         ) {
 
             message =
-                "Camera permission was denied. Allow camera access in your browser.";
+                "Camera permission was denied. Allow camera access in your browser settings.";
 
         }
 
@@ -687,20 +791,17 @@ async function startScanner() {
         ) {
 
             message =
-                "Camera requires HTTPS or localhost.";
-
-        }
-
-        else {
-
-            message =
-                "Camera could not start. Open the browser console for the exact error.";
+                "Camera access requires HTTPS or localhost.";
 
         }
 
 
         scannerMessage.textContent =
             message;
+
+
+        startScannerButton.disabled =
+            false;
 
     }
 
@@ -719,7 +820,8 @@ function handleQrSuccess(
         String(
             decodedText ||
             ""
-        ).trim();
+        )
+        .trim();
 
 
     if (!value) {
@@ -734,8 +836,7 @@ function handleQrSuccess(
 
 
     /*
-     * Prevent the same QR code from
-     * being processed repeatedly.
+     * Prevent repeated detection.
      */
 
     if (
@@ -760,13 +861,13 @@ function handleQrSuccess(
 
 
     console.log(
-        "DOMINEXUS QR:",
+        "DOMINEXUS QR DETECTED:",
         value
     );
 
 
     scannerMessage.textContent =
-        "QR detected. Looking for student...";
+        "QR detected. Verifying student...";
 
 
     findStudent(
@@ -777,7 +878,7 @@ function handleQrSuccess(
 
 
 /* =========================================================
-   QR SCAN ERROR
+   QR ERROR
 ========================================================= */
 
 function handleQrError(
@@ -785,21 +886,21 @@ function handleQrError(
 ) {
 
     /*
-     * html5-qrcode calls this repeatedly
-     * while it is searching.
+     * html5-qrcode calls this continuously
+     * while searching for a QR code.
      *
-     * Do not display these messages to
-     * the user because they are normal.
+     * These are normal scanning messages,
+     * so we intentionally don't display them.
      */
 
 }
 
 
 /* =========================================================
-   FIND STUDENT
+   FIND STUDENT FROM DATABASE
 ========================================================= */
 
-function findStudent(
+async function findStudent(
     uniqueId
 ) {
 
@@ -808,8 +909,7 @@ function findStudent(
             uniqueId ||
             ""
         )
-        .trim()
-        .toUpperCase();
+        .trim();
 
 
     if (!cleanedId) {
@@ -819,33 +919,100 @@ function findStudent(
     }
 
 
-    const students =
-        getStudents();
+    try {
+
+        manualStatus.textContent =
+            "Searching student...";
 
 
-    const student =
-        students.find(
-            function(item) {
+        /*
+         * Your Laravel route:
+         *
+         * GET /api/students/{uniqueId}
+         */
 
-                const storedId =
-                    String(
-                        item.uniqueId ||
-                        ""
-                    )
-                    .trim()
-                    .toUpperCase();
-
-
-                return (
-                    storedId ===
+        const response =
+            await fetch(
+                `${API_BASE}/students/${encodeURIComponent(
                     cleanedId
-                );
+                )}`,
+                {
+                    method: "GET",
 
-            }
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "STUDENT LOOKUP RESPONSE:",
+            data
         );
 
 
-    if (!student) {
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Student not found."
+            );
+
+        }
+
+
+        /*
+         * Handle common API response
+         * structures.
+         */
+
+        const student =
+            data.student ||
+            data.data ||
+            data;
+
+
+        if (
+            !student ||
+            typeof student !== "object"
+        ) {
+
+            throw new Error(
+                "Student record was not found."
+            );
+
+        }
+
+
+        currentStudent =
+            student;
+
+
+        displayStudent(
+            student
+        );
+
+
+        manualStatus.textContent =
+            "Student found.";
+
+        manualStatus.style.color =
+            "#198754";
+
+
+    } catch (error) {
+
+        console.error(
+            "STUDENT LOOKUP ERROR:",
+            error
+        );
+
 
         currentStudent =
             null;
@@ -857,96 +1024,15 @@ function findStudent(
 
 
         scannerMessage.textContent =
-            "QR detected, but no matching student was found.";
+            "QR detected, but the student could not be found.";
 
 
-        return;
+        manualStatus.textContent =
+            error.message ||
+            "Student not found.";
 
-    }
-
-
-    displayStudent(
-        student
-    );
-
-}
-
-
-/* =========================================================
-   GET STUDENTS
-========================================================= */
-
-function getStudents() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                STUDENTS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (
-            Array.isArray(
-                parsed
-            )
-        ) {
-
-            return parsed;
-
-        }
-
-
-        if (
-            parsed &&
-            Array.isArray(
-                parsed.students
-            )
-        ) {
-
-            return parsed.students;
-
-        }
-
-
-        if (
-            parsed &&
-            Array.isArray(
-                parsed.data
-            )
-        ) {
-
-            return parsed.data;
-
-        }
-
-
-        return [];
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "DOMINEXUS: Student data error.",
-            error
-        );
-
-
-        return [];
+        manualStatus.style.color =
+            "#7b1113";
 
     }
 
@@ -965,24 +1051,39 @@ function displayStudent(
         student;
 
 
-    studentName.textContent =
-        student.fullName ||
+    const name =
         student.name ||
+        student.fullName ||
+        student.full_name ||
         "Unknown Student";
 
 
-    studentId.textContent =
+    const id =
+        student.student_id ||
         student.studentId ||
         "—";
 
 
-    studentUniqueId.textContent =
+    const uniqueId =
+        student.unique_id ||
         student.uniqueId ||
         "—";
 
 
+    studentName.textContent =
+        name;
+
+
+    studentId.textContent =
+        id;
+
+
+    studentUniqueId.textContent =
+        uniqueId;
+
+
     studentMessage.textContent =
-        "Student identity successfully verified.";
+        "Student identity successfully verified. Select the meeting and confirm attendance.";
 
 
     studentMessage.style.color =
@@ -999,7 +1100,9 @@ function displayStudent(
 
 
     /*
-     * Stop camera after successful scan.
+     * Stop the camera after finding
+     * the student so another scan
+     * doesn't happen accidentally.
      */
 
     stopScanner();
@@ -1040,35 +1143,12 @@ manualSearchButton.addEventListener(
             value
         );
 
-
-        if (
-            currentStudent
-        ) {
-
-            manualStatus.textContent =
-                "Student found.";
-
-            manualStatus.style.color =
-                "#198754";
-
-        }
-
-        else {
-
-            manualStatus.textContent =
-                "No student found.";
-
-            manualStatus.style.color =
-                "#7b1113";
-
-        }
-
     }
 );
 
 
 /* =========================================================
-   ENTER KEY
+   ENTER KEY — MANUAL SEARCH
 ========================================================= */
 
 manualUniqueId.addEventListener(
@@ -1081,6 +1161,7 @@ manualUniqueId.addEventListener(
         ) {
 
             event.preventDefault();
+
 
             manualSearchButton.click();
 
@@ -1097,10 +1178,6 @@ manualUniqueId.addEventListener(
 confirmAttendanceButton.addEventListener(
     "click",
     function() {
-
-        /*
-         * NOW a meeting IS required.
-         */
 
         if (
             !meetingSelect.value
@@ -1145,10 +1222,7 @@ confirmAttendanceButton.addEventListener(
         }
 
 
-        recordAttendance(
-            currentStudent,
-            meetingSelect.value
-        );
+        recordAttendance();
 
     }
 );
@@ -1156,107 +1230,209 @@ confirmAttendanceButton.addEventListener(
 
 /* =========================================================
    RECORD ATTENDANCE
+   DATABASE
 ========================================================= */
 
-function recordAttendance(
-    student,
-    meetingId
-) {
+async function recordAttendance() {
 
-    let attendance =
-        {};
+    const selectedMeetingId =
+        meetingSelect.value;
+
+
+    /*
+     * Backend expects student_id,
+     * not unique_id.
+     */
+
+    const selectedStudentId =
+        currentStudent.student_id ||
+        currentStudent.studentId;
+
+
+    if (
+        !selectedStudentId
+    ) {
+
+        studentMessage.textContent =
+            "Student ID is missing from the student record.";
+
+        studentMessage.style.color =
+            "#7b1113";
+
+        return;
+
+    }
+
+
+    confirmAttendanceButton.disabled =
+        true;
+
+
+    confirmAttendanceButton.textContent =
+        "Recording...";
 
 
     try {
 
-        attendance =
-            JSON.parse(
-                localStorage.getItem(
-                    ATTENDANCE_KEY
-                ) ||
-                "{}"
+        const response =
+            await fetch(
+                `${API_BASE}/attendances`,
+                {
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Accept":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            meeting_id:
+                                Number(
+                                    selectedMeetingId
+                                ),
+
+                            student_id:
+                                selectedStudentId,
+
+                            status:
+                                "present"
+
+                        })
+
+                }
             );
 
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "ATTENDANCE RESPONSE:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            /*
+             * 409 means duplicate attendance.
+             */
+
+            if (
+                response.status ===
+                409
+            ) {
+
+                throw new Error(
+                    "Attendance has already been recorded for this student in this meeting."
+                );
+
+            }
+
+
+            throw new Error(
+                data.message ||
+                "Unable to record attendance."
+            );
+
+        }
+
+
+        studentMessage.textContent =
+            data.message ||
+            "Attendance recorded successfully.";
+
+
+        studentMessage.style.color =
+            "#198754";
+
+
+        scannerMessage.textContent =
+            "Attendance recorded successfully.";
+
+
+        /*
+         * Clear current student after
+         * successful attendance.
+         */
+
+        setTimeout(
+            function() {
+
+                clearStudent();
+
+            },
+            1500
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "ATTENDANCE ERROR:",
+            error
+        );
+
+
+        studentMessage.textContent =
+            error.message ||
+            "Unable to record attendance.";
+
+
+        studentMessage.style.color =
+            "#7b1113";
+
+    } finally {
+
+        confirmAttendanceButton.disabled =
+            false;
+
+
+        confirmAttendanceButton.textContent =
+            "Confirm Attendance";
+
     }
 
-    catch (error) {
-
-        attendance =
-            {};
-
-    }
+}
 
 
-    if (
-        !attendance[meetingId]
-    ) {
+/* =========================================================
+   CLEAR STUDENT
+========================================================= */
 
-        attendance[meetingId] =
-            {};
+function clearStudent() {
 
-    }
-
-
-    const uniqueId =
-        student.uniqueId ||
-        student.studentId;
+    currentStudent =
+        null;
 
 
-    attendance[meetingId][
-        uniqueId
-    ] = {
-
-        studentId:
-            student.studentId ||
-            "",
-
-        uniqueId:
-            student.uniqueId ||
-            "",
-
-        studentName:
-            student.fullName ||
-            student.name ||
-            "",
-
-        status:
-            "Present",
-
-        recordedAt:
-            new Date()
-                .toISOString(),
-
-        recordedBy:
-            sessionStorage.getItem(
-                "moderatorId"
-            ) ||
-            "MOD-0001"
-
-    };
-
-
-    localStorage.setItem(
-        ATTENDANCE_KEY,
-        JSON.stringify(
-            attendance
-        )
+    studentCard.classList.add(
+        "hidden"
     );
+
+
+    manualUniqueId.value =
+        "";
+
+
+    manualStatus.textContent =
+        "";
 
 
     studentMessage.textContent =
-        "Attendance successfully recorded.";
+        "";
 
 
-    studentMessage.style.color =
-        "#198754";
-
-
-    console.log(
-        "DOMINEXUS ATTENDANCE RECORDED:",
-        attendance[meetingId][
-            uniqueId
-        ]
-    );
+    scannerMessage.textContent =
+        "Click \"Start QR Scanner\" to activate the camera.";
 
 }
 
@@ -1270,6 +1446,34 @@ async function stopScanner() {
     if (
         !html5QrCode
     ) {
+
+        scannerRunning =
+            false;
+
+
+        if (
+            startScannerButton
+        ) {
+
+            startScannerButton.disabled =
+                false;
+
+        }
+
+
+        if (
+            stopScannerButton
+        ) {
+
+            stopScannerButton.disabled =
+                true;
+
+        }
+
+
+        setScannerActive(
+            false
+        );
 
         return;
 
@@ -1291,7 +1495,7 @@ async function stopScanner() {
     catch (error) {
 
         console.warn(
-            "DOMINEXUS: Camera stop warning.",
+            "CAMERA STOP WARNING:",
             error
         );
 
@@ -1307,7 +1511,7 @@ async function stopScanner() {
     catch (error) {
 
         console.warn(
-            "DOMINEXUS: Camera clear warning.",
+            "CAMERA CLEAR WARNING:",
             error
         );
 
@@ -1341,12 +1545,6 @@ async function stopScanner() {
 }
 
 
-stopScannerButton.addEventListener(
-    "click",
-    stopScanner
-);
-
-
 /* =========================================================
    SCANNER STATUS
 ========================================================= */
@@ -1354,6 +1552,15 @@ stopScannerButton.addEventListener(
 function setScannerActive(
     active
 ) {
+
+    if (
+        !scannerIndicator
+    ) {
+
+        return;
+
+    }
+
 
     if (
         active
@@ -1423,6 +1630,26 @@ logoutButton.addEventListener(
         );
 
 
+        sessionStorage.removeItem(
+            "moderatorRole"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorStatus"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorOrganizationId"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorOrganization"
+        );
+
+
         window.location.href =
             "moderator-login.html";
 
@@ -1457,13 +1684,13 @@ function buildMeetingLabel(
 
 
     if (
-        meeting.time
+        meeting.start_time
     ) {
 
         label +=
             " • " +
             formatTime(
-                meeting.time
+                meeting.start_time
             );
 
     }
@@ -1527,7 +1754,9 @@ function formatTime(
 
 
     const parts =
-        time.split(":");
+        String(
+            time
+        ).split(":");
 
 
     if (
@@ -1549,6 +1778,17 @@ function formatTime(
 
     const minute =
         parts[1];
+
+
+    if (
+        Number.isNaN(
+            hour
+        )
+    ) {
+
+        return time;
+
+    }
 
 
     const period =
@@ -1577,23 +1817,19 @@ function getInitials(
     name
 ) {
 
+    if (!name) {
+
+        return "MO";
+
+    }
+
+
     const parts =
         String(
-            name ||
-            ""
+            name
         )
         .trim()
         .split(/\s+/);
-
-
-    if (
-        parts.length === 0 ||
-        !parts[0]
-    ) {
-
-        return "M";
-
-    }
 
 
     if (
@@ -1611,45 +1847,37 @@ function getInitials(
 
 
     return (
-        parts[0][0] +
+        parts[0].charAt(0) +
         parts[
             parts.length - 1
-        ][0]
+        ].charAt(0)
     ).toUpperCase();
 
 }
 
 
 /* =========================================================
-   REFRESH WHEN RETURNING TO PAGE
+   PAGE CLEANUP
 ========================================================= */
 
 window.addEventListener(
-    "pageshow",
+    "beforeunload",
     function() {
 
-        loadMeetings();
-
-    }
-);
-
-
-/*
- * If another DOMINEXUS page changes
- * localStorage in another tab, update
- * the meeting list automatically.
- */
-
-window.addEventListener(
-    "storage",
-    function(event) {
-
         if (
-            event.key ===
-            MEETINGS_KEY
+            html5QrCode &&
+            scannerRunning
         ) {
 
-            loadMeetings();
+            /*
+             * Browser normally releases
+             * the camera when leaving.
+             */
+
+            html5QrCode.stop()
+                .catch(
+                    function() {}
+                );
 
         }
 
