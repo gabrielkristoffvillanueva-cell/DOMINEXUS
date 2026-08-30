@@ -3,7 +3,8 @@
    Laravel API Connected
 ========================================================= */
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -11,84 +12,116 @@ const API_URL = "http://127.0.0.1:8000/api";
 ========================================================= */
 
 const loginForm =
-    document.getElementById("studentLoginForm");
+    document.getElementById(
+        "studentLoginForm"
+    );
 
 const studentIdInput =
-    document.getElementById("studentId");
+    document.getElementById(
+        "studentId"
+    );
 
 const passwordInput =
-    document.getElementById("password");
+    document.getElementById(
+        "password"
+    );
 
 const togglePassword =
-    document.getElementById("togglePassword");
+    document.getElementById(
+        "togglePassword"
+    );
 
 const rememberMe =
-    document.getElementById("rememberMe");
+    document.getElementById(
+        "rememberMe"
+    );
 
 const loginMessage =
-    document.getElementById("loginMessage");
-
-const forgotPassword =
-    document.getElementById("forgotPassword");
+    document.getElementById(
+        "loginMessage"
+    );
 
 const registerLink =
-    document.getElementById("registerLink");
+    document.getElementById(
+        "registerLink"
+    );
 
 
 /* =========================================================
    LOAD REMEMBERED STUDENT ID
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    const savedId =
-        localStorage.getItem("rememberedStudentId");
+        const savedId =
+            localStorage.getItem(
+                "rememberedStudentId"
+            );
 
-    if (savedId) {
 
-        studentIdInput.value = savedId;
+        if (savedId) {
 
-        rememberMe.checked = true;
+            studentIdInput.value =
+                savedId;
+
+            rememberMe.checked =
+                true;
+
+        }
 
     }
-
-});
+);
 
 
 /* =========================================================
    SHOW / HIDE PASSWORD
 ========================================================= */
 
-togglePassword.addEventListener(
-    "click",
-    function () {
+if (
+    togglePassword
+) {
 
-        if (passwordInput.type === "password") {
+    togglePassword.addEventListener(
+        "click",
+        function () {
 
-            passwordInput.type = "text";
+            if (
+                passwordInput.type ===
+                "password"
+            ) {
 
-            togglePassword.textContent = "Hide";
+                passwordInput.type =
+                    "text";
 
-            togglePassword.setAttribute(
-                "aria-label",
-                "Hide password"
-            );
+                togglePassword.textContent =
+                    "Hide";
 
-        } else {
+                togglePassword.setAttribute(
+                    "aria-label",
+                    "Hide password"
+                );
 
-            passwordInput.type = "password";
+            } else {
 
-            togglePassword.textContent = "Show";
+                passwordInput.type =
+                    "password";
 
-            togglePassword.setAttribute(
-                "aria-label",
-                "Show password"
-            );
+                togglePassword.textContent =
+                    "Show";
+
+                togglePassword.setAttribute(
+                    "aria-label",
+                    "Show password"
+                );
+
+            }
 
         }
+    );
 
-    }
-);
+}
 
 
 /* =========================================================
@@ -101,20 +134,27 @@ loginForm.addEventListener(
 
         event.preventDefault();
 
+
         const enteredStudentId =
             studentIdInput.value.trim();
+
 
         const enteredPassword =
             passwordInput.value;
 
-        loginMessage.textContent = "";
+
+        loginMessage.textContent =
+            "";
 
 
         /* ---------------------------------------------
            EMPTY CHECK
         --------------------------------------------- */
 
-        if (!enteredStudentId || !enteredPassword) {
+        if (
+            !enteredStudentId ||
+            !enteredPassword
+        ) {
 
             showMessage(
                 "Please enter your Student ID and password.",
@@ -122,6 +162,7 @@ loginForm.addEventListener(
             );
 
             return;
+
         }
 
 
@@ -134,53 +175,72 @@ loginForm.addEventListener(
                 'button[type="submit"]'
             );
 
+
         if (loginButton) {
-            loginButton.disabled = true;
-            loginButton.textContent = "Logging in...";
+
+            loginButton.disabled =
+                true;
+
+            loginButton.textContent =
+                "Logging in...";
+
         }
 
 
         /* ---------------------------------------------
-           SEND LOGIN REQUEST TO LARAVEL
+           SEND LOGIN REQUEST
         --------------------------------------------- */
 
         try {
 
-            const response = await fetch(
-                `${API_URL}/login`,
-                {
-                    method: "POST",
+            const response =
+                await fetch(
+                    `${API_URL}/login`,
+                    {
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json",
+                        headers: {
 
-                        "Accept":
-                            "application/json"
-                    },
+                            "Content-Type":
+                                "application/json",
 
-                    body: JSON.stringify({
+                            "Accept":
+                                "application/json"
 
-                        student_id:
-                            enteredStudentId,
+                        },
 
-                        password:
-                            enteredPassword
+                        body:
+                            JSON.stringify({
 
-                    })
-                }
-            );
+                                student_id:
+                                    enteredStudentId,
+
+                                password:
+                                    enteredPassword
+
+                            })
+
+                    }
+                );
 
 
             const data =
                 await response.json();
 
 
+            console.log(
+                "STUDENT LOGIN RESPONSE:",
+                data
+            );
+
+
             /* -----------------------------------------
                LOGIN FAILED
             ----------------------------------------- */
 
-            if (!response.ok) {
+            if (
+                !response.ok
+            ) {
 
                 showMessage(
                     data.message ||
@@ -189,6 +249,7 @@ loginForm.addEventListener(
                 );
 
                 return;
+
             }
 
 
@@ -200,30 +261,52 @@ loginForm.addEventListener(
                 data.user;
 
 
+            if (!student) {
+
+                showMessage(
+                    "Login succeeded, but student information was not returned.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            /* -----------------------------------------
+               SAVE STUDENT SESSION
+            ----------------------------------------- */
+
             sessionStorage.setItem(
                 "studentLoggedIn",
                 "true"
             );
+
 
             sessionStorage.setItem(
                 "studentId",
                 student.student_id || ""
             );
 
+
             sessionStorage.setItem(
                 "studentUniqueId",
                 student.unique_id || ""
             );
 
+
             sessionStorage.setItem(
                 "studentName",
-                student.name || "Student"
+                student.name ||
+                "Student"
             );
+
 
             sessionStorage.setItem(
                 "studentSection",
                 student.section || ""
             );
+
 
             sessionStorage.setItem(
                 "studentOrganization",
@@ -232,24 +315,32 @@ loginForm.addEventListener(
                     : ""
             );
 
+
             sessionStorage.setItem(
                 "studentOrganizationId",
-                student.organization_id || ""
+                student.organization_id ||
+                ""
             );
+
 
             sessionStorage.setItem(
                 "studentClubRole",
-                student.club_role || ""
+                student.club_role ||
+                ""
             );
+
 
             sessionStorage.setItem(
                 "studentRole",
-                student.role || ""
+                student.role ||
+                ""
             );
+
 
             sessionStorage.setItem(
                 "studentStatus",
-                student.status || ""
+                student.status ||
+                ""
             );
 
 
@@ -257,7 +348,9 @@ loginForm.addEventListener(
                REMEMBER ME
             ----------------------------------------- */
 
-            if (rememberMe.checked) {
+            if (
+                rememberMe.checked
+            ) {
 
                 localStorage.setItem(
                     "rememberedStudentId",
@@ -274,18 +367,57 @@ loginForm.addEventListener(
 
 
             /* -----------------------------------------
-               SUCCESS MESSAGE
+               TEMPORARY PASSWORD CHECK
             ----------------------------------------- */
+
+            if (
+                data.must_change_password ===
+                true
+            ) {
+
+                sessionStorage.setItem(
+                    "studentMustChangePassword",
+                    "true"
+                );
+
+
+                showMessage(
+                    "Temporary password accepted. You must change your password.",
+                    "success"
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "student-change-password.html";
+
+                    },
+                    700
+                );
+
+
+                return;
+
+            }
+
+
+            /* -----------------------------------------
+               NORMAL LOGIN
+            ----------------------------------------- */
+
+            sessionStorage.setItem(
+                "studentMustChangePassword",
+                "false"
+            );
+
 
             showMessage(
                 "Login successful! Redirecting...",
                 "success"
             );
 
-
-            /* -----------------------------------------
-               REDIRECT
-            ----------------------------------------- */
 
             setTimeout(
                 function () {
@@ -298,25 +430,33 @@ loginForm.addEventListener(
             );
 
 
-        } catch (error) {
+        } catch (
+            error
+        ) {
 
             console.error(
                 "Login error:",
                 error
             );
 
+
             showMessage(
                 "Unable to connect to the server. Make sure Laravel is running.",
                 "error"
             );
 
+
         } finally {
 
-            if (loginButton) {
+            if (
+                loginButton
+            ) {
 
-                loginButton.disabled = false;
+                loginButton.disabled =
+                    false;
 
-                loginButton.textContent = "Log In";
+                loginButton.textContent =
+                    "Log In";
 
             }
 
@@ -338,7 +478,11 @@ function showMessage(
     loginMessage.textContent =
         message;
 
-    if (type === "success") {
+
+    if (
+        type ===
+        "success"
+    ) {
 
         loginMessage.style.color =
             "#198754";
@@ -362,15 +506,18 @@ const forgotPasswordLink =
         "forgotPasswordLink"
     );
 
+
 const forgotPasswordModal =
     document.getElementById(
         "forgotPasswordModal"
     );
 
+
 const closeForgotPassword =
     document.getElementById(
         "closeForgotPassword"
     );
+
 
 const forgotPasswordOkay =
     document.getElementById(
@@ -380,18 +527,30 @@ const forgotPasswordOkay =
 
 function openForgotPasswordModal() {
 
-    forgotPasswordModal.classList.remove(
-        "hidden"
-    );
+    if (
+        forgotPasswordModal
+    ) {
+
+        forgotPasswordModal.classList.remove(
+            "hidden"
+        );
+
+    }
 
 }
 
 
 function closeForgotPasswordModal() {
 
-    forgotPasswordModal.classList.add(
-        "hidden"
-    );
+    if (
+        forgotPasswordModal
+    ) {
+
+        forgotPasswordModal.classList.add(
+            "hidden"
+        );
+
+    }
 
 }
 
@@ -466,7 +625,8 @@ document.addEventListener(
     function(event) {
 
         if (
-            event.key === "Escape" &&
+            event.key ===
+            "Escape" &&
             forgotPasswordModal &&
             !forgotPasswordModal.classList.contains(
                 "hidden"
@@ -480,18 +640,26 @@ document.addEventListener(
     }
 );
 
+
 /* =========================================================
    REGISTER
 ========================================================= */
 
-registerLink.addEventListener(
-    "click",
-    function (event) {
+if (
+    registerLink
+) {
 
-        event.preventDefault();
+    registerLink.addEventListener(
+        "click",
+        function (event) {
 
-        window.location.href =
-            "student-signup.html";
+            event.preventDefault();
 
-    }
-);
+
+            window.location.href =
+                "student-signup.html";
+
+        }
+    );
+
+}
