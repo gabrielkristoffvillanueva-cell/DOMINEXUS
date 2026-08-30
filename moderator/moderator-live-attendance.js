@@ -1,7 +1,17 @@
 /* =========================================================
    DOMINEXUS
    MODERATOR - LIVE ATTENDANCE
+   Laravel / MySQL Connected
+   Organization-Isolated
 ========================================================= */
+
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -13,6 +23,24 @@ if (
         "moderatorLoggedIn"
     ) !== "true"
 ) {
+
+    window.location.href =
+        "moderator-login.html";
+
+}
+
+
+const moderatorId =
+    sessionStorage.getItem(
+        "moderatorId"
+    );
+
+
+if (!moderatorId) {
+
+    alert(
+        "Moderator session not found. Please log in again."
+    );
 
     window.location.href =
         "moderator-login.html";
@@ -72,6 +100,29 @@ const logoutButton =
     );
 
 
+const moderatorNameElement =
+    document.getElementById(
+        "moderatorName"
+    );
+
+
+const moderatorAvatar =
+    document.getElementById(
+        "moderatorAvatar"
+    );
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+let meetings = [];
+
+let selectedMeeting = null;
+
+let totalStudents = 0;
+
+
 /* =========================================================
    MODERATOR INFORMATION
 ========================================================= */
@@ -80,46 +131,339 @@ const moderatorName =
     sessionStorage.getItem(
         "moderatorName"
     ) ||
-    "System Moderator";
+    "Moderator";
 
 
-document.getElementById(
-    "moderatorName"
-).textContent =
-    moderatorName;
+if (
+    moderatorNameElement
+) {
+
+    moderatorNameElement.textContent =
+        moderatorName;
+
+}
 
 
-document.getElementById(
-    "moderatorAvatar"
-).textContent =
-    getInitials(
-        moderatorName
-    );
+if (
+    moderatorAvatar
+) {
+
+    moderatorAvatar.textContent =
+        getInitials(
+            moderatorName
+        );
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+initialize();
+
+
+async function initialize() {
+
+    await loadModeratorData();
+
+    await loadMeetings();
+
+}
+
+
+/* =========================================================
+   LOAD MODERATOR DATA
+   Used to get total registered
+   students in this organization.
+========================================================= */
+
+async function loadModeratorData() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/moderator-dashboard?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "LIVE ATTENDANCE MODERATOR DATA:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load moderator information."
+            );
+
+        }
+
+
+        /*
+         * The moderator dashboard already
+         * returns the total students for
+         * this moderator's organization.
+         */
+
+        totalStudents =
+            Number(
+                data.students?.total
+            ) || 0;
+
+
+        totalCount.textContent =
+            totalStudents;
+
+
+    } catch (error) {
+
+        console.error(
+            "MODERATOR DATA ERROR:",
+            error
+        );
+
+
+        totalStudents =
+            0;
+
+
+        totalCount.textContent =
+            "0";
+
+    }
+
+}
 
 
 /* =========================================================
    LOAD MEETINGS
+   ONLY THIS MODERATOR'S ORGANIZATION
 ========================================================= */
 
-loadMeetings();
-
-
-function loadMeetings() {
+async function loadMeetings() {
 
     meetingSelect.innerHTML = `
 
         <option value="">
-            Select a meeting
+            Loading meetings...
         </option>
 
     `;
 
 
-    const meetings =
-        getMeetings();
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/meetings?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
 
 
-    meetings.forEach(
+        const data =
+            await response.json();
+
+
+        console.log(
+            "LIVE ATTENDANCE MEETINGS:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load meetings."
+            );
+
+        }
+
+
+        meetings =
+            Array.isArray(data)
+                ? data
+                : (
+                    data.meetings ||
+                    data.data ||
+                    []
+                );
+
+
+        populateMeetingSelect();
+
+
+    } catch (error) {
+
+        console.error(
+            "MEETINGS ERROR:",
+            error
+        );
+
+
+        meetingSelect.innerHTML = `
+
+            <option value="">
+                Unable to load meetings
+            </option>
+
+        `;
+
+
+        meetingStatus.textContent =
+            error.message ||
+            "Unable to load meetings.";
+
+
+        meetingStatus.classList.add(
+            "warning"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   POPULATE MEETING SELECT
+========================================================= */
+
+function populateMeetingSelect() {
+
+    meetingSelect.innerHTML = "";
+
+
+    const defaultOption =
+        document.createElement(
+            "option"
+        );
+
+
+    defaultOption.value =
+        "";
+
+
+    defaultOption.textContent =
+        "Select a meeting";
+
+
+    meetingSelect.appendChild(
+        defaultOption
+    );
+
+
+    if (
+        meetings.length === 0
+    ) {
+
+        const emptyOption =
+            document.createElement(
+                "option"
+            );
+
+
+        emptyOption.value =
+            "";
+
+
+        emptyOption.textContent =
+            "No meetings available";
+
+
+        emptyOption.disabled =
+            true;
+
+
+        meetingSelect.appendChild(
+            emptyOption
+        );
+
+
+        meetingStatus.textContent =
+            "No meetings found for your organization.";
+
+
+        meetingStatus.classList.add(
+            "warning"
+        );
+
+
+        return;
+
+    }
+
+
+    meetingStatus.textContent =
+        "Select a meeting to view attendance.";
+
+
+    meetingStatus.classList.remove(
+        "warning"
+    );
+
+
+    /*
+     * Sort newest/latest meeting first.
+     */
+
+    const sortedMeetings =
+        [...meetings]
+        .sort(
+            function(a, b) {
+
+                const dateA =
+                    new Date(
+                        `${a.date || ""}T${
+                            a.start_time ||
+                            "00:00"
+                        }`
+                    );
+
+
+                const dateB =
+                    new Date(
+                        `${b.date || ""}T${
+                            b.start_time ||
+                            "00:00"
+                        }`
+                    );
+
+
+                return dateB - dateA;
+
+            }
+        );
+
+
+    sortedMeetings.forEach(
         function(meeting) {
 
             const option =
@@ -145,32 +489,6 @@ function loadMeetings() {
         }
     );
 
-
-    if (
-        meetings.length ===
-        0
-    ) {
-
-        const option =
-            document.createElement(
-                "option"
-            );
-
-
-        option.textContent =
-            "No meetings available";
-
-
-        option.disabled =
-            true;
-
-
-        meetingSelect.appendChild(
-            option
-        );
-
-    }
-
 }
 
 
@@ -180,7 +498,7 @@ function loadMeetings() {
 
 meetingSelect.addEventListener(
     "change",
-    function() {
+    async function() {
 
         const meetingId =
             meetingSelect.value;
@@ -188,17 +506,65 @@ meetingSelect.addEventListener(
 
         if (!meetingId) {
 
+            selectedMeeting =
+                null;
+
+
             meetingStatus.textContent =
                 "Select a meeting to view attendance.";
 
+
             clearAttendance();
+
 
             return;
 
         }
 
 
-        updateAttendance(
+        selectedMeeting =
+            meetings.find(
+                function(meeting) {
+
+                    return (
+                        String(
+                            meeting.id
+                        ) ===
+                        String(
+                            meetingId
+                        )
+                    );
+
+                }
+            );
+
+
+        if (!selectedMeeting) {
+
+            meetingStatus.textContent =
+                "Meeting could not be found.";
+
+
+            clearAttendance();
+
+
+            return;
+
+        }
+
+
+        meetingStatus.textContent =
+            buildMeetingLabel(
+                selectedMeeting
+            );
+
+
+        meetingStatus.classList.remove(
+            "warning"
+        );
+
+
+        await updateAttendance(
             meetingId
         );
 
@@ -207,143 +573,212 @@ meetingSelect.addEventListener(
 
 
 /* =========================================================
-   UPDATE ATTENDANCE
+   LOAD ATTENDANCE FOR SELECTED MEETING
 ========================================================= */
 
-function updateAttendance(
+async function updateAttendance(
     meetingId
 ) {
 
-    const meetings =
-        getMeetings();
+    /*
+     * Show loading state.
+     */
+
+    attendanceList.innerHTML = `
+
+        <div class="empty-state">
+
+            Loading attendance...
+
+        </div>
+
+    `;
 
 
-    const meeting =
-        meetings.find(
-            function(item) {
+    try {
 
-                return (
-                    String(
-                        item.id
-                    ) ===
-                    String(meetingId)
-                );
+        /*
+         * AttendanceController supports:
+         *
+         * GET /api/attendances?meeting_id=ID
+         */
 
-            }
+        const response =
+            await fetch(
+                `${API_BASE}/attendances?meeting_id=${encodeURIComponent(
+                    meetingId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "LIVE ATTENDANCE RECORDS:",
+            data
         );
 
 
-    if (!meeting) {
+        if (!response.ok) {
 
-        meetingStatus.textContent =
-            "Meeting could not be found.";
+            throw new Error(
+                data.message ||
+                "Unable to load attendance."
+            );
+
+        }
+
+
+        const records =
+            Array.isArray(data)
+                ? data
+                : (
+                    data.attendances ||
+                    data.data ||
+                    []
+                );
+
+
+        processAttendance(
+            records
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "ATTENDANCE LOAD ERROR:",
+            error
+        );
+
 
         clearAttendance();
 
-        return;
+
+        attendanceList.innerHTML = `
+
+            <div class="empty-state">
+
+                Unable to load attendance records.
+
+            </div>
+
+        `;
 
     }
 
-
-    meetingStatus.textContent =
-        meeting.title +
-        " • " +
-        formatDate(
-            meeting.date
-        ) +
-        (
-            meeting.time
-                ? " • " +
-                  formatTime(
-                      meeting.time
-                  )
-                : ""
-        );
+}
 
 
-    const students =
-        getStudents();
+/* =========================================================
+   PROCESS ATTENDANCE
+========================================================= */
 
-
-    const records =
-        getAttendanceForMeeting(
-            meetingId
-        );
-
-
-    let present =
-        [];
-
-
-    let absent =
-        0;
-
+function processAttendance(
+    records
+) {
 
     /*
-     * Find Present records.
+     * Present includes:
+     *
+     * present
+     * late
+     *
+     * because both mean the student
+     * actually attended the meeting.
      */
 
-    Object.values(
-        records
-    )
-    .forEach(
-        function(record) {
+    const presentRecords =
+        records.filter(
+            function(record) {
 
-            if (
-                !record
-            ) {
-
-                return;
-
-            }
+                const status =
+                    String(
+                        record.status ||
+                        ""
+                    )
+                    .toLowerCase();
 
 
-            if (
-                record.status ===
-                "Present"
-            ) {
-
-                present.push(
-                    record
+                return (
+                    status === "present" ||
+                    status === "late"
                 );
 
             }
-
-        }
-    );
+        );
 
 
     /*
-     * Calculate absent based on
-     * registered students minus
-     * present students.
+     * Students explicitly marked absent.
      */
 
-    absent =
+    const explicitAbsent =
+        records.filter(
+            function(record) {
+
+                return (
+                    String(
+                        record.status ||
+                        ""
+                    )
+                    .toLowerCase() ===
+                    "absent"
+                );
+
+            }
+        ).length;
+
+
+    /*
+     * Students that have no attendance
+     * record yet are also considered
+     * not present for the current
+     * meeting.
+     *
+     * This keeps the total based on
+     * registered students.
+     */
+
+    const absent =
         Math.max(
-            students.length -
-            present.length,
-            0
+            totalStudents -
+            presentRecords.length,
+            explicitAbsent
         );
 
 
     const total =
-        students.length;
+        totalStudents;
 
 
     const rate =
         total > 0
             ? Math.round(
                 (
-                    present.length /
+                    presentRecords.length /
                     total
                 ) * 100
             )
             : 0;
 
 
+    /*
+     * Update statistics.
+     */
+
     presentCount.textContent =
-        present.length;
+        presentRecords.length;
 
 
     absentCount.textContent =
@@ -359,9 +794,12 @@ function updateAttendance(
         "%";
 
 
+    /*
+     * Render students.
+     */
+
     renderPresentStudents(
-        present,
-        students
+        presentRecords
     );
 
 }
@@ -372,8 +810,7 @@ function updateAttendance(
 ========================================================= */
 
 function renderPresentStudents(
-    records,
-    students
+    records
 ) {
 
     attendanceList.innerHTML =
@@ -381,8 +818,7 @@ function renderPresentStudents(
 
 
     if (
-        records.length ===
-        0
+        records.length === 0
     ) {
 
         attendanceList.innerHTML = `
@@ -396,40 +832,75 @@ function renderPresentStudents(
 
         `;
 
+
         return;
 
     }
 
 
     /*
-     * Sort by Time In.
+     * Sort by scanned_at.
      */
 
-    records.sort(
-        function(a, b) {
+    const sortedRecords =
+        [...records]
+        .sort(
+            function(a, b) {
 
-            return (
-                new Date(
-                    a.timeIn ||
-                    0
-                ) -
-                new Date(
-                    b.timeIn ||
-                    0
-                )
-            );
-
-        }
-    );
+                const dateA =
+                    new Date(
+                        a.scanned_at ||
+                        0
+                    );
 
 
-    records.forEach(
+                const dateB =
+                    new Date(
+                        b.scanned_at ||
+                        0
+                    );
+
+
+                return dateA - dateB;
+
+            }
+        );
+
+
+    sortedRecords.forEach(
         function(record) {
 
             const student =
-                findStudent(
-                    record
-                );
+                record.student ||
+                {};
+
+
+            const name =
+                student.name ||
+                record.student_name ||
+                "Unknown Student";
+
+
+            const id =
+                student.student_id ||
+                record.student_id ||
+                "—";
+
+
+            const status =
+                String(
+                    record.status ||
+                    "present"
+                )
+                .toLowerCase();
+
+
+            const timeIn =
+                record.scanned_at
+                    ? formatDateTime(
+                        record.scanned_at
+                    )
+                    : "—";
 
 
             const row =
@@ -442,55 +913,26 @@ function renderPresentStudents(
                 "attendance-row";
 
 
-            const name =
-                student
-                    ? (
-                        student.fullName ||
-                        student.name ||
-                        "Unknown Student"
-                    )
-                    : (
-                        record.fullName ||
-                        record.name ||
-                        "Unknown Student"
-                    );
-
-
-            const id =
-                student
-                    ? (
-                        student.studentId ||
-                        "—"
-                    )
-                    : (
-                        record.studentId ||
-                        "—"
-                    );
-
-
-            const time =
-                record.timeIn
-                    ? formatDateTime(
-                        record.timeIn
-                    )
-                    : "—";
-
-
             row.innerHTML = `
 
                 <div>
 
                     <div class="student-name">
+
                         ${escapeHtml(
                             name
                         )}
+
                     </div>
 
+
                     <div class="student-id">
+
                         Student ID:
                         ${escapeHtml(
                             id
                         )}
+
                     </div>
 
                 </div>
@@ -500,7 +942,7 @@ function renderPresentStudents(
 
                     Time In:
                     ${escapeHtml(
-                        time
+                        timeIn
                     )}
 
                 </div>
@@ -509,7 +951,13 @@ function renderPresentStudents(
                 <div>
 
                     <span class="present-badge">
-                        PRESENT
+
+                        ${escapeHtml(
+                            status === "late"
+                                ? "LATE"
+                                : "PRESENT"
+                        )}
+
                     </span>
 
                 </div>
@@ -528,273 +976,7 @@ function renderPresentStudents(
 
 
 /* =========================================================
-   FIND STUDENT
-========================================================= */
-
-function findStudent(
-    record
-) {
-
-    const students =
-        getStudents();
-
-
-    const possibleIds = [
-
-        record.studentId,
-
-        record.uniqueId,
-
-        record.id
-
-    ];
-
-
-    return students.find(
-        function(student) {
-
-            return possibleIds.some(
-                function(value) {
-
-                    if (!value) {
-
-                        return false;
-
-                    }
-
-
-                    return (
-
-                        String(
-                            student.studentId ||
-                            ""
-                        ).toLowerCase() ===
-                        String(
-                            value
-                        ).toLowerCase()
-
-                        ||
-
-                        String(
-                            student.uniqueId ||
-                            ""
-                        ).toLowerCase() ===
-                        String(
-                            value
-                        ).toLowerCase()
-
-                        ||
-
-                        String(
-                            student.id ||
-                            ""
-                        ).toLowerCase() ===
-                        String(
-                            value
-                        ).toLowerCase()
-
-                    );
-
-                }
-            );
-
-        }
-    ) || null;
-
-}
-
-
-/* =========================================================
-   GET STUDENTS
-========================================================= */
-
-function getStudents() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                "dominexus_students"
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (
-            Array.isArray(
-                parsed
-            )
-        ) {
-
-            return parsed;
-
-        }
-
-
-        return [];
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Student data error:",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   GET MEETINGS
-========================================================= */
-
-function getMeetings() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                "dominexus_meetings"
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (
-            Array.isArray(
-                parsed
-            )
-        ) {
-
-            return parsed;
-
-        }
-
-
-        return [];
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Meeting data error:",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   GET ATTENDANCE
-========================================================= */
-
-function getAttendanceForMeeting(
-    meetingId
-) {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                "dominexus_attendance"
-            );
-
-
-        if (!raw) {
-
-            return {};
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (!parsed) {
-
-            return {};
-
-        }
-
-
-        /*
-         * Expected format:
-         *
-         * {
-         *   meetingId: {
-         *      studentId: {...}
-         *   }
-         * }
-         */
-
-        if (
-            parsed[
-                meetingId
-            ] &&
-            typeof parsed[
-                meetingId
-            ] === "object"
-        ) {
-
-            return parsed[
-                meetingId
-            ];
-
-        }
-
-
-        return {};
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Attendance data error:",
-            error
-        );
-
-
-        return {};
-
-    }
-
-}
-
-
-/* =========================================================
-   CLEAR
+   CLEAR ATTENDANCE
 ========================================================= */
 
 function clearAttendance() {
@@ -808,7 +990,7 @@ function clearAttendance() {
 
 
     totalCount.textContent =
-        "0";
+        totalStudents;
 
 
     attendanceRate.textContent =
@@ -830,6 +1012,92 @@ function clearAttendance() {
 
 
 /* =========================================================
+   AUTO REFRESH
+   Makes "LIVE" actually live.
+========================================================= */
+
+let refreshTimer =
+    null;
+
+
+function startLiveRefresh() {
+
+    stopLiveRefresh();
+
+
+    refreshTimer =
+        setInterval(
+            async function() {
+
+                const meetingId =
+                    meetingSelect.value;
+
+
+                if (
+                    !meetingId
+                ) {
+
+                    return;
+
+                }
+
+
+                await updateAttendance(
+                    meetingId
+                );
+
+            },
+            5000
+        );
+
+}
+
+
+function stopLiveRefresh() {
+
+    if (
+        refreshTimer
+    ) {
+
+        clearInterval(
+            refreshTimer
+        );
+
+
+        refreshTimer =
+            null;
+
+    }
+
+}
+
+
+/*
+ * Start live refresh whenever
+ * a meeting is selected.
+ */
+
+meetingSelect.addEventListener(
+    "change",
+    function() {
+
+        if (
+            meetingSelect.value
+        ) {
+
+            startLiveRefresh();
+
+        } else {
+
+            stopLiveRefresh();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    LOGOUT
 ========================================================= */
 
@@ -837,15 +1105,20 @@ logoutButton.addEventListener(
     "click",
     function() {
 
-        if (
-            !confirm(
+        const confirmed =
+            confirm(
                 "Are you sure you want to log out?"
-            )
-        ) {
+            );
+
+
+        if (!confirmed) {
 
             return;
 
         }
+
+
+        stopLiveRefresh();
 
 
         sessionStorage.removeItem(
@@ -860,6 +1133,26 @@ logoutButton.addEventListener(
 
         sessionStorage.removeItem(
             "moderatorName"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorRole"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorStatus"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorOrganizationId"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorOrganization"
         );
 
 
@@ -897,13 +1190,13 @@ function buildMeetingLabel(
 
 
     if (
-        meeting.time
+        meeting.start_time
     ) {
 
         label +=
             " • " +
             formatTime(
-                meeting.time
+                meeting.start_time
             );
 
     }
@@ -972,7 +1265,9 @@ function formatTime(
 
 
     const parts =
-        time.split(":");
+        String(
+            time
+        ).split(":");
 
 
     if (
@@ -993,6 +1288,17 @@ function formatTime(
 
     const minute =
         parts[1];
+
+
+    if (
+        Number.isNaN(
+            hour
+        )
+    ) {
+
+        return time;
+
+    }
 
 
     const period =
@@ -1061,50 +1367,27 @@ function formatDateTime(
 }
 
 
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
 function getInitials(
     name
 ) {
 
+    if (!name) {
+
+        return "MO";
+
+    }
+
+
     const parts =
-        name
-            .trim()
-            .split(/\s+/);
+        String(
+            name
+        )
+        .trim()
+        .split(/\s+/);
 
 
     if (
-        parts.length ===
-        1
+        parts.length === 1
     ) {
 
         return parts[0]
@@ -1118,10 +1401,46 @@ function getInitials(
 
 
     return (
-        parts[0][0] +
+        parts[0].charAt(0) +
         parts[
             parts.length - 1
-        ][0]
+        ].charAt(0)
     ).toUpperCase();
 
 }
+
+
+function escapeHtml(
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(
+            value ??
+            ""
+        );
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   PAGE CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    function() {
+
+        stopLiveRefresh();
+
+    }
+);
