@@ -377,7 +377,7 @@ if (signupForm) {
                 showError(
                     "password",
                     "passwordError",
-                    "Password must be at least 6 characters."
+                    "Password must be at least 8 characters."
                 );
 
                 isValid = false;

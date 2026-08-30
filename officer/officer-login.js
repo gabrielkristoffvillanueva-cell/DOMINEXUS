@@ -1,18 +1,10 @@
 /* =========================================
-   DOMINEXUS OFFICER LOGIN
+   DOMINEXUS — OFFICER LOGIN
+   Laravel / MySQL Connected
 ========================================= */
 
-
-/* =========================================
-   DEMO OFFICER ACCOUNT
-========================================= */
-
-const DEMO_OFFICER = {
-    officerId: "OFF-0001",
-    password: "officer123",
-    name: "Demo Officer",
-    organization: "DOMINEXUS"
-};
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================
@@ -22,26 +14,20 @@ const DEMO_OFFICER = {
 const loginForm =
     document.getElementById("officerLoginForm");
 
-
 const officerIdInput =
     document.getElementById("officerId");
-
 
 const passwordInput =
     document.getElementById("officerPassword");
 
-
 const togglePassword =
     document.getElementById("togglePassword");
-
 
 const rememberOfficer =
     document.getElementById("rememberOfficer");
 
-
 const loginMessage =
     document.getElementById("loginMessage");
-
 
 const forgotPassword =
     document.getElementById("forgotPassword");
@@ -72,187 +58,452 @@ if (rememberedOfficerId) {
    SHOW / HIDE PASSWORD
 ========================================= */
 
-togglePassword.addEventListener(
-    "click",
-    () => {
+if (togglePassword) {
 
-        if (
-            passwordInput.type ===
-            "password"
-        ) {
+    togglePassword.addEventListener(
+        "click",
+        function () {
 
-            passwordInput.type =
-                "text";
+            if (
+                passwordInput.type ===
+                "password"
+            ) {
 
-            togglePassword.textContent =
-                "Hide";
+                passwordInput.type =
+                    "text";
 
-            togglePassword.setAttribute(
-                "aria-label",
-                "Hide password"
-            );
+                togglePassword.textContent =
+                    "Hide";
+
+                togglePassword.setAttribute(
+                    "aria-label",
+                    "Hide password"
+                );
+
+            } else {
+
+                passwordInput.type =
+                    "password";
+
+                togglePassword.textContent =
+                    "Show";
+
+                togglePassword.setAttribute(
+                    "aria-label",
+                    "Show password"
+                );
+
+            }
 
         }
+    );
 
-        else {
-
-            passwordInput.type =
-                "password";
-
-            togglePassword.textContent =
-                "Show";
-
-            togglePassword.setAttribute(
-                "aria-label",
-                "Show password"
-            );
-
-        }
-
-    }
-);
+}
 
 
 /* =========================================
-   LOGIN
+   OFFICER LOGIN
 ========================================= */
 
-loginForm.addEventListener(
-    "submit",
-    (event) => {
+if (loginForm) {
 
-        event.preventDefault();
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
 
-
-        const officerId =
-            officerIdInput.value
-                .trim();
+            event.preventDefault();
 
 
-        const password =
-            passwordInput.value;
+            const officerId =
+                officerIdInput.value.trim();
 
 
-        /* Clear previous message */
+            const password =
+                passwordInput.value;
 
-        loginMessage.textContent =
-            "";
-
-
-        /* =================================
-           VALIDATION
-        ================================= */
-
-        if (!officerId || !password) {
 
             loginMessage.textContent =
-                "Please enter your Officer ID and password.";
-
-            return;
-
-        }
+                "";
 
 
-        /* =================================
-           CHECK DEMO ACCOUNT
-        ================================= */
+            /* =================================
+               VALIDATION
+            ================================= */
 
-        if (
-            officerId.toLowerCase() ===
-            DEMO_OFFICER.officerId.toLowerCase()
-            &&
-            password ===
-            DEMO_OFFICER.password
-        ) {
+            if (
+                !officerId ||
+                !password
+            ) {
 
-            /* =============================
-               REMEMBER OFFICER ID
-            ============================= */
+                loginMessage.textContent =
+                    "Please enter your Officer ID and password.";
 
-            if (rememberOfficer.checked) {
+                return;
 
-                localStorage.setItem(
-                    "dominexus_remembered_officer",
+            }
+
+
+            /* =================================
+               DISABLE BUTTON
+            ================================= */
+
+            const loginButton =
+                loginForm.querySelector(
+                    ".login-button"
+                );
+
+
+            if (loginButton) {
+
+                loginButton.disabled =
+                    true;
+
+                loginButton.textContent =
+                    "Logging in...";
+
+            }
+
+
+            try {
+
+                /* =============================
+                   SEND TO LARAVEL
+                ============================= */
+
+                const response =
+                    await fetch(
+                        `${API_BASE}/officer-login`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+
+                                "Accept":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                officer_id:
+                                    officerId,
+
+                                password:
+                                    password
+
+                            })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "Officer login response:",
+                    data
+                );
+
+
+                /* =============================
+                   HANDLE ERROR
+                ============================= */
+
+                if (!response.ok) {
+
+                    if (
+                        data.errors
+                    ) {
+
+                        const messages =
+                            Object.values(
+                                data.errors
+                            )
+                            .flat()
+                            .join("\n");
+
+
+                        throw new Error(
+                            messages
+                        );
+
+                    }
+
+
+                    throw new Error(
+                        data.message ||
+                        "Invalid Officer ID or password."
+                    );
+
+                }
+
+
+                /* =============================
+                   GET USER
+                ============================= */
+
+                const officer =
+                    data.user ||
+                    data.officer;
+
+
+                if (!officer) {
+
+                    throw new Error(
+                        "Login succeeded but officer information was not returned."
+                    );
+
+                }
+
+
+                /* =============================
+                   VERIFY ROLE
+                ============================= */
+
+                if (
+                    String(
+                        officer.role
+                    ).toLowerCase() !==
+                    "officer"
+                ) {
+
+                    throw new Error(
+                        "This account does not have Officer access."
+                    );
+
+                }
+
+
+                /* =============================
+                   VERIFY STATUS
+                ============================= */
+
+                if (
+                    officer.status &&
+                    String(
+                        officer.status
+                    ).toLowerCase() !==
+                    "active"
+                ) {
+
+                    throw new Error(
+                        "This Officer account is not active."
+                    );
+
+                }
+
+
+                /* =============================
+                   REMEMBER OFFICER ID
+                ============================= */
+
+                if (
+                    rememberOfficer &&
+                    rememberOfficer.checked
+                ) {
+
+                    localStorage.setItem(
+                        "dominexus_remembered_officer",
+                        officerId
+                    );
+
+                } else {
+
+                    localStorage.removeItem(
+                        "dominexus_remembered_officer"
+                    );
+
+                }
+
+
+                /* =============================
+                   CREATE OFFICER SESSION
+                ============================= */
+
+                sessionStorage.setItem(
+                    "officerLoggedIn",
+                    "true"
+                );
+
+
+                sessionStorage.setItem(
+                    "officerId",
+                    officer.student_id ||
+                    officer.unique_id ||
                     officerId
                 );
 
-            }
 
-            else {
-
-                localStorage.removeItem(
-                    "dominexus_remembered_officer"
+                sessionStorage.setItem(
+                    "officerName",
+                    officer.name ||
+                    "Officer"
                 );
 
+
+                sessionStorage.setItem(
+                    "officerRole",
+                    officer.role ||
+                    "officer"
+                );
+
+
+                sessionStorage.setItem(
+                    "officerStatus",
+                    officer.status ||
+                    "Active"
+                );
+
+
+                if (
+                    officer.organization_id !==
+                    null &&
+                    officer.organization_id !==
+                    undefined
+                ) {
+
+                    sessionStorage.setItem(
+                        "officerOrganizationId",
+                        officer.organization_id
+                    );
+
+                }
+
+
+                /* =============================
+                   ORGANIZATION
+                ============================= */
+
+                if (
+                    officer.organization
+                ) {
+
+                    const organization =
+                        officer.organization;
+
+
+                    if (
+                        organization.name
+                    ) {
+
+                        sessionStorage.setItem(
+                            "officerOrganization",
+                            organization.name
+                        );
+
+                    }
+
+                }
+
+
+                /* =============================
+                   CLUB ROLE
+                ============================= */
+
+                if (
+                    officer.club_role
+                ) {
+
+                    sessionStorage.setItem(
+                        "officerClubRole",
+                        officer.club_role
+                    );
+
+                }
+
+
+                /* =============================
+                   SUCCESS
+                ============================= */
+
+                loginMessage.style.color =
+                    "#198754";
+
+
+                loginMessage.textContent =
+                    "Login successful. Redirecting...";
+
+
+                /* =============================
+                   REDIRECT
+                ============================= */
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "officer-dashboard.html";
+
+                    },
+                    500
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Officer login error:",
+                    error
+                );
+
+
+                loginMessage.style.color =
+                    "#d93025";
+
+
+                loginMessage.textContent =
+                    error.message ||
+                    "Unable to log in.";
+
+
+                passwordInput.value =
+                    "";
+
+
+                passwordInput.focus();
+
+
+            } finally {
+
+                if (loginButton) {
+
+                    loginButton.disabled =
+                        false;
+
+                    loginButton.textContent =
+                        "Login";
+
+                }
+
             }
 
-
-            /* =============================
-               CREATE LOGIN SESSION
-            ============================= */
-
-            sessionStorage.setItem(
-                "officerLoggedIn",
-                "true"
-            );
-
-
-            sessionStorage.setItem(
-                "officerId",
-                DEMO_OFFICER.officerId
-            );
-
-
-            sessionStorage.setItem(
-                "officerName",
-                DEMO_OFFICER.name
-            );
-
-
-            sessionStorage.setItem(
-                "officerOrganization",
-                DEMO_OFFICER.organization
-            );
-
-
-            /* =============================
-               REDIRECT
-            ============================= */
-
-            window.location.href =
-                "officer-dashboard.html";
-
         }
+    );
 
-        else {
-
-            loginMessage.textContent =
-                "Invalid Officer ID or password.";
-
-            passwordInput.value = "";
-
-            passwordInput.focus();
-
-        }
-
-    }
-);
+}
 
 
 /* =========================================
    FORGOT PASSWORD
 ========================================= */
 
-forgotPassword.addEventListener(
-    "click",
-    (event) => {
+if (forgotPassword) {
 
-        event.preventDefault();
+    forgotPassword.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
 
 
-        alert(
-            "Password recovery will be connected to the backend later."
-        );
+            alert(
+                "Password recovery is not available yet. Please contact your organization administrator."
+            );
 
-    }
-);
+        }
+    );
+
+}
