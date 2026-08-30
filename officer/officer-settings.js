@@ -1,6 +1,15 @@
 /* =========================================
    DOMINEXUS OFFICER SETTINGS
+   Laravel / MySQL Connected
 ========================================= */
+
+
+/* =========================================
+   API
+========================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================
@@ -8,7 +17,10 @@
 ========================================= */
 
 const loggedIn =
-    sessionStorage.getItem("officerLoggedIn");
+    sessionStorage.getItem(
+        "officerLoggedIn"
+    );
+
 
 if (loggedIn !== "true") {
 
@@ -19,22 +31,25 @@ if (loggedIn !== "true") {
 
 
 /* =========================================
-   GET OFFICER DATA
+   OFFICER ID
 ========================================= */
 
 const officerId =
-    sessionStorage.getItem("officerId")
-    || "OFF-0001";
-
-const savedOfficerName =
-    sessionStorage.getItem("officerName")
-    || "Demo Officer";
-
-const savedOrganization =
     sessionStorage.getItem(
-        "officerOrganization"
-    )
-    || "DOMINEXUS";
+        "officerId"
+    );
+
+
+if (!officerId) {
+
+    alert(
+        "Officer session not found. Please log in again."
+    );
+
+    window.location.href =
+        "officer-login.html";
+
+}
 
 
 /* =========================================
@@ -56,6 +71,7 @@ const topAvatar =
         "topAvatar"
     );
 
+
 const profileAvatar =
     document.getElementById(
         "profileAvatar"
@@ -70,6 +86,7 @@ const profileId =
     document.getElementById(
         "profileId"
     );
+
 
 const officerNameInput =
     document.getElementById(
@@ -86,10 +103,12 @@ const organizationInput =
         "organizationInput"
     );
 
+
 const saveProfileButton =
     document.getElementById(
         "saveProfileButton"
     );
+
 
 const currentPassword =
     document.getElementById(
@@ -106,10 +125,12 @@ const confirmPassword =
         "confirmPassword"
     );
 
+
 const changePasswordButton =
     document.getElementById(
         "changePasswordButton"
     );
+
 
 const notificationToggle =
     document.getElementById(
@@ -121,6 +142,7 @@ const logoutConfirmToggle =
         "logoutConfirmToggle"
     );
 
+
 const logoutButton =
     document.getElementById(
         "logoutButton"
@@ -131,10 +153,12 @@ const logoutAllButton =
         "logoutAllButton"
     );
 
+
 const toast =
     document.getElementById(
         "toast"
     );
+
 
 const menuButton =
     document.getElementById(
@@ -153,43 +177,287 @@ const sidebarOverlay =
 
 
 /* =========================================
+   OFFICER DATA
+========================================= */
+
+let officerData = null;
+
+
+/* =========================================
+   LOAD OFFICER FROM DATABASE
+========================================= */
+
+async function loadOfficer() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/officer-dashboard?officer_id=${encodeURIComponent(
+                    officerId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "DOMINEXUS OFFICER SETTINGS:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load officer information."
+            );
+
+        }
+
+
+        officerData =
+            data.officer;
+
+
+        if (!officerData) {
+
+            throw new Error(
+                "Officer information was not returned."
+            );
+
+        }
+
+
+        displayOfficer(
+            officerData
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "OFFICER SETTINGS LOAD ERROR:",
+            error
+        );
+
+
+        /*
+         * Use session data only as a temporary
+         * display fallback if the API fails.
+         */
+
+        displayOfficer({
+
+            id:
+                officerId,
+
+            name:
+                sessionStorage.getItem(
+                    "officerName"
+                ) || "Officer",
+
+            organization:
+                sessionStorage.getItem(
+                    "officerOrganization"
+                ) || ""
+
+        });
+
+
+        showToast(
+            error.message ||
+            "Unable to load officer information."
+        );
+
+    }
+
+}
+
+
+/* =========================================
    DISPLAY OFFICER
 ========================================= */
 
-function displayOfficer() {
+function displayOfficer(
+    officer
+) {
 
-    topOfficerName.textContent =
-        savedOfficerName;
+    const name =
+        officer.name ||
+        "Officer";
 
-    topOfficerId.textContent =
+
+    const id =
+        officer.id ||
         officerId;
 
-    profileName.textContent =
-        savedOfficerName;
 
-    profileId.textContent =
-        officerId;
+    let organization = "";
 
-    officerNameInput.value =
-        savedOfficerName;
 
-    officerIdInput.value =
-        officerId;
+    if (
+        officer.organization
+    ) {
 
-    organizationInput.value =
-        savedOrganization;
+        if (
+            typeof officer.organization ===
+            "object"
+        ) {
 
+            organization =
+                officer.organization.name ||
+                officer.organization.title ||
+                "";
+
+        } else {
+
+            organization =
+                officer.organization;
+
+        }
+
+    }
+
+
+    if (
+        !organization &&
+        officer.organization_name
+    ) {
+
+        organization =
+            officer.organization_name;
+
+    }
+
+
+    if (
+        !organization
+    ) {
+
+        organization =
+            sessionStorage.getItem(
+                "officerOrganization"
+            ) || "";
+
+    }
+
+
+    /* -----------------------------------------
+       TOPBAR
+    ----------------------------------------- */
+
+    if (topOfficerName) {
+
+        topOfficerName.textContent =
+            name;
+
+    }
+
+
+    if (topOfficerId) {
+
+        topOfficerId.textContent =
+            id;
+
+    }
+
+
+    /* -----------------------------------------
+       PROFILE
+    ----------------------------------------- */
+
+    if (profileName) {
+
+        profileName.textContent =
+            name;
+
+    }
+
+
+    if (profileId) {
+
+        profileId.textContent =
+            id;
+
+    }
+
+
+    if (officerNameInput) {
+
+        officerNameInput.value =
+            name;
+
+    }
+
+
+    if (officerIdInput) {
+
+        officerIdInput.value =
+            id;
+
+        /*
+         * Officer ID comes from database
+         * and should not be editable.
+         */
+
+        officerIdInput.readOnly =
+            true;
+
+    }
+
+
+    if (organizationInput) {
+
+        organizationInput.value =
+            organization;
+
+        /*
+         * Officer cannot change
+         * organization from Settings.
+         */
+
+        organizationInput.readOnly =
+            true;
+
+    }
+
+
+    /* -----------------------------------------
+       AVATAR
+    ----------------------------------------- */
 
     const initials =
         getInitials(
-            savedOfficerName
+            name
         );
 
-    topAvatar.textContent =
-        initials;
 
-    profileAvatar.textContent =
-        initials;
+    if (topAvatar) {
+
+        topAvatar.textContent =
+            initials;
+
+    }
+
+
+    if (profileAvatar) {
+
+        profileAvatar.textContent =
+            initials;
+
+    }
 
 }
 
@@ -198,188 +466,396 @@ function displayOfficer() {
    SAVE PROFILE
 ========================================= */
 
-saveProfileButton.addEventListener(
-    "click",
-    () => {
+if (saveProfileButton) {
 
-        const newName =
-            officerNameInput.value.trim();
+    saveProfileButton.addEventListener(
+        "click",
+        saveProfile
+    );
 
-        const newOrganization =
-            organizationInput.value.trim();
+}
 
 
-        if (!newName) {
+async function saveProfile() {
 
-            alert(
-                "Please enter your full name."
+    const newName =
+        officerNameInput
+            ? officerNameInput.value.trim()
+            : "";
+
+
+    if (!newName) {
+
+        alert(
+            "Please enter your full name."
+        );
+
+        return;
+
+    }
+
+
+    saveProfileButton.disabled =
+        true;
+
+
+    saveProfileButton.textContent =
+        "Saving...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/officer-profile`,
+                {
+                    method: "PUT",
+
+                    headers: {
+
+                        "Accept":
+                            "application/json",
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            officer_id:
+                                officerId,
+
+                            name:
+                                newName
+
+                        })
+
+                }
             );
 
-            return;
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "PROFILE UPDATE RESPONSE:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to update profile."
+            );
 
         }
 
 
-        if (!newOrganization) {
-
-            alert(
-                "Please enter your organization."
-            );
-
-            return;
-
-        }
-
+        /*
+         * Update the current session
+         * so other pages immediately
+         * show the new officer name.
+         */
 
         sessionStorage.setItem(
             "officerName",
             newName
         );
 
-        sessionStorage.setItem(
-            "officerOrganization",
-            newOrganization
-        );
 
+        if (data.officer) {
 
-        /*
-           Save a simple profile copy
-           for the front-end version.
-        */
+            officerData =
+                data.officer;
 
-        localStorage.setItem(
-            "dominexus_officer_profile",
-            JSON.stringify({
+            displayOfficer(
+                data.officer
+            );
 
-                officerId: officerId,
+        } else {
 
-                officerName: newName,
+            displayOfficer({
+
+                id:
+                    officerId,
+
+                name:
+                    newName,
 
                 organization:
-                    newOrganization
+                    organizationInput
+                        ? organizationInput.value
+                        : ""
 
-            })
-        );
+            });
 
-
-        topOfficerName.textContent =
-            newName;
-
-        profileName.textContent =
-            newName;
-
-        topAvatar.textContent =
-            getInitials(newName);
-
-        profileAvatar.textContent =
-            getInitials(newName);
+        }
 
 
         showToast(
+            data.message ||
             "Profile updated successfully."
         );
 
+
+    } catch (error) {
+
+        console.error(
+            "PROFILE UPDATE ERROR:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to update profile."
+        );
+
+
+    } finally {
+
+        saveProfileButton.disabled =
+            false;
+
+        saveProfileButton.textContent =
+            "Save Changes";
+
     }
-);
+
+}
 
 
 /* =========================================
    CHANGE PASSWORD
 ========================================= */
 
-changePasswordButton.addEventListener(
-    "click",
-    () => {
+if (changePasswordButton) {
 
-        const current =
-            currentPassword.value;
+    changePasswordButton.addEventListener(
+        "click",
+        changeOfficerPassword
+    );
 
-        const newPass =
-            newPassword.value;
-
-        const confirmPass =
-            confirmPassword.value;
+}
 
 
-        if (
-            !current ||
-            !newPass ||
-            !confirmPass
-        ) {
+async function changeOfficerPassword() {
 
-            alert(
-                "Please complete all password fields."
+    const current =
+        currentPassword
+            ? currentPassword.value
+            : "";
+
+
+    const newPass =
+        newPassword
+            ? newPassword.value
+            : "";
+
+
+    const confirmPass =
+        confirmPassword
+            ? confirmPassword.value
+            : "";
+
+
+    /* -----------------------------------------
+       VALIDATION
+    ----------------------------------------- */
+
+    if (
+        !current ||
+        !newPass ||
+        !confirmPass
+    ) {
+
+        alert(
+            "Please complete all password fields."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        newPass.length < 6
+    ) {
+
+        alert(
+            "New password must be at least 6 characters."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        newPass !== confirmPass
+    ) {
+
+        alert(
+            "New passwords do not match."
+        );
+
+        return;
+
+    }
+
+
+    changePasswordButton.disabled =
+        true;
+
+
+    changePasswordButton.textContent =
+        "Changing...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/officer-password`,
+                {
+                    method: "PUT",
+
+                    headers: {
+
+                        "Accept":
+                            "application/json",
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            officer_id:
+                                officerId,
+
+                            current_password:
+                                current,
+
+                            new_password:
+                                newPass
+
+                        })
+
+                }
             );
 
-            return;
 
-        }
-
-
-        if (newPass.length < 6) {
-
-            alert(
-                "New password must be at least 6 characters."
-            );
-
-            return;
-
-        }
+        const data =
+            await response.json();
 
 
-        if (
-            newPass !== confirmPass
-        ) {
-
-            alert(
-                "New passwords do not match."
-            );
-
-            return;
-
-        }
-
-
-        /*
-           Front-end demo only.
-
-           The actual password should
-           eventually be handled by
-           the backend/database.
-        */
-
-        localStorage.setItem(
-            "dominexus_officer_password",
-            newPass
+        console.log(
+            "PASSWORD UPDATE RESPONSE:",
+            data
         );
 
 
-        currentPassword.value = "";
-        newPassword.value = "";
-        confirmPassword.value = "";
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to change password."
+            );
+
+        }
+
+
+        /* -----------------------------------------
+           CLEAR PASSWORD FIELDS
+        ----------------------------------------- */
+
+        if (currentPassword) {
+
+            currentPassword.value =
+                "";
+
+        }
+
+
+        if (newPassword) {
+
+            newPassword.value =
+                "";
+
+        }
+
+
+        if (confirmPassword) {
+
+            confirmPassword.value =
+                "";
+
+        }
 
 
         showToast(
+            data.message ||
             "Password changed successfully."
         );
 
+
+    } catch (error) {
+
+        console.error(
+            "PASSWORD UPDATE ERROR:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to change password."
+        );
+
+
+    } finally {
+
+        changePasswordButton.disabled =
+            false;
+
+        changePasswordButton.textContent =
+            "Change Password";
+
     }
-);
+
+}
 
 
 /* =========================================
    SAVE PREFERENCES
 ========================================= */
 
-notificationToggle.addEventListener(
-    "change",
-    savePreferences
-);
+if (notificationToggle) {
 
-logoutConfirmToggle.addEventListener(
-    "change",
-    savePreferences
-);
+    notificationToggle.addEventListener(
+        "change",
+        savePreferences
+    );
+
+}
+
+
+if (logoutConfirmToggle) {
+
+    logoutConfirmToggle.addEventListener(
+        "change",
+        savePreferences
+    );
+
+}
 
 
 function savePreferences() {
@@ -387,10 +863,14 @@ function savePreferences() {
     const preferences = {
 
         notifications:
-            notificationToggle.checked,
+            notificationToggle
+                ? notificationToggle.checked
+                : true,
 
         logoutConfirmation:
-            logoutConfirmToggle.checked
+            logoutConfirmToggle
+                ? logoutConfirmToggle.checked
+                : true
 
     };
 
@@ -411,20 +891,37 @@ function savePreferences() {
 
 function loadPreferences() {
 
-    const saved =
-        JSON.parse(
-            localStorage.getItem(
-                "dominexus_officer_preferences"
-            ) || "null"
+    let saved = null;
+
+
+    try {
+
+        saved =
+            JSON.parse(
+                localStorage.getItem(
+                    "dominexus_officer_preferences"
+                ) || "null"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Preferences error:",
+            error
         );
+
+    }
 
 
     if (!saved) {
+
         return;
+
     }
 
 
     if (
+        notificationToggle &&
         typeof saved.notifications ===
         "boolean"
     ) {
@@ -436,6 +933,7 @@ function loadPreferences() {
 
 
     if (
+        logoutConfirmToggle &&
         typeof saved.logoutConfirmation ===
         "boolean"
     ) {
@@ -452,21 +950,36 @@ function loadPreferences() {
    LOGOUT
 ========================================= */
 
-logoutButton.addEventListener(
-    "click",
-    handleLogout
-);
+if (logoutButton) {
 
-logoutAllButton.addEventListener(
-    "click",
-    handleLogout
-);
+    logoutButton.addEventListener(
+        "click",
+        handleLogout
+    );
+
+}
+
+
+if (logoutAllButton) {
+
+    logoutAllButton.addEventListener(
+        "click",
+        handleLogout
+    );
+
+}
 
 
 function handleLogout() {
 
+    const requiresConfirmation =
+        logoutConfirmToggle
+            ? logoutConfirmToggle.checked
+            : true;
+
+
     if (
-        logoutConfirmToggle.checked
+        requiresConfirmation
     ) {
 
         const confirmed =
@@ -476,7 +989,9 @@ function handleLogout() {
 
 
         if (!confirmed) {
+
             return;
+
         }
 
     }
@@ -509,37 +1024,70 @@ function handleLogout() {
    MOBILE MENU
 ========================================= */
 
-menuButton.addEventListener(
-    "click",
-    () => {
+if (
+    menuButton &&
+    sidebar &&
+    sidebarOverlay
+) {
 
-        sidebar.classList.add(
-            "open"
+    menuButton.addEventListener(
+        "click",
+        function() {
+
+            sidebar.classList.add(
+                "open"
+            );
+
+            sidebarOverlay.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+    sidebarOverlay.addEventListener(
+        "click",
+        closeSidebar
+    );
+
+
+    document
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(
+            function(link) {
+
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
         );
 
-        sidebarOverlay.classList.add(
-            "show"
-        );
-
-    }
-);
-
-
-sidebarOverlay.addEventListener(
-    "click",
-    closeSidebar
-);
+}
 
 
 function closeSidebar() {
 
-    sidebar.classList.remove(
-        "open"
-    );
+    if (sidebar) {
 
-    sidebarOverlay.classList.remove(
-        "show"
-    );
+        sidebar.classList.remove(
+            "open"
+        );
+
+    }
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.classList.remove(
+            "show"
+        );
+
+    }
 
 }
 
@@ -548,10 +1096,20 @@ function closeSidebar() {
    TOAST
 ========================================= */
 
-function showToast(message) {
+function showToast(
+    message
+) {
+
+    if (!toast) {
+
+        return;
+
+    }
+
 
     toast.textContent =
         message;
+
 
     toast.classList.add(
         "show"
@@ -559,7 +1117,7 @@ function showToast(message) {
 
 
     setTimeout(
-        () => {
+        function() {
 
             toast.classList.remove(
                 "show"
@@ -576,15 +1134,26 @@ function showToast(message) {
    INITIALS
 ========================================= */
 
-function getInitials(name) {
+function getInitials(
+    name
+) {
+
+    if (!name) {
+
+        return "OF";
+
+    }
+
 
     const parts =
-        name
+        String(name)
             .trim()
             .split(/\s+/);
 
 
-    if (parts.length === 1) {
+    if (
+        parts.length === 1
+    ) {
 
         return parts[0]
             .substring(0, 2)
@@ -595,7 +1164,9 @@ function getInitials(name) {
 
     return (
         parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
+        parts[
+            parts.length - 1
+        ].charAt(0)
     ).toUpperCase();
 
 }
@@ -605,6 +1176,6 @@ function getInitials(name) {
    INITIALIZE
 ========================================= */
 
-displayOfficer();
-
 loadPreferences();
+
+loadOfficer();
