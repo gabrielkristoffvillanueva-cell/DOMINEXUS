@@ -1,17 +1,54 @@
 /* =========================================================
    DOMINEXUS — OFFICER ATTENDANCE
-   LARAVEL API CONNECTED VERSION
+   LARAVEL API CONNECTED
 ========================================================= */
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
    LOGIN CHECK
 ========================================================= */
 
-if (sessionStorage.getItem("officerLoggedIn") !== "true") {
-    window.location.href = "officer-login.html";
+if (
+    sessionStorage.getItem(
+        "officerLoggedIn"
+    ) !== "true"
+) {
+
+    window.location.href =
+        "officer-login.html";
+
+}
+
+
+/* =========================================================
+   OFFICER SESSION
+========================================================= */
+
+const officerId =
+    sessionStorage.getItem(
+        "officerId"
+    );
+
+const officerName =
+    sessionStorage.getItem(
+        "officerName"
+    ) || "Officer";
+
+
+if (!officerId) {
+
+    alert(
+        "Officer session expired. Please log in again."
+    );
+
+    sessionStorage.clear();
+
+    window.location.href =
+        "officer-login.html";
+
 }
 
 
@@ -20,40 +57,129 @@ if (sessionStorage.getItem("officerLoggedIn") !== "true") {
 ========================================================= */
 
 const meetingSelect =
-    document.getElementById("meetingSelect");
+    document.getElementById(
+        "meetingSelect"
+    );
 
 const startScannerButton =
-    document.getElementById("startScannerButton");
+    document.getElementById(
+        "startScannerButton"
+    );
 
 const stopScannerButton =
-    document.getElementById("stopScannerButton");
+    document.getElementById(
+        "stopScannerButton"
+    );
 
 const qrScannerContainer =
-    document.getElementById("qrScanner");
+    document.getElementById(
+        "qrScanner"
+    );
 
 const scanResult =
-    document.getElementById("scanResult");
+    document.getElementById(
+        "scanResult"
+    );
 
 const scannedStudentName =
-    document.getElementById("scannedStudentName");
+    document.getElementById(
+        "scannedStudentName"
+    );
 
 const scannedStudentId =
-    document.getElementById("scannedStudentId");
+    document.getElementById(
+        "scannedStudentId"
+    );
 
 const scannedStudentUniqueId =
-    document.getElementById("scannedStudentUniqueId");
+    document.getElementById(
+        "scannedStudentUniqueId"
+    );
 
 const confirmAttendanceButton =
-    document.getElementById("confirmAttendanceButton");
+    document.getElementById(
+        "confirmAttendanceButton"
+    );
 
 const manualUniqueId =
-    document.getElementById("manualUniqueId");
+    document.getElementById(
+        "manualUniqueId"
+    );
 
 const manualUniqueIdButton =
-    document.getElementById("manualUniqueIdButton");
+    document.getElementById(
+        "manualUniqueIdButton"
+    );
 
 const manualUniqueIdMessage =
-    document.getElementById("manualUniqueIdMessage");
+    document.getElementById(
+        "manualUniqueIdMessage"
+    );
+
+const attendanceTable =
+    document.getElementById(
+        "attendanceTable"
+    );
+
+const emptyAttendance =
+    document.getElementById(
+        "emptyAttendance"
+    );
+
+const selectedMeetingText =
+    document.getElementById(
+        "selectedMeetingText"
+    );
+
+const totalMembers =
+    document.getElementById(
+        "totalMembers"
+    );
+
+const presentMembers =
+    document.getElementById(
+        "presentMembers"
+    );
+
+const attendanceRate =
+    document.getElementById(
+        "attendanceRate"
+    );
+
+const topOfficerName =
+    document.getElementById(
+        "topOfficerName"
+    );
+
+const topOfficerId =
+    document.getElementById(
+        "topOfficerId"
+    );
+
+const topAvatar =
+    document.getElementById(
+        "topAvatar"
+    );
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
+const menuButton =
+    document.getElementById(
+        "menuButton"
+    );
+
+const sidebar =
+    document.getElementById(
+        "sidebar"
+    );
+
+const sidebarOverlay =
+    document.getElementById(
+        "sidebarOverlay"
+    );
 
 
 /* =========================================================
@@ -61,85 +187,159 @@ const manualUniqueIdMessage =
 ========================================================= */
 
 let dominexusQRScanner = null;
+
 let qrScannerRunning = false;
+
 let currentScannedStudent = null;
+
 let processingScan = false;
+
+let currentAttendance = [];
 
 
 /* =========================================================
-   LOAD MEETINGS FROM LARAVEL
+   DISPLAY OFFICER
+========================================================= */
+
+if (topOfficerName) {
+
+    topOfficerName.textContent =
+        officerName;
+
+}
+
+
+if (topOfficerId) {
+
+    topOfficerId.textContent =
+        officerId;
+
+}
+
+
+if (topAvatar) {
+
+    topAvatar.textContent =
+        getInitials(
+            officerName
+        );
+
+}
+
+
+/* =========================================================
+   LOAD MEETINGS
 ========================================================= */
 
 async function loadMeetings() {
 
-    if (!meetingSelect) return;
+    if (!meetingSelect) {
+        return;
+    }
+
 
     meetingSelect.innerHTML = `
+
         <option value="">
             Loading meetings...
         </option>
+
     `;
+
 
     try {
 
-        const response = await fetch(
-            `${API_BASE}/meetings`
+        const response =
+            await fetch(
+                `${API_BASE}/meetings?officer_id=${encodeURIComponent(officerId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Officer meetings:",
+            data
         );
 
+
         if (!response.ok) {
+
             throw new Error(
-                `Failed to load meetings (${response.status})`
+                data.message ||
+                "Unable to load meetings."
             );
+
         }
 
-        const data = await response.json();
-
-        console.log("DOMINEXUS meetings:", data);
-
-        /*
-           Laravel may return either:
-           { meetings: [...] }
-           or directly [...]
-        */
 
         const meetings =
             Array.isArray(data)
                 ? data
-                : data.meetings || data.data || [];
+                : data.meetings ||
+                  data.data ||
+                  [];
+
 
         meetingSelect.innerHTML = `
+
             <option value="">
                 Select a meeting
             </option>
+
         `;
 
-        meetings.forEach(function (meeting) {
 
-            const option =
-                document.createElement("option");
+        meetings.forEach(
+            function (meeting) {
 
-            option.value =
-                meeting.id;
+                const option =
+                    document.createElement(
+                        "option"
+                    );
 
-            option.textContent =
-                meeting.title ||
-                meeting.name ||
-                meeting.meeting_name ||
-                `Meeting #${meeting.id}`;
 
-            meetingSelect.appendChild(option);
+                option.value =
+                    meeting.id;
 
-        });
 
-        if (meetings.length === 0) {
+                option.textContent =
+                    meeting.title ||
+                    `Meeting #${meeting.id}`;
+
+
+                meetingSelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        if (
+            meetings.length === 0
+        ) {
 
             meetingSelect.innerHTML = `
+
                 <option value="">
                     No meetings available
                 </option>
+
             `;
 
         }
+
 
     } catch (error) {
 
@@ -148,15 +348,19 @@ async function loadMeetings() {
             error
         );
 
+
         meetingSelect.innerHTML = `
+
             <option value="">
                 Unable to load meetings
             </option>
+
         `;
 
+
         alert(
-            "Unable to load meetings from the server.\n\n" +
-            "Make sure Laravel is running on http://127.0.0.1:8000"
+            "Unable to load meetings.\n\n" +
+            error.message
         );
 
     }
@@ -165,13 +369,412 @@ async function loadMeetings() {
 
 
 /* =========================================================
-   FIND STUDENT FROM LARAVEL
+   MEETING SELECTED
 ========================================================= */
 
-async function findStudent(uniqueId) {
+meetingSelect.addEventListener(
+    "change",
+    async function () {
+
+        const meetingId =
+            meetingSelect.value;
+
+
+        currentScannedStudent =
+            null;
+
+
+        if (scanResult) {
+
+            scanResult.style.display =
+                "none";
+
+        }
+
+
+        if (!meetingId) {
+
+            selectedMeetingText.textContent =
+                "Select a meeting to view attendance.";
+
+
+            clearAttendanceTable();
+
+            return;
+
+        }
+
+
+        const selectedOption =
+            meetingSelect.options[
+                meetingSelect.selectedIndex
+            ];
+
+
+        selectedMeetingText.textContent =
+            `Attendance for ${selectedOption.textContent}`;
+
+
+        await loadAttendance(
+            meetingId
+        );
+
+    }
+);
+
+
+/* =========================================================
+   LOAD ATTENDANCE
+========================================================= */
+
+async function loadAttendance(
+    meetingId
+) {
+
+    try {
+
+        if (attendanceTable) {
+
+            attendanceTable.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        style="text-align:center;padding:30px;"
+                    >
+                        Loading attendance...
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/attendances?meeting_id=${encodeURIComponent(meetingId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Attendance records:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load attendance."
+            );
+
+        }
+
+
+        currentAttendance =
+            Array.isArray(data)
+                ? data
+                : data.attendance ||
+                  data.data ||
+                  [];
+
+
+        displayAttendance(
+            currentAttendance
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Attendance loading error:",
+            error
+        );
+
+
+        currentAttendance = [];
+
+
+        clearAttendanceTable();
+
+
+        if (emptyAttendance) {
+
+            emptyAttendance.style.display =
+                "block";
+
+            emptyAttendance.innerHTML = `
+
+                <div class="empty-icon">
+                    !
+                </div>
+
+                <h3>
+                    Unable to load attendance
+                </h3>
+
+                <p>
+                    ${escapeHTML(
+                        error.message
+                    )}
+                </p>
+
+            `;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   DISPLAY ATTENDANCE
+========================================================= */
+
+function displayAttendance(
+    records
+) {
+
+    if (!attendanceTable) {
+        return;
+    }
+
+
+    attendanceTable.innerHTML =
+        "";
+
+
+    if (
+        !records ||
+        records.length === 0
+    ) {
+
+        if (emptyAttendance) {
+
+            emptyAttendance.style.display =
+                "block";
+
+        }
+
+
+        updateAttendanceSummary(
+            records
+        );
+
+        return;
+
+    }
+
+
+    if (emptyAttendance) {
+
+        emptyAttendance.style.display =
+            "none";
+
+    }
+
+
+    records.forEach(
+        function (record) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const student =
+                record.student ||
+                {};
+
+
+            const name =
+                student.name ||
+                student.full_name ||
+                "Unknown Student";
+
+
+            const studentId =
+                student.student_id ||
+                "--";
+
+
+            const status =
+                record.status ||
+                "present";
+
+
+            const timeIn =
+                record.scanned_at ||
+                "--";
+
+
+            const remarks =
+                record.officer_remarks ||
+                "—";
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(name)}
+                </td>
+
+                <td>
+                    ${escapeHTML(studentId)}
+                </td>
+
+                <td>
+
+                    <span class="attendance-status">
+
+                        ${escapeHTML(
+                            capitalize(
+                                status
+                            )
+                        )}
+
+                    </span>
+
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        formatDateTime(
+                            timeIn
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        remarks
+                    )}
+                </td>
+
+            `;
+
+
+            attendanceTable.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    updateAttendanceSummary(
+        records
+    );
+
+}
+
+
+/* =========================================================
+   ATTENDANCE SUMMARY
+========================================================= */
+
+function updateAttendanceSummary(
+    records
+) {
+
+    const total =
+        records.length;
+
+
+    const present =
+        records.filter(
+            function (record) {
+
+                return (
+                    record.status ===
+                    "present" ||
+                    record.status ===
+                    "late"
+                );
+
+            }
+        ).length;
+
+
+    const rate =
+        total > 0
+            ? Math.round(
+                (
+                    present /
+                    total
+                ) * 100
+            )
+            : 0;
+
+
+    /*
+     * We currently don't have an API endpoint
+     * that returns ALL organization members.
+     *
+     * Therefore we don't pretend that the
+     * attendance-record count is the member count.
+     *
+     * Total Members will remain 0 until we add
+     * the Officer Members endpoint.
+     */
+
+    if (totalMembers) {
+
+        totalMembers.textContent =
+            "—";
+
+    }
+
+
+    if (presentMembers) {
+
+        presentMembers.textContent =
+            present;
+
+    }
+
+
+    if (attendanceRate) {
+
+        attendanceRate.textContent =
+            rate + "%";
+
+    }
+
+}
+
+
+/* =========================================================
+   FIND STUDENT
+========================================================= */
+
+async function findStudent(
+    uniqueId
+) {
 
     const cleanedId =
-        String(uniqueId || "").trim();
+        String(
+            uniqueId || ""
+        ).trim();
+
 
     if (!cleanedId) {
 
@@ -181,27 +784,43 @@ async function findStudent(uniqueId) {
 
     }
 
-    console.log(
-        "Looking up student:",
-        cleanedId
-    );
 
-    const response = await fetch(
-        `${API_BASE}/students/${encodeURIComponent(cleanedId)}`
-    );
+    const response =
+        await fetch(
+            `${API_BASE}/students/${encodeURIComponent(cleanedId)}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Accept":
+                        "application/json"
+                }
+            }
+        );
+
 
     let data = {};
 
+
     try {
-        data = await response.json();
+
+        data =
+            await response.json();
+
     } catch (error) {
-        console.warn("Response was not JSON.");
+
+        console.warn(
+            "Student response was not JSON."
+        );
+
     }
 
+
     console.log(
-        "Student API response:",
+        "Student lookup:",
         data
     );
+
 
     if (!response.ok) {
 
@@ -212,7 +831,12 @@ async function findStudent(uniqueId) {
 
     }
 
-    return data.student || data.data || data;
+
+    return (
+        data.student ||
+        data.data ||
+        data
+    );
 
 }
 
@@ -221,44 +845,56 @@ async function findStudent(uniqueId) {
    SHOW STUDENT
 ========================================================= */
 
-function showStudent(student, scannedValue) {
+function showStudent(
+    student,
+    scannedValue
+) {
 
-    currentScannedStudent = student;
+    currentScannedStudent =
+        student;
+
 
     if (scannedStudentName) {
 
         scannedStudentName.textContent =
             student.name ||
             student.full_name ||
-            student.fullName ||
             "Student";
 
     }
+
 
     if (scannedStudentId) {
 
         scannedStudentId.textContent =
             student.student_id ||
-            student.studentId ||
             "--";
 
     }
+
 
     if (scannedStudentUniqueId) {
 
         scannedStudentUniqueId.textContent =
             student.unique_id ||
-            student.uniqueId ||
             scannedValue;
 
     }
 
+
     if (scanResult) {
-        scanResult.style.display = "block";
+
+        scanResult.style.display =
+            "block";
+
     }
 
+
     if (confirmAttendanceButton) {
-        confirmAttendanceButton.disabled = false;
+
+        confirmAttendanceButton.disabled =
+            false;
+
     }
 
 }
@@ -268,59 +904,70 @@ function showStudent(student, scannedValue) {
    HANDLE QR SCAN
 ========================================================= */
 
-async function handleScannedStudent(decodedText) {
+async function handleScannedStudent(
+    decodedText
+) {
 
     const scannedValue =
-        String(decodedText || "").trim();
+        String(
+            decodedText || ""
+        ).trim();
+
 
     if (!scannedValue) {
 
-        processingScan = false;
+        processingScan =
+            false;
+
         return;
 
     }
 
+
     console.log(
-        "DOMINEXUS QR DETECTED:",
+        "QR DETECTED:",
         scannedValue
     );
+
 
     const status =
         document.getElementById(
             "qrScannerStatus"
         );
 
+
     if (status) {
+
         status.textContent =
             "QR detected. Finding student...";
+
     }
+
 
     try {
 
         const student =
-            await findStudent(scannedValue);
+            await findStudent(
+                scannedValue
+            );
 
-        console.log(
-            "STUDENT FOUND:",
-            student
-        );
 
         showStudent(
             student,
             scannedValue
         );
 
+
         if (status) {
+
             status.textContent =
-                "Student found! Please confirm attendance.";
+                "Student found. Please confirm attendance.";
+
         }
 
-        /*
-           Stop camera after successful scan
-           so the same QR isn't scanned repeatedly.
-        */
 
         await stopQRScanner();
+
 
     } catch (error) {
 
@@ -329,35 +976,58 @@ async function handleScannedStudent(decodedText) {
             error
         );
 
-        currentScannedStudent = null;
+
+        currentScannedStudent =
+            null;
+
 
         if (scanResult) {
-            scanResult.style.display = "block";
+
+            scanResult.style.display =
+                "block";
+
         }
+
 
         if (scannedStudentName) {
+
             scannedStudentName.textContent =
                 "Student Not Found";
+
         }
+
 
         if (scannedStudentId) {
+
             scannedStudentId.textContent =
                 "--";
+
         }
+
 
         if (scannedStudentUniqueId) {
+
             scannedStudentUniqueId.textContent =
                 scannedValue;
+
         }
+
 
         if (confirmAttendanceButton) {
-            confirmAttendanceButton.disabled = true;
+
+            confirmAttendanceButton.disabled =
+                true;
+
         }
 
+
         if (status) {
+
             status.textContent =
                 "Student was not found.";
+
         }
+
 
         alert(
             error.message ||
@@ -366,7 +1036,9 @@ async function handleScannedStudent(decodedText) {
 
     }
 
-    processingScan = false;
+
+    processingScan =
+        false;
 
 }
 
@@ -381,8 +1053,9 @@ async function startQRScanner() {
         return;
     }
 
+
     if (
-        meetingSelect &&
+        !meetingSelect ||
         !meetingSelect.value
     ) {
 
@@ -391,7 +1064,9 @@ async function startQRScanner() {
         );
 
         return;
+
     }
+
 
     if (
         typeof Html5Qrcode ===
@@ -403,22 +1078,33 @@ async function startQRScanner() {
         );
 
         return;
+
     }
 
-    if (!qrScannerContainer) {
-        return;
-    }
 
-    currentScannedStudent = null;
-    processingScan = false;
+    currentScannedStudent =
+        null;
+
+
+    processingScan =
+        false;
+
 
     if (scanResult) {
-        scanResult.style.display = "none";
+
+        scanResult.style.display =
+            "none";
+
     }
 
+
     if (confirmAttendanceButton) {
-        confirmAttendanceButton.disabled = true;
+
+        confirmAttendanceButton.disabled =
+            true;
+
     }
+
 
     qrScannerContainer.innerHTML = `
 
@@ -427,13 +1113,17 @@ async function startQRScanner() {
             class="dominexus-qr-reader">
         </div>
 
+
         <div class="qr-scan-overlay">
 
             <div class="qr-scan-frame">
 
                 <span class="qr-corner top-left"></span>
+
                 <span class="qr-corner top-right"></span>
+
                 <span class="qr-corner bottom-left"></span>
+
                 <span class="qr-corner bottom-right"></span>
 
                 <span class="qr-scan-line"></span>
@@ -441,6 +1131,7 @@ async function startQRScanner() {
             </div>
 
         </div>
+
 
         <div class="qr-scanner-status">
 
@@ -457,20 +1148,24 @@ async function startQRScanner() {
 
     `;
 
+
     dominexusQRScanner =
         new Html5Qrcode(
             "dominexus-qr-reader"
         );
+
 
     try {
 
         const cameras =
             await Html5Qrcode.getCameras();
 
+
         console.log(
-            "DOMINEXUS cameras:",
+            "Available cameras:",
             cameras
         );
+
 
         if (
             !cameras ||
@@ -483,68 +1178,72 @@ async function startQRScanner() {
 
         }
 
+
         let selectedCamera =
-            cameras.find(function(camera) {
+            cameras.find(
+                function (camera) {
 
-                const label =
-                    String(
-                        camera.label || ""
-                    ).toLowerCase();
+                    const label =
+                        String(
+                            camera.label ||
+                            ""
+                        ).toLowerCase();
 
-                return (
-                    label.includes("back") ||
-                    label.includes("rear") ||
-                    label.includes("environment")
-                );
 
-            });
+                    return (
+                        label.includes("back") ||
+                        label.includes("rear") ||
+                        label.includes("environment")
+                    );
+
+                }
+            );
+
 
         if (!selectedCamera) {
-            selectedCamera = cameras[0];
+
+            selectedCamera =
+                cameras[0];
+
         }
 
-        const scanConfig = {
-
-            fps: 10,
-
-            qrbox: {
-                width: 280,
-                height: 280
-            },
-
-            aspectRatio: 1.0,
-
-            disableFlip: false,
-
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.QR_CODE
-            ]
-
-        };
 
         await dominexusQRScanner.start(
 
             selectedCamera.id,
 
-            scanConfig,
+            {
+                fps: 10,
 
-            function(decodedText) {
+                qrbox: {
+                    width: 280,
+                    height: 280
+                },
 
-                if (processingScan) {
+                aspectRatio: 1,
+
+                disableFlip: false,
+
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.QR_CODE
+                ]
+
+            },
+
+            function (decodedText) {
+
+                if (
+                    processingScan
+                ) {
+
                     return;
+
                 }
 
-                processingScan = true;
 
-                const status =
-                    document.getElementById(
-                        "qrScannerStatus"
-                    );
+                processingScan =
+                    true;
 
-                if (status) {
-                    status.textContent =
-                        "QR code detected...";
-                }
 
                 handleScannedStudent(
                     decodedText
@@ -552,40 +1251,43 @@ async function startQRScanner() {
 
             },
 
-            function(errorMessage) {
-                // Ignore continuous scan errors.
+            function () {
+
+                /*
+                 * Ignore continuous
+                 * scanner errors.
+                 */
+
             }
 
         );
 
-        qrScannerRunning = true;
+
+        qrScannerRunning =
+            true;
+
 
         const status =
             document.getElementById(
                 "qrScannerStatus"
             );
 
+
         if (status) {
+
             status.textContent =
                 "Scanning for QR code...";
-        }
-
-        if (startScannerButton) {
-            startScannerButton.disabled = true;
-        }
-
-        if (stopScannerButton) {
-
-            stopScannerButton.style.display =
-                "inline-flex";
-
-            stopScannerButton.disabled = false;
 
         }
 
-        console.log(
-            "DOMINEXUS OFFICER QR SCANNER ACTIVE."
-        );
+
+        startScannerButton.disabled =
+            true;
+
+
+        stopScannerButton.style.display =
+            "inline-flex";
+
 
     } catch (error) {
 
@@ -594,10 +1296,12 @@ async function startQRScanner() {
             error
         );
 
+
         alert(
             "Unable to start the QR scanner.\n\n" +
             error.message
         );
+
 
         await stopQRScanner();
 
@@ -617,17 +1321,20 @@ async function stopQRScanner() {
         try {
 
             if (qrScannerRunning) {
+
                 await dominexusQRScanner.stop();
+
             }
 
         } catch (error) {
 
             console.warn(
-                "Scanner stop warning:",
+                "Scanner stop:",
                 error
             );
 
         }
+
 
         try {
 
@@ -636,7 +1343,7 @@ async function stopQRScanner() {
         } catch (error) {
 
             console.warn(
-                "Scanner clear warning:",
+                "Scanner clear:",
                 error
             );
 
@@ -644,17 +1351,28 @@ async function stopQRScanner() {
 
     }
 
-    dominexusQRScanner = null;
-    qrScannerRunning = false;
-    processingScan = false;
+
+    dominexusQRScanner =
+        null;
+
+
+    qrScannerRunning =
+        false;
+
+
+    processingScan =
+        false;
+
 
     if (startScannerButton) {
-        startScannerButton.disabled = false;
+
+        startScannerButton.disabled =
+            false;
+
     }
 
-    if (stopScannerButton) {
 
-        stopScannerButton.disabled = false;
+    if (stopScannerButton) {
 
         stopScannerButton.style.display =
             "none";
@@ -670,7 +1388,9 @@ async function stopQRScanner() {
 
 async function confirmStudentAttendance() {
 
-    if (!currentScannedStudent) {
+    if (
+        !currentScannedStudent
+    ) {
 
         alert(
             "Please scan a student QR code first."
@@ -680,8 +1400,9 @@ async function confirmStudentAttendance() {
 
     }
 
+
     if (
-        meetingSelect &&
+        !meetingSelect ||
         !meetingSelect.value
     ) {
 
@@ -693,15 +1414,18 @@ async function confirmStudentAttendance() {
 
     }
 
+
     const student =
         currentScannedStudent;
+
 
     const meetingId =
         meetingSelect.value;
 
+
     const studentId =
-        student.student_id ||
-        student.studentId;
+        student.student_id;
+
 
     if (!studentId) {
 
@@ -713,20 +1437,12 @@ async function confirmStudentAttendance() {
 
     }
 
-    if (confirmAttendanceButton) {
-        confirmAttendanceButton.disabled = true;
-    }
+
+    confirmAttendanceButton.disabled =
+        true;
+
 
     try {
-
-        console.log(
-            "Sending attendance:",
-            {
-                meeting_id: meetingId,
-                student_id: studentId,
-                status: "present"
-            }
-        );
 
         const response =
             await fetch(
@@ -735,43 +1451,42 @@ async function confirmStudentAttendance() {
                     method: "POST",
 
                     headers: {
+
                         "Content-Type":
                             "application/json",
 
                         "Accept":
                             "application/json"
+
                     },
 
-                    body: JSON.stringify({
+                    body:
+                        JSON.stringify({
 
-                        meeting_id:
-                            meetingId,
+                            meeting_id:
+                                meetingId,
 
-                        student_id:
-                            studentId,
+                            student_id:
+                                studentId,
 
-                        status:
-                            "present"
+                            status:
+                                "present"
 
-                    })
+                        })
 
                 }
             );
 
-        let data = {};
 
-        try {
-            data = await response.json();
-        } catch (error) {
-            console.warn(
-                "Attendance response was not JSON."
-            );
-        }
+        const data =
+            await response.json();
+
 
         console.log(
-            "Attendance API response:",
+            "Attendance response:",
             data
         );
+
 
         if (!response.ok) {
 
@@ -782,52 +1497,50 @@ async function confirmStudentAttendance() {
 
         }
 
+
         alert(
             "Attendance recorded successfully for " +
             (
                 student.name ||
-                student.full_name ||
-                student.fullName ||
                 "student"
             ) +
             "."
         );
 
-        currentScannedStudent = null;
+
+        currentScannedStudent =
+            null;
+
 
         if (scanResult) {
-            scanResult.style.display = "none";
+
+            scanResult.style.display =
+                "none";
+
         }
 
-        if (confirmAttendanceButton) {
-            confirmAttendanceButton.disabled = true;
-        }
 
-        const status =
-            document.getElementById(
-                "qrScannerStatus"
-            );
+        await loadAttendance(
+            meetingId
+        );
 
-        if (status) {
-            status.textContent =
-                "Attendance saved successfully.";
-        }
 
     } catch (error) {
 
         console.error(
-            "Attendance recording error:",
+            "Attendance error:",
             error
         );
 
+
         alert(
-            "Attendance could not be recorded.\n\n" +
-            error.message
+            error.message ||
+            "Unable to record attendance."
         );
 
-        if (confirmAttendanceButton) {
-            confirmAttendanceButton.disabled = false;
-        }
+
+        confirmAttendanceButton.disabled =
+            false;
 
     }
 
@@ -845,6 +1558,7 @@ async function manualFindStudent() {
             ? manualUniqueId.value.trim()
             : "";
 
+
     if (!value) {
 
         alert(
@@ -855,8 +1569,9 @@ async function manualFindStudent() {
 
     }
 
+
     if (
-        meetingSelect &&
+        !meetingSelect ||
         !meetingSelect.value
     ) {
 
@@ -868,54 +1583,48 @@ async function manualFindStudent() {
 
     }
 
-    if (manualUniqueIdButton) {
-        manualUniqueIdButton.disabled = true;
-    }
 
-    if (manualUniqueIdMessage) {
+    manualUniqueIdButton.disabled =
+        true;
 
-        manualUniqueIdMessage.textContent =
-            "Finding student...";
 
-    }
+    manualUniqueIdMessage.textContent =
+        "Finding student...";
+
 
     try {
 
         const student =
-            await findStudent(value);
+            await findStudent(
+                value
+            );
+
 
         showStudent(
             student,
             value
         );
 
-        if (manualUniqueIdMessage) {
 
-            manualUniqueIdMessage.textContent =
-                "Student found. Please confirm attendance.";
+        manualUniqueIdMessage.textContent =
+            "Student found. Please confirm attendance.";
 
-        }
 
     } catch (error) {
 
         console.error(
-            "Manual student lookup error:",
             error
         );
 
-        if (manualUniqueIdMessage) {
 
-            manualUniqueIdMessage.textContent =
-                error.message ||
-                "Student not found.";
-
-        }
+        manualUniqueIdMessage.textContent =
+            error.message ||
+            "Student not found.";
 
     } finally {
 
-        if (manualUniqueIdButton) {
-            manualUniqueIdButton.disabled = false;
-        }
+        manualUniqueIdButton.disabled =
+            false;
 
     }
 
@@ -923,7 +1632,288 @@ async function manualFindStudent() {
 
 
 /* =========================================================
-   EVENT LISTENERS
+   CLEAR TABLE
+========================================================= */
+
+function clearAttendanceTable() {
+
+    if (attendanceTable) {
+
+        attendanceTable.innerHTML =
+            "";
+
+    }
+
+
+    if (emptyAttendance) {
+
+        emptyAttendance.style.display =
+            "block";
+
+    }
+
+
+    if (totalMembers) {
+
+        totalMembers.textContent =
+            "—";
+
+    }
+
+
+    if (presentMembers) {
+
+        presentMembers.textContent =
+            "0";
+
+    }
+
+
+    if (attendanceRate) {
+
+        attendanceRate.textContent =
+            "0%";
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMAT DATE/TIME
+========================================================= */
+
+function formatDateTime(
+    value
+) {
+
+    if (!value) {
+        return "--";
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CAPITALIZE
+========================================================= */
+
+function capitalize(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const text =
+        String(value);
+
+
+    return (
+        text.charAt(0).toUpperCase() +
+        text.slice(1)
+    );
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function getInitials(
+    name
+) {
+
+    if (!name) {
+        return "OF";
+    }
+
+
+    const parts =
+        name
+            .trim()
+            .split(/\s+/);
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[
+            parts.length - 1
+        ].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+if (logoutButton) {
+
+    logoutButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                !confirm(
+                    "Are you sure you want to log out?"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            sessionStorage.clear();
+
+
+            window.location.href =
+                "officer-login.html";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+if (
+    menuButton &&
+    sidebar &&
+    sidebarOverlay
+) {
+
+    menuButton.addEventListener(
+        "click",
+        function () {
+
+            sidebar.classList.add(
+                "open"
+            );
+
+            sidebarOverlay.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+    sidebarOverlay.addEventListener(
+        "click",
+        closeSidebar
+    );
+
+}
+
+
+function closeSidebar() {
+
+    if (sidebar) {
+
+        sidebar.classList.remove(
+            "open"
+        );
+
+    }
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   BUTTONS
 ========================================================= */
 
 if (startScannerButton) {
@@ -935,6 +1925,7 @@ if (startScannerButton) {
 
 }
 
+
 if (stopScannerButton) {
 
     stopScannerButton.addEventListener(
@@ -944,6 +1935,7 @@ if (stopScannerButton) {
 
 }
 
+
 if (confirmAttendanceButton) {
 
     confirmAttendanceButton.addEventListener(
@@ -952,6 +1944,7 @@ if (confirmAttendanceButton) {
     );
 
 }
+
 
 if (manualUniqueIdButton) {
 
@@ -964,202 +1957,7 @@ if (manualUniqueIdButton) {
 
 
 /* =========================================================
-   MEETING CHANGE
-========================================================= */
-
-if (meetingSelect) {
-
-    meetingSelect.addEventListener(
-        "change",
-        function() {
-
-            currentScannedStudent = null;
-
-            if (scanResult) {
-                scanResult.style.display = "none";
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
-
-const menuButton =
-    document.getElementById("menuButton");
-
-const sidebar =
-    document.getElementById("sidebar");
-
-const sidebarOverlay =
-    document.getElementById("sidebarOverlay");
-
-if (
-    menuButton &&
-    sidebar &&
-    sidebarOverlay
-) {
-
-    menuButton.addEventListener(
-        "click",
-        function() {
-
-            sidebar.classList.add("open");
-
-            sidebarOverlay.classList.add("show");
-
-        }
-    );
-
-    sidebarOverlay.addEventListener(
-        "click",
-        closeSidebar
-    );
-
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(function(link) {
-
-            link.addEventListener(
-                "click",
-                closeSidebar
-            );
-
-        });
-
-}
-
-function closeSidebar() {
-
-    if (sidebar) {
-        sidebar.classList.remove("open");
-    }
-
-    if (sidebarOverlay) {
-        sidebarOverlay.classList.remove("show");
-    }
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-const logoutButton =
-    document.getElementById("logoutButton");
-
-if (logoutButton) {
-
-    logoutButton.addEventListener(
-        "click",
-        function() {
-
-            if (
-                !confirm(
-                    "Are you sure you want to log out?"
-                )
-            ) {
-                return;
-            }
-
-            sessionStorage.removeItem(
-                "officerLoggedIn"
-            );
-
-            sessionStorage.removeItem(
-                "officerId"
-            );
-
-            sessionStorage.removeItem(
-                "officerName"
-            );
-
-            sessionStorage.removeItem(
-                "officerOrganization"
-            );
-
-            window.location.href =
-                "officer-login.html";
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   OFFICER INFORMATION
-========================================================= */
-
-const officerName =
-    sessionStorage.getItem("officerName") ||
-    "Officer";
-
-const officerId =
-    sessionStorage.getItem("officerId") ||
-    "Officer ID";
-
-const topOfficerName =
-    document.getElementById("topOfficerName");
-
-const topOfficerId =
-    document.getElementById("topOfficerId");
-
-const topAvatar =
-    document.getElementById("topAvatar");
-
-if (topOfficerName) {
-    topOfficerName.textContent =
-        officerName;
-}
-
-if (topOfficerId) {
-    topOfficerId.textContent =
-        officerId;
-}
-
-if (topAvatar) {
-    topAvatar.textContent =
-        getInitials(officerName);
-}
-
-
-/* =========================================================
    INITIALIZE
 ========================================================= */
 
 loadMeetings();
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function getInitials(name) {
-
-    if (!name) {
-        return "OF";
-    }
-
-    const parts =
-        name.trim().split(/\s+/);
-
-    if (parts.length === 1) {
-
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-    return (
-        parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
-
-}

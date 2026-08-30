@@ -1,6 +1,10 @@
 /* =========================================
-   DOMINEXUS OFFICER DASHBOARD
+   DOMINEXUS — OFFICER DASHBOARD
+   Laravel / MySQL Connected
 ========================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================
@@ -22,19 +26,19 @@ if (loggedIn !== "true") {
 
 
 /* =========================================
-   OFFICER INFORMATION
+   OFFICER SESSION
 ========================================= */
 
 const officerId =
     sessionStorage.getItem(
         "officerId"
-    ) || "OFF-0001";
+    );
 
 
 const officerName =
     sessionStorage.getItem(
         "officerName"
-    ) || "Demo Officer";
+    ) || "Officer";
 
 
 /* =========================================
@@ -83,6 +87,12 @@ const attendanceRate =
     );
 
 
+const upcomingMeeting =
+    document.getElementById(
+        "upcomingMeeting"
+    );
+
+
 const meetingsTable =
     document.getElementById(
         "meetingsTable"
@@ -126,7 +136,9 @@ const sidebarOverlay =
 if (welcomeName) {
 
     welcomeName.textContent =
-        getFirstName(officerName);
+        getFirstName(
+            officerName
+        );
 
 }
 
@@ -142,7 +154,8 @@ if (topOfficerName) {
 if (topOfficerId) {
 
     topOfficerId.textContent =
-        officerId;
+        officerId ||
+        "Officer ID";
 
 }
 
@@ -150,49 +163,267 @@ if (topOfficerId) {
 if (topAvatar) {
 
     topAvatar.textContent =
-        getInitials(officerName);
+        getInitials(
+            officerName
+        );
 
 }
 
 
 /* =========================================
-   GET DATA
+   LOAD DASHBOARD
 ========================================= */
 
-const meetings =
-    JSON.parse(
-        localStorage.getItem(
-            "dominexus_meetings"
-        ) || "[]"
-    );
+async function loadDashboard() {
+
+    if (!officerId) {
+
+        showDashboardError(
+            "Officer session information is missing. Please log in again."
+        );
+
+        return;
+
+    }
 
 
-const members =
-    JSON.parse(
-        localStorage.getItem(
-            "dominexus_students"
-        ) || "[]"
-    );
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/officer-dashboard?officer_id=${encodeURIComponent(officerId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
 
 
-const attendance =
-    JSON.parse(
-        localStorage.getItem(
-            "dominexus_attendance"
-        ) || "[]"
-    );
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Officer dashboard response:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load Officer Dashboard."
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE OFFICER INFORMATION
+        |--------------------------------------------------------------------------
+        */
+
+        if (data.officer) {
+
+            updateOfficerInformation(
+                data.officer
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE STATISTICS
+        |--------------------------------------------------------------------------
+        */
+
+        updateStatistics(
+            data.statistics
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE UPCOMING MEETING
+        |--------------------------------------------------------------------------
+        */
+
+        displayUpcomingMeeting(
+            data.upcoming_meeting
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE RECENT MEETINGS
+        |--------------------------------------------------------------------------
+        */
+
+        displayMeetings(
+            data.meetings
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Officer dashboard error:",
+            error
+        );
+
+
+        showDashboardError(
+            error.message ||
+            "Unable to connect to the Laravel server."
+        );
+
+    }
+
+}
 
 
 /* =========================================
-   UPDATE SUMMARY
+   UPDATE OFFICER INFORMATION
 ========================================= */
 
-function updateSummary() {
+function updateOfficerInformation(
+    officer
+) {
+
+    const name =
+        officer.name ||
+        officerName;
+
+
+    const id =
+        officer.id ||
+        officerId;
+
+
+    if (welcomeName) {
+
+        welcomeName.textContent =
+            getFirstName(name);
+
+    }
+
+
+    if (topOfficerName) {
+
+        topOfficerName.textContent =
+            name;
+
+    }
+
+
+    if (topOfficerId) {
+
+        topOfficerId.textContent =
+            id;
+
+    }
+
+
+    if (topAvatar) {
+
+        topAvatar.textContent =
+            getInitials(name);
+
+    }
+
+
+    /*
+     * Keep the latest organization
+     * information in the session.
+     */
+
+    if (
+        officer.organization_id !==
+        undefined &&
+        officer.organization_id !==
+        null
+    ) {
+
+        sessionStorage.setItem(
+            "officerOrganizationId",
+            officer.organization_id
+        );
+
+    }
+
+
+    if (
+        officer.organization &&
+        officer.organization.name
+    ) {
+
+        sessionStorage.setItem(
+            "officerOrganization",
+            officer.organization.name
+        );
+
+    }
+
+
+    if (officer.club_role) {
+
+        sessionStorage.setItem(
+            "officerClubRole",
+            officer.club_role
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   UPDATE STATISTICS
+========================================= */
+
+function updateStatistics(
+    statistics
+) {
+
+    if (!statistics) {
+
+        return;
+
+    }
+
+
+    const meetings =
+        Number(
+            statistics.total_meetings ||
+            0
+        );
+
+
+    const members =
+        Number(
+            statistics.total_members ||
+            0
+        );
+
+
+    const rate =
+        Number(
+            statistics.attendance_rate ||
+            0
+        );
+
 
     if (totalMeetings) {
 
         totalMeetings.textContent =
-            meetings.length;
+            meetings;
 
     }
 
@@ -200,40 +431,7 @@ function updateSummary() {
     if (totalMembers) {
 
         totalMembers.textContent =
-            members.length;
-
-    }
-
-
-    let rate = 0;
-
-
-    if (attendance.length > 0) {
-
-        const present =
-            attendance.filter(record => {
-
-                const status =
-                    (
-                        record.status ||
-                        ""
-                    ).toLowerCase();
-
-
-                return (
-                    status === "present" ||
-                    status === "late"
-                );
-
-            }).length;
-
-
-        rate =
-            Math.round(
-                (present /
-                attendance.length) *
-                100
-            );
+            members;
 
     }
 
@@ -249,20 +447,143 @@ function updateSummary() {
 
 
 /* =========================================
-   DISPLAY RECENT MEETINGS
+   UPCOMING MEETING
 ========================================= */
 
-function displayMeetings() {
+function displayUpcomingMeeting(
+    meeting
+) {
 
-    if (!meetingsTable) {
+    if (!upcomingMeeting) {
+
         return;
+
     }
 
 
-    meetingsTable.innerHTML = "";
+    if (!meeting) {
+
+        upcomingMeeting.innerHTML = `
+
+            <div class="meeting-icon">
+                ▦
+            </div>
+
+            <div class="meeting-info">
+
+                <strong>
+                    No upcoming meeting
+                </strong>
+
+                <span>
+                    Create a meeting to see it here.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
 
 
-    if (meetings.length === 0) {
+    const title =
+        meeting.title ||
+        "Organization Meeting";
+
+
+    const date =
+        formatDate(
+            meeting.date
+        );
+
+
+    const startTime =
+        formatTime(
+            meeting.start_time
+        );
+
+
+    const endTime =
+        formatTime(
+            meeting.end_time
+        );
+
+
+    let timeText =
+        startTime;
+
+
+    if (endTime) {
+
+        timeText +=
+            " - " +
+            endTime;
+
+    }
+
+
+    const location =
+        meeting.location ||
+        "Location not specified";
+
+
+    upcomingMeeting.innerHTML = `
+
+        <div class="meeting-icon">
+            ▦
+        </div>
+
+
+        <div class="meeting-info">
+
+            <strong>
+                ${escapeHtml(title)}
+            </strong>
+
+
+            <span>
+                ${escapeHtml(date)}
+                ·
+                ${escapeHtml(timeText)}
+            </span>
+
+
+            <span>
+                ${escapeHtml(location)}
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================
+   DISPLAY RECENT MEETINGS
+========================================= */
+
+function displayMeetings(
+    meetings
+) {
+
+    if (!meetingsTable) {
+
+        return;
+
+    }
+
+
+    meetingsTable.innerHTML =
+        "";
+
+
+    if (
+        !Array.isArray(meetings) ||
+        meetings.length === 0
+    ) {
 
         if (noMeetings) {
 
@@ -284,16 +605,31 @@ function displayMeetings() {
     }
 
 
+    /*
+     * Sort newest first.
+     */
+
     const sortedMeetings =
         [...meetings].sort(
-            (a, b) => {
+            function (a, b) {
 
-                return new Date(
-                    b.date || 0
-                ) -
-                new Date(
-                    a.date || 0
-                );
+                const dateA =
+                    new Date(
+                        buildDateTime(
+                            a
+                        )
+                    );
+
+
+                const dateB =
+                    new Date(
+                        buildDateTime(
+                            b
+                        )
+                    );
+
+
+                return dateB - dateA;
 
             }
         );
@@ -301,143 +637,444 @@ function displayMeetings() {
 
     sortedMeetings
         .slice(0, 5)
-        .forEach(meeting => {
+        .forEach(
+            function (meeting) {
 
-            const row =
-                document.createElement(
-                    "tr"
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                /*
+                 * MEETING
+                 */
+
+                const meetingCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                meetingCell.textContent =
+                    meeting.title ||
+                    "Organization Meeting";
+
+
+                /*
+                 * DATE
+                 */
+
+                const dateCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                dateCell.textContent =
+                    formatDate(
+                        meeting.date
+                    );
+
+
+                /*
+                 * TIME
+                 */
+
+                const timeCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                const startTime =
+                    formatTime(
+                        meeting.start_time
+                    );
+
+
+                const endTime =
+                    formatTime(
+                        meeting.end_time
+                    );
+
+
+                if (endTime) {
+
+                    timeCell.textContent =
+                        `${startTime} - ${endTime}`;
+
+                } else {
+
+                    timeCell.textContent =
+                        startTime || "--";
+
+                }
+
+
+                /*
+                 * STATUS
+                 */
+
+                const statusCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                const status =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                const meetingStatus =
+                    meeting.status ||
+                    "upcoming";
+
+
+                status.textContent =
+                    capitalizeStatus(
+                        meetingStatus
+                    );
+
+
+                const normalizedStatus =
+                    String(
+                        meetingStatus
+                    ).toLowerCase();
+
+
+                if (
+                    normalizedStatus ===
+                    "completed"
+                ) {
+
+                    status.className =
+                        "meeting-status status-completed";
+
+                }
+
+                else if (
+                    normalizedStatus ===
+                    "cancelled"
+                ) {
+
+                    status.className =
+                        "meeting-status status-cancelled";
+
+                }
+
+                else if (
+                    normalizedStatus ===
+                    "ongoing"
+                ) {
+
+                    status.className =
+                        "meeting-status status-upcoming";
+
+                }
+
+                else {
+
+                    status.className =
+                        "meeting-status status-upcoming";
+
+                }
+
+
+                statusCell.appendChild(
+                    status
                 );
 
 
-            const meetingCell =
-                document.createElement(
-                    "td"
+                /*
+                 * ADD ROW
+                 */
+
+                row.appendChild(
+                    meetingCell
                 );
 
 
-            meetingCell.textContent =
-                meeting.title ||
-                meeting.meetingName ||
-                meeting.name ||
-                "Organization Meeting";
-
-
-            const dateCell =
-                document.createElement(
-                    "td"
+                row.appendChild(
+                    dateCell
                 );
 
 
-            dateCell.textContent =
-                meeting.date ||
-                "--";
-
-
-            const timeCell =
-                document.createElement(
-                    "td"
+                row.appendChild(
+                    timeCell
                 );
 
 
-            timeCell.textContent =
-                meeting.time ||
-                "--";
-
-
-            const statusCell =
-                document.createElement(
-                    "td"
+                row.appendChild(
+                    statusCell
                 );
 
 
-            const status =
-                document.createElement(
-                    "span"
+                meetingsTable.appendChild(
+                    row
                 );
-
-
-            const meetingStatus =
-                meeting.status ||
-                "Upcoming";
-
-
-            status.textContent =
-                meetingStatus;
-
-
-            const normalizedStatus =
-                meetingStatus.toLowerCase();
-
-
-            if (
-                normalizedStatus ===
-                "completed"
-            ) {
-
-                status.className =
-                    "meeting-status status-completed";
 
             }
-
-            else if (
-                normalizedStatus ===
-                "cancelled"
-            ) {
-
-                status.className =
-                    "meeting-status status-cancelled";
-
-            }
-
-            else {
-
-                status.className =
-                    "meeting-status status-upcoming";
-
-            }
-
-
-            statusCell.appendChild(
-                status
-            );
-
-
-            row.appendChild(
-                meetingCell
-            );
-
-
-            row.appendChild(
-                dateCell
-            );
-
-
-            row.appendChild(
-                timeCell
-            );
-
-
-            row.appendChild(
-                statusCell
-            );
-
-
-            meetingsTable.appendChild(
-                row
-            );
-
-        });
+        );
 
 }
 
 
 /* =========================================
-   INITIALIZE
+   BUILD DATE + TIME
 ========================================= */
 
-updateSummary();
+function buildDateTime(
+    meeting
+) {
 
-displayMeetings();
+    if (!meeting) {
+
+        return "";
+
+    }
+
+
+    const date =
+        meeting.date ||
+        "";
+
+
+    const time =
+        meeting.start_time ||
+        "00:00:00";
+
+
+    return `${date}T${time}`;
+
+}
+
+
+/* =========================================
+   FORMAT DATE
+========================================= */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "--";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================
+   FORMAT TIME
+========================================= */
+
+function formatTime(
+    value
+) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    const parts =
+        String(
+            value
+        ).split(":");
+
+
+    if (
+        parts.length < 2
+    ) {
+
+        return value;
+
+    }
+
+
+    let hour =
+        parseInt(
+            parts[0],
+            10
+        );
+
+
+    const minute =
+        parts[1];
+
+
+    if (
+        Number.isNaN(hour)
+    ) {
+
+        return value;
+
+    }
+
+
+    const suffix =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+
+    hour =
+        hour % 12;
+
+
+    if (hour === 0) {
+
+        hour = 12;
+
+    }
+
+
+    return `${hour}:${minute} ${suffix}`;
+
+}
+
+
+/* =========================================
+   CAPITALIZE STATUS
+========================================= */
+
+function capitalizeStatus(
+    status
+) {
+
+    if (!status) {
+
+        return "";
+
+    }
+
+
+    const text =
+        String(
+            status
+        );
+
+
+    return text.charAt(0).toUpperCase() +
+        text.slice(1);
+
+}
+
+
+/* =========================================
+   DASHBOARD ERROR
+========================================= */
+
+function showDashboardError(
+    message
+) {
+
+    console.error(
+        message
+    );
+
+
+    if (totalMeetings) {
+
+        totalMeetings.textContent =
+            "--";
+
+    }
+
+
+    if (totalMembers) {
+
+        totalMembers.textContent =
+            "--";
+
+    }
+
+
+    if (attendanceRate) {
+
+        attendanceRate.textContent =
+            "--";
+
+    }
+
+
+    if (upcomingMeeting) {
+
+        upcomingMeeting.innerHTML = `
+
+            <div class="meeting-icon">
+                !
+            </div>
+
+            <div class="meeting-info">
+
+                <strong>
+                    Unable to load dashboard
+                </strong>
+
+                <span>
+                    ${escapeHtml(message)}
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    if (meetingsTable) {
+
+        meetingsTable.innerHTML = "";
+
+    }
+
+
+    if (noMeetings) {
+
+        noMeetings.style.display =
+            "block";
+
+        noMeetings.textContent =
+            "Unable to load meetings.";
+
+    }
+
+}
 
 
 /* =========================================
@@ -448,7 +1085,7 @@ if (logoutButton) {
 
     logoutButton.addEventListener(
         "click",
-        () => {
+        function () {
 
             const confirmLogout =
                 confirm(
@@ -457,7 +1094,9 @@ if (logoutButton) {
 
 
             if (!confirmLogout) {
+
                 return;
+
             }
 
 
@@ -477,7 +1116,27 @@ if (logoutButton) {
 
 
             sessionStorage.removeItem(
+                "officerRole"
+            );
+
+
+            sessionStorage.removeItem(
+                "officerStatus"
+            );
+
+
+            sessionStorage.removeItem(
+                "officerOrganizationId"
+            );
+
+
+            sessionStorage.removeItem(
                 "officerOrganization"
+            );
+
+
+            sessionStorage.removeItem(
+                "officerClubRole"
             );
 
 
@@ -502,7 +1161,7 @@ if (
 
     menuButton.addEventListener(
         "click",
-        () => {
+        function () {
 
             sidebar.classList.add(
                 "open"
@@ -561,52 +1220,68 @@ const navigationLinks =
     );
 
 
-navigationLinks.forEach(link => {
+navigationLinks.forEach(
+    function (link) {
 
-    link.addEventListener(
-        "click",
-        () => {
+        link.addEventListener(
+            "click",
+            function () {
 
-            closeSidebar();
+                closeSidebar();
 
-        }
-    );
+            }
+        );
 
-});
+    }
+);
 
 
 /* =========================================
    HELPERS
 ========================================= */
 
-function getFirstName(name) {
+function getFirstName(
+    name
+) {
 
     if (!name) {
+
         return "Officer";
+
     }
 
 
-    return name
-        .trim()
-        .split(/\s+/)[0];
+    return String(
+        name
+    )
+    .trim()
+    .split(/\s+/)[0];
 
 }
 
 
-function getInitials(name) {
+function getInitials(
+    name
+) {
 
     if (!name) {
+
         return "OF";
+
     }
 
 
     const parts =
-        name
-            .trim()
-            .split(/\s+/);
+        String(
+            name
+        )
+        .trim()
+        .split(/\s+/);
 
 
-    if (parts.length === 1) {
+    if (
+        parts.length === 1
+    ) {
 
         return parts[0]
             .substring(0, 2)
@@ -617,7 +1292,37 @@ function getInitials(name) {
 
     return (
         parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
+        parts[
+            parts.length - 1
+        ].charAt(0)
     ).toUpperCase();
 
 }
+
+
+function escapeHtml(
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(
+            value ?? ""
+        );
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================
+   START
+========================================= */
+
+loadDashboard();

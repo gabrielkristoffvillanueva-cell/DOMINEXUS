@@ -1,6 +1,9 @@
 /* =========================================
-   DOMINEXUS OFFICER MEETINGS
+   DOMINEXUS — OFFICER MEETINGS
+   Laravel / MySQL Connected
 ========================================= */
+
+const API_BASE = "http://127.0.0.1:8000/api";
 
 
 /* =========================================
@@ -11,10 +14,7 @@ const officerLoggedIn =
     sessionStorage.getItem("officerLoggedIn");
 
 if (officerLoggedIn !== "true") {
-
-    window.location.href =
-        "officer-login.html";
-
+    window.location.href = "officer-login.html";
 }
 
 
@@ -23,12 +23,21 @@ if (officerLoggedIn !== "true") {
 ========================================= */
 
 const officerName =
-    sessionStorage.getItem("officerName")
-    || "Demo Officer";
+    sessionStorage.getItem("officerName") ||
+    "Officer";
 
 const officerId =
-    sessionStorage.getItem("officerId")
-    || "OFF-0001";
+    sessionStorage.getItem("officerId");
+
+
+if (!officerId) {
+    alert("Officer session expired. Please log in again.");
+
+    sessionStorage.clear();
+
+    window.location.href =
+        "officer-login.html";
+}
 
 
 /* =========================================
@@ -121,44 +130,128 @@ const sidebarOverlay =
 
 
 /* =========================================
-   DISPLAY OFFICER
+   OFFICER DISPLAY
 ========================================= */
 
-topOfficerName.textContent =
-    officerName;
+if (topOfficerName) {
+    topOfficerName.textContent =
+        officerName;
+}
 
-topOfficerId.textContent =
-    officerId;
+if (topOfficerId) {
+    topOfficerId.textContent =
+        officerId;
+}
 
-topAvatar.textContent =
-    getInitials(officerName);
+if (topAvatar) {
+    topAvatar.textContent =
+        getInitials(officerName);
+}
 
 
 /* =========================================
-   MEETING STORAGE
+   MEETING DATA
 ========================================= */
 
-let meetings =
-    JSON.parse(
-        localStorage.getItem(
-            "dominexus_meetings"
-        ) || "[]"
-    );
-
+let meetings = [];
 
 let meetingToDelete = null;
 
 
 /* =========================================
-   SAVE MEETINGS
+   LOAD MEETINGS FROM LARAVEL
 ========================================= */
 
-function saveMeetings() {
+async function loadMeetings() {
 
-    localStorage.setItem(
-        "dominexus_meetings",
-        JSON.stringify(meetings)
-    );
+    try {
+
+        showLoading();
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/meetings?officer_id=${encodeURIComponent(officerId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Meetings response:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load meetings."
+            );
+
+        }
+
+
+        meetings =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        displayMeetings();
+
+
+    } catch (error) {
+
+        console.error(
+            "Load meetings error:",
+            error
+        );
+
+
+        meetings = [];
+
+
+        meetingsGrid.innerHTML = "";
+
+
+        emptyState.style.display =
+            "block";
+
+
+        emptyState.innerHTML = `
+
+            <div class="empty-icon">
+                !
+            </div>
+
+            <h3>
+                Unable to load meetings
+            </h3>
+
+            <p>
+                ${escapeHTML(
+                    error.message
+                )}
+            </p>
+
+        `;
+
+
+        updateSummary();
+
+    }
 
 }
 
@@ -174,70 +267,85 @@ function displayMeetings() {
             .trim()
             .toLowerCase();
 
+
     const filter =
         statusFilter.value;
 
 
     const filtered =
-        meetings.filter(meeting => {
+        meetings.filter(
+            function (meeting) {
 
-            const title =
-                meeting.title ||
-                meeting.name ||
-                "";
-
-            const description =
-                meeting.description ||
-                "";
-
-            const matchesSearch =
-
-                title
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                description
-                    .toLowerCase()
-                    .includes(search);
+                const title =
+                    meeting.title ||
+                    "";
 
 
-            const completed =
-                isMeetingCompleted(meeting);
+                const location =
+                    meeting.location ||
+                    "";
 
 
-            let matchesFilter = true;
+                const matchesSearch =
+                    title
+                        .toLowerCase()
+                        .includes(search)
+                    ||
+                    location
+                        .toLowerCase()
+                        .includes(search);
 
 
-            if (filter === "upcoming") {
+                const status =
+                    getMeetingStatus(
+                        meeting
+                    );
 
-                matchesFilter =
-                    !completed;
+
+                let matchesFilter =
+                    true;
+
+
+                if (
+                    filter ===
+                    "upcoming"
+                ) {
+
+                    matchesFilter =
+                        status ===
+                        "upcoming";
+
+                }
+
+
+                if (
+                    filter ===
+                    "completed"
+                ) {
+
+                    matchesFilter =
+                        status ===
+                        "completed";
+
+                }
+
+
+                return (
+                    matchesSearch &&
+                    matchesFilter
+                );
 
             }
+        );
 
 
-            if (filter === "completed") {
-
-                matchesFilter =
-                    completed;
-
-            }
+    meetingsGrid.innerHTML =
+        "";
 
 
-            return (
-                matchesSearch &&
-                matchesFilter
-            );
-
-        });
-
-
-    meetingsGrid.innerHTML = "";
-
-
-    if (filtered.length === 0) {
+    if (
+        filtered.length === 0
+    ) {
 
         emptyState.style.display =
             "block";
@@ -250,13 +358,17 @@ function displayMeetings() {
     }
 
 
-    filtered.forEach(meeting => {
+    filtered.forEach(
+        function (meeting) {
 
-        meetingsGrid.appendChild(
-            createMeetingCard(meeting)
-        );
+            meetingsGrid.appendChild(
+                createMeetingCard(
+                    meeting
+                )
+            );
 
-    });
+        }
+    );
 
 
     updateSummary();
@@ -268,10 +380,15 @@ function displayMeetings() {
    CREATE MEETING CARD
 ========================================= */
 
-function createMeetingCard(meeting) {
+function createMeetingCard(
+    meeting
+) {
 
     const card =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     card.className =
         "meeting-card";
@@ -282,27 +399,21 @@ function createMeetingCard(meeting) {
         "Untitled Meeting";
 
 
-    const date =
-        meeting.date ||
-        "";
-
-
-    const time =
-        meeting.time ||
-        "No time";
-
-
     const description =
         meeting.description ||
-        "No description provided.";
+        "Organization meeting";
 
 
-    const completed =
-        isMeetingCompleted(meeting);
+    const status =
+        getMeetingStatus(
+            meeting
+        );
 
 
     const dateObject =
-        parseMeetingDate(meeting);
+        parseMeetingDate(
+            meeting
+        );
 
 
     let month = "—";
@@ -321,6 +432,7 @@ function createMeetingCard(meeting) {
                 )
                 .toUpperCase();
 
+
         day =
             dateObject.getDate();
 
@@ -328,15 +440,53 @@ function createMeetingCard(meeting) {
 
 
     const statusText =
-        completed
+        status === "completed"
             ? "COMPLETED"
-            : "UPCOMING";
+            : status === "ongoing"
+                ? "ONGOING"
+                : "UPCOMING";
 
 
     const statusClass =
-        completed
+        status === "completed"
             ? "completed"
             : "";
+
+
+    const location =
+        meeting.location ||
+        "Location not specified";
+
+
+    const dateText =
+        formatDate(
+            meeting.date
+        );
+
+
+    const timeText =
+        formatTime(
+            meeting.start_time
+        );
+
+
+    const endTimeText =
+        formatTime(
+            meeting.end_time
+        );
+
+
+    let fullTime =
+        timeText;
+
+
+    if (endTimeText) {
+
+        fullTime +=
+            " - " +
+            endTimeText;
+
+    }
 
 
     card.innerHTML = `
@@ -387,9 +537,7 @@ function createMeetingCard(meeting) {
                 </span>
 
                 <span>
-                    ${escapeHTML(
-                        formatDate(date)
-                    )}
+                    ${escapeHTML(dateText)}
                 </span>
 
             </div>
@@ -402,9 +550,20 @@ function createMeetingCard(meeting) {
                 </span>
 
                 <span>
-                    ${escapeHTML(
-                        formatTime(time)
-                    )}
+                    ${escapeHTML(fullTime)}
+                </span>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span class="info-icon">
+                    ⌖
+                </span>
+
+                <span>
+                    ${escapeHTML(location)}
                 </span>
 
             </div>
@@ -417,9 +576,7 @@ function createMeetingCard(meeting) {
             <button
                 class="edit-button"
                 data-action="edit"
-                data-id="${escapeHTML(
-                    meeting.id
-                )}">
+                data-id="${meeting.id}">
 
                 Edit
 
@@ -429,9 +586,7 @@ function createMeetingCard(meeting) {
             <button
                 class="delete-meeting-button"
                 data-action="delete"
-                data-id="${escapeHTML(
-                    meeting.id
-                )}">
+                data-id="${meeting.id}">
 
                 Delete
 
@@ -448,15 +603,17 @@ function createMeetingCard(meeting) {
 
 
 /* =========================================
-   CARD ACTIONS
+   CARD BUTTONS
 ========================================= */
 
 meetingsGrid.addEventListener(
     "click",
-    event => {
+    function (event) {
 
         const button =
-            event.target.closest("button");
+            event.target.closest(
+                "button"
+            );
 
 
         if (!button) {
@@ -467,20 +624,29 @@ meetingsGrid.addEventListener(
         const id =
             button.dataset.id;
 
+
         const action =
             button.dataset.action;
 
 
-        if (action === "edit") {
+        if (
+            action === "edit"
+        ) {
 
-            openEditMeeting(id);
+            openEditMeeting(
+                id
+            );
 
         }
 
 
-        if (action === "delete") {
+        if (
+            action === "delete"
+        ) {
 
-            openDeleteMeeting(id);
+            openDeleteMeeting(
+                id
+            );
 
         }
 
@@ -489,34 +655,28 @@ meetingsGrid.addEventListener(
 
 
 /* =========================================
-   OPEN CREATE
+   CREATE MEETING
 ========================================= */
 
 openCreateButton.addEventListener(
     "click",
-    () => {
+    function () {
 
-        openCreateMeeting();
+        meetingForm.reset();
+
+        editingMeetingId.value =
+            "";
+
+        modalTitle.textContent =
+            "Create Meeting";
+
+
+        meetingModal.classList.add(
+            "show"
+        );
 
     }
 );
-
-
-function openCreateMeeting() {
-
-    meetingForm.reset();
-
-    editingMeetingId.value = "";
-
-    modalTitle.textContent =
-        "Create Meeting";
-
-
-    meetingModal.classList.add(
-        "show"
-    );
-
-}
 
 
 /* =========================================
@@ -525,54 +685,28 @@ function openCreateMeeting() {
 
 function openEditMeeting(id) {
 
-    const meeting =
-        meetings.find(
-            item =>
-                String(item.id) ===
-                String(id)
-        );
+    /*
+     * Your backend currently has no PUT/PATCH
+     * update route, so we don't pretend that
+     * Edit is working.
+     */
 
-
-    if (!meeting) {
-        return;
-    }
-
-
-    editingMeetingId.value =
-        meeting.id;
-
-    meetingTitle.value =
-        meeting.title || "";
-
-    meetingDate.value =
-        meeting.date || "";
-
-    meetingTime.value =
-        meeting.time || "";
-
-    meetingDescription.value =
-        meeting.description || "";
-
-
-    modalTitle.textContent =
-        "Edit Meeting";
-
-
-    meetingModal.classList.add(
-        "show"
+    alert(
+        "Edit Meeting is not available yet. We will connect it after the meeting update API is added."
     );
 
 }
 
 
 /* =========================================
-   CLOSE MEETING MODAL
+   CLOSE CREATE MODAL
 ========================================= */
 
 closeModal.addEventListener(
     "click",
     closeMeetingModal
 );
+
 
 cancelButton.addEventListener(
     "click",
@@ -582,7 +716,7 @@ cancelButton.addEventListener(
 
 meetingModal.addEventListener(
     "click",
-    event => {
+    function (event) {
 
         if (
             event.target ===
@@ -607,12 +741,12 @@ function closeMeetingModal() {
 
 
 /* =========================================
-   SAVE MEETING
+   CREATE MEETING
 ========================================= */
 
 meetingForm.addEventListener(
     "submit",
-    event => {
+    async function (event) {
 
         event.preventDefault();
 
@@ -620,11 +754,14 @@ meetingForm.addEventListener(
         const title =
             meetingTitle.value.trim();
 
+
         const date =
             meetingDate.value;
 
-        const time =
+
+        const startTime =
             meetingTime.value;
+
 
         const description =
             meetingDescription.value.trim();
@@ -633,7 +770,7 @@ meetingForm.addEventListener(
         if (
             !title ||
             !date ||
-            !time
+            !startTime
         ) {
 
             alert(
@@ -645,82 +782,158 @@ meetingForm.addEventListener(
         }
 
 
-        const existingId =
-            editingMeetingId.value;
+        /*
+         * The backend currently accepts:
+         *
+         * officer_id
+         * title
+         * date
+         * start_time
+         * end_time
+         * location
+         * status
+         *
+         * The HTML currently has no end-time
+         * or location field, so those remain null.
+         */
+
+        const payload = {
+
+            officer_id:
+                officerId,
+
+            title:
+                title,
+
+            date:
+                date,
+
+            start_time:
+                startTime,
+
+            end_time:
+                null,
+
+            location:
+                null,
+
+            status:
+                "upcoming"
+
+        };
 
 
-        if (existingId) {
-
-            const index =
-                meetings.findIndex(
-                    meeting =>
-                        String(
-                            meeting.id
-                        ) ===
-                        String(existingId)
-                );
+        const saveButton =
+            meetingForm.querySelector(
+                ".save-button"
+            );
 
 
-            if (index !== -1) {
+        const originalText =
+            saveButton
+                ? saveButton.textContent
+                : "Save Meeting";
 
-                meetings[index] = {
 
-                    ...meetings[index],
+        try {
 
-                    title,
-                    date,
-                    time,
-                    description
+            if (saveButton) {
 
-                };
+                saveButton.disabled =
+                    true;
+
+                saveButton.textContent =
+                    "Saving...";
 
             }
 
-        } else {
 
-            const newMeeting = {
+            const response =
+                await fetch(
+                    `${API_BASE}/meetings`,
+                    {
+                        method: "POST",
 
-                id:
-                    "meeting-" +
-                    Date.now(),
+                        headers: {
 
-                title,
+                            "Content-Type":
+                                "application/json",
 
-                date,
+                            "Accept":
+                                "application/json"
 
-                time,
+                        },
 
-                description,
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
 
-                createdBy:
-                    officerId,
-
-                createdAt:
-                    new Date()
-                        .toISOString()
-
-            };
+                    }
+                );
 
 
-            meetings.push(
-                newMeeting
+            const data =
+                await response.json();
+
+
+            console.log(
+                "Create meeting response:",
+                data
             );
 
+
+            if (!response.ok) {
+
+                throw new Error(
+                    getValidationMessage(
+                        data
+                    )
+                );
+
+            }
+
+
+            closeMeetingModal();
+
+
+            meetingForm.reset();
+
+
+            await loadMeetings();
+
+
+            alert(
+                "Meeting created successfully."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Create meeting error:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Unable to create meeting."
+            );
+
+        } finally {
+
+            if (saveButton) {
+
+                saveButton.disabled =
+                    false;
+
+                saveButton.textContent =
+                    originalText;
+
+            }
+
         }
-
-
-        saveMeetings();
-
-        displayMeetings();
-
-        closeMeetingModal();
-
-
-        alert(
-            existingId
-                ? "Meeting updated successfully."
-                : "Meeting created successfully."
-        );
 
     }
 );
@@ -732,7 +945,9 @@ meetingForm.addEventListener(
 
 function openDeleteMeeting(id) {
 
-    meetingToDelete = id;
+    meetingToDelete =
+        id;
+
 
     deleteModal.classList.add(
         "show"
@@ -743,9 +958,11 @@ function openDeleteMeeting(id) {
 
 cancelDelete.addEventListener(
     "click",
-    () => {
+    function () {
 
-        meetingToDelete = null;
+        meetingToDelete =
+            null;
+
 
         deleteModal.classList.remove(
             "show"
@@ -757,31 +974,100 @@ cancelDelete.addEventListener(
 
 confirmDelete.addEventListener(
     "click",
-    () => {
+    async function () {
 
         if (!meetingToDelete) {
             return;
         }
 
 
-        meetings =
-            meetings.filter(
-                meeting =>
-                    String(meeting.id) !==
-                    String(meetingToDelete)
+        const id =
+            meetingToDelete;
+
+
+        try {
+
+            confirmDelete.disabled =
+                true;
+
+
+            confirmDelete.textContent =
+                "Deleting...";
+
+
+            const response =
+                await fetch(
+                    `${API_BASE}/meetings/${encodeURIComponent(id)}?officer_id=${encodeURIComponent(officerId)}`,
+                    {
+                        method: "DELETE",
+
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "Delete meeting response:",
+                data
             );
 
 
-        saveMeetings();
+            if (!response.ok) {
 
-        displayMeetings();
+                throw new Error(
+                    data.message ||
+                    "Unable to delete meeting."
+                );
+
+            }
 
 
-        meetingToDelete = null;
+            deleteModal.classList.remove(
+                "show"
+            );
 
-        deleteModal.classList.remove(
-            "show"
-        );
+
+            meetingToDelete =
+                null;
+
+
+            await loadMeetings();
+
+
+            alert(
+                "Meeting deleted successfully."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Delete meeting error:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Unable to delete meeting."
+            );
+
+        } finally {
+
+            confirmDelete.disabled =
+                false;
+
+            confirmDelete.textContent =
+                "Delete";
+
+        }
 
     }
 );
@@ -789,14 +1075,16 @@ confirmDelete.addEventListener(
 
 deleteModal.addEventListener(
     "click",
-    event => {
+    function (event) {
 
         if (
             event.target ===
             deleteModal
         ) {
 
-            meetingToDelete = null;
+            meetingToDelete =
+                null;
+
 
             deleteModal.classList.remove(
                 "show"
@@ -818,25 +1106,543 @@ function updateSummary() {
         meetings.length;
 
 
-    const completed =
+    const upcoming =
         meetings.filter(
-            meeting =>
-                isMeetingCompleted(meeting)
+            function (meeting) {
+
+                return (
+                    getMeetingStatus(
+                        meeting
+                    ) === "upcoming"
+                );
+
+            }
         ).length;
 
 
-    const upcoming =
-        total - completed;
+    const completed =
+        meetings.filter(
+            function (meeting) {
+
+                return (
+                    getMeetingStatus(
+                        meeting
+                    ) === "completed"
+                );
+
+            }
+        ).length;
 
 
     totalMeetings.textContent =
         total;
 
+
     upcomingMeetings.textContent =
         upcoming;
 
+
     completedMeetings.textContent =
         completed;
+
+}
+
+
+/* =========================================
+   MEETING STATUS
+========================================= */
+
+function getMeetingStatus(
+    meeting
+) {
+
+    const backendStatus =
+        String(
+            meeting.status ||
+            ""
+        ).toLowerCase();
+
+
+    /*
+     * Trust backend status first.
+     */
+
+    if (
+        backendStatus ===
+        "cancelled"
+    ) {
+
+        return "cancelled";
+
+    }
+
+
+    if (
+        backendStatus ===
+        "completed"
+    ) {
+
+        return "completed";
+
+    }
+
+
+    if (
+        backendStatus ===
+        "ongoing"
+    ) {
+
+        return "ongoing";
+
+    }
+
+
+    /*
+     * If backend says upcoming,
+     * keep it upcoming.
+     */
+
+    if (
+        backendStatus ===
+        "upcoming"
+    ) {
+
+        return "upcoming";
+
+    }
+
+
+    /*
+     * Fallback based on date/time.
+     */
+
+    const date =
+        parseMeetingDate(
+            meeting
+        );
+
+
+    if (!date) {
+
+        return "upcoming";
+
+    }
+
+
+    return date < new Date()
+        ? "completed"
+        : "upcoming";
+
+}
+
+
+/* =========================================
+   PARSE MEETING DATE
+========================================= */
+
+function parseMeetingDate(
+    meeting
+) {
+
+    if (!meeting.date) {
+
+        return null;
+
+    }
+
+
+    const time =
+        meeting.start_time ||
+        "00:00";
+
+
+    const date =
+        new Date(
+            `${meeting.date}T${time}`
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================
+   FORMAT DATE
+========================================= */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "No date";
+
+    }
+
+
+    const date =
+        new Date(
+            `${value}T00:00`
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================
+   FORMAT TIME
+========================================= */
+
+function formatTime(
+    value
+) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    const parts =
+        String(value)
+            .split(":");
+
+
+    if (
+        parts.length < 2
+    ) {
+
+        return value;
+
+    }
+
+
+    let hour =
+        parseInt(
+            parts[0],
+            10
+        );
+
+
+    const minute =
+        parts[1];
+
+
+    if (
+        Number.isNaN(hour)
+    ) {
+
+        return value;
+
+    }
+
+
+    const period =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+
+    hour =
+        hour % 12;
+
+
+    if (hour === 0) {
+
+        hour = 12;
+
+    }
+
+
+    return `${hour}:${minute} ${period}`;
+
+}
+
+
+/* =========================================
+   LOADING STATE
+========================================= */
+
+function showLoading() {
+
+    meetingsGrid.innerHTML = `
+
+        <div style="
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+        ">
+
+            Loading meetings...
+
+        </div>
+
+    `;
+
+
+    emptyState.style.display =
+        "none";
+
+}
+
+
+/* =========================================
+   VALIDATION ERROR
+========================================= */
+
+function getValidationMessage(
+    data
+) {
+
+    if (
+        data &&
+        data.errors
+    ) {
+
+        const firstField =
+            Object.keys(
+                data.errors
+            )[0];
+
+
+        if (
+            firstField &&
+            data.errors[firstField] &&
+            data.errors[firstField][0]
+        ) {
+
+            return data.errors[
+                firstField
+            ][0];
+
+        }
+
+    }
+
+
+    return (
+        data.message ||
+        "Unable to complete the request."
+    );
+
+}
+
+
+/* =========================================
+   INITIALS
+========================================= */
+
+function getInitials(
+    name
+) {
+
+    if (!name) {
+
+        return "OF";
+
+    }
+
+
+    const parts =
+        name
+            .trim()
+            .split(/\s+/);
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[
+            parts.length - 1
+        ].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================
+   LOGOUT
+========================================= */
+
+logoutButton.addEventListener(
+    "click",
+    function () {
+
+        const confirmLogout =
+            confirm(
+                "Are you sure you want to log out?"
+            );
+
+
+        if (!confirmLogout) {
+
+            return;
+
+        }
+
+
+        sessionStorage.removeItem(
+            "officerLoggedIn"
+        );
+
+        sessionStorage.removeItem(
+            "officerId"
+        );
+
+        sessionStorage.removeItem(
+            "officerName"
+        );
+
+        sessionStorage.removeItem(
+            "officerRole"
+        );
+
+        sessionStorage.removeItem(
+            "officerStatus"
+        );
+
+        sessionStorage.removeItem(
+            "officerOrganizationId"
+        );
+
+        sessionStorage.removeItem(
+            "officerOrganization"
+        );
+
+        sessionStorage.removeItem(
+            "officerClubRole"
+        );
+
+
+        window.location.href =
+            "officer-login.html";
+
+    }
+);
+
+
+/* =========================================
+   MOBILE MENU
+========================================= */
+
+if (
+    menuButton &&
+    sidebar &&
+    sidebarOverlay
+) {
+
+    menuButton.addEventListener(
+        "click",
+        function () {
+
+            sidebar.classList.add(
+                "open"
+            );
+
+            sidebarOverlay.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+    sidebarOverlay.addEventListener(
+        "click",
+        closeSidebar
+    );
+
+}
+
+
+function closeSidebar() {
+
+    sidebar.classList.remove(
+        "open"
+    );
+
+    sidebarOverlay.classList.remove(
+        "show"
+    );
 
 }
 
@@ -862,300 +1668,7 @@ statusFilter.addEventListener(
 
 
 /* =========================================
-   CHECK MEETING DATE
-========================================= */
-
-function isMeetingCompleted(meeting) {
-
-    const meetingDate =
-        parseMeetingDate(meeting);
-
-
-    if (!meetingDate) {
-
-        return false;
-
-    }
-
-
-    return meetingDate < new Date();
-
-}
-
-
-/* =========================================
-   PARSE DATE
-========================================= */
-
-function parseMeetingDate(meeting) {
-
-    if (!meeting.date) {
-        return null;
-    }
-
-
-    const dateString =
-        meeting.date;
-
-
-    const timeString =
-        meeting.time ||
-        "00:00";
-
-
-    const date =
-        new Date(
-            `${dateString}T${timeString}`
-        );
-
-
-    if (Number.isNaN(date.getTime())) {
-
-        return null;
-
-    }
-
-
-    return date;
-
-}
-
-
-/* =========================================
-   FORMAT DATE
-========================================= */
-
-function formatDate(date) {
-
-    if (!date) {
-        return "No date";
-    }
-
-
-    const dateObject =
-        new Date(
-            `${date}T00:00`
-        );
-
-
-    if (Number.isNaN(
-        dateObject.getTime()
-    )) {
-
-        return date;
-
-    }
-
-
-    return dateObject.toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }
-    );
-
-}
-
-
-/* =========================================
-   FORMAT TIME
-========================================= */
-
-function formatTime(time) {
-
-    if (!time) {
-        return "No time";
-    }
-
-
-    const parts =
-        time.split(":");
-
-
-    if (parts.length < 2) {
-
-        return time;
-
-    }
-
-
-    let hour =
-        parseInt(
-            parts[0],
-            10
-        );
-
-    const minute =
-        parts[1];
-
-
-    const period =
-        hour >= 12
-            ? "PM"
-            : "AM";
-
-
-    hour =
-        hour % 12 || 12;
-
-
-    return (
-        hour +
-        ":" +
-        minute +
-        " " +
-        period
-    );
-
-}
-
-
-/* =========================================
-   INITIALS
-========================================= */
-
-function getInitials(name) {
-
-    const parts =
-        name
-            .trim()
-            .split(/\s+/);
-
-
-    if (parts.length === 1) {
-
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-
-    return (
-        parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
-
-}
-
-
-/* =========================================
-   SECURITY
-========================================= */
-
-function escapeHTML(value) {
-
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-/* =========================================
-   LOGOUT
-========================================= */
-
-logoutButton.addEventListener(
-    "click",
-    () => {
-
-        const confirmLogout =
-            confirm(
-                "Are you sure you want to log out?"
-            );
-
-
-        if (!confirmLogout) {
-            return;
-        }
-
-
-        sessionStorage.removeItem(
-            "officerLoggedIn"
-        );
-
-        sessionStorage.removeItem(
-            "officerId"
-        );
-
-        sessionStorage.removeItem(
-            "officerName"
-        );
-
-        sessionStorage.removeItem(
-            "officerOrganization"
-        );
-
-
-        window.location.href =
-            "officer-login.html";
-
-    }
-);
-
-
-/* =========================================
-   MOBILE MENU
-========================================= */
-
-menuButton.addEventListener(
-    "click",
-    () => {
-
-        sidebar.classList.add(
-            "open"
-        );
-
-        sidebarOverlay.classList.add(
-            "show"
-        );
-
-    }
-);
-
-
-sidebarOverlay.addEventListener(
-    "click",
-    closeSidebar
-);
-
-
-function closeSidebar() {
-
-    sidebar.classList.remove(
-        "open"
-    );
-
-    sidebarOverlay.classList.remove(
-        "show"
-    );
-
-}
-
-
-/* =========================================
    INITIALIZE
 ========================================= */
 
-displayMeetings();
+loadMeetings();
