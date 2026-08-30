@@ -1,48 +1,44 @@
-/* =========================================
+/* =========================================================
    DOMINEXUS — OFFICER MEETINGS
-   Laravel / MySQL Connected
-========================================= */
+   Laravel API Connected
+========================================================= */
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
 
-/* =========================================
-   CHECK OFFICER LOGIN
-========================================= */
+/* =========================================================
+   LOGIN
+========================================================= */
 
-const officerLoggedIn =
-    sessionStorage.getItem("officerLoggedIn");
-
-if (officerLoggedIn !== "true") {
+if (
+    sessionStorage.getItem("officerLoggedIn") !== "true"
+) {
     window.location.href = "officer-login.html";
 }
 
 
-/* =========================================
-   OFFICER INFORMATION
-========================================= */
+const officerId =
+    sessionStorage.getItem("officerId") || "";
 
 const officerName =
-    sessionStorage.getItem("officerName") ||
-    "Officer";
-
-const officerId =
-    sessionStorage.getItem("officerId");
+    sessionStorage.getItem("officerName") || "Officer";
 
 
-if (!officerId) {
-    alert("Officer session expired. Please log in again.");
-
-    sessionStorage.clear();
-
-    window.location.href =
-        "officer-login.html";
-}
-
-
-/* =========================================
+/* =========================================================
    ELEMENTS
-========================================= */
+========================================================= */
+
+const sidebar =
+    document.getElementById("sidebar");
+
+const sidebarOverlay =
+    document.getElementById("sidebarOverlay");
+
+const menuButton =
+    document.getElementById("menuButton");
+
+const logoutButton =
+    document.getElementById("logoutButton");
 
 const topOfficerName =
     document.getElementById("topOfficerName");
@@ -52,15 +48,6 @@ const topOfficerId =
 
 const topAvatar =
     document.getElementById("topAvatar");
-
-const totalMeetings =
-    document.getElementById("totalMeetings");
-
-const upcomingMeetings =
-    document.getElementById("upcomingMeetings");
-
-const completedMeetings =
-    document.getElementById("completedMeetings");
 
 const meetingsGrid =
     document.getElementById("meetingsGrid");
@@ -74,11 +61,25 @@ const searchInput =
 const statusFilter =
     document.getElementById("statusFilter");
 
-const openCreateButton =
-    document.getElementById("openCreateButton");
+const totalMeetings =
+    document.getElementById("totalMeetings");
+
+const upcomingMeetings =
+    document.getElementById("upcomingMeetings");
+
+const completedMeetings =
+    document.getElementById("completedMeetings");
+
+
+/* =========================================================
+   CREATE / EDIT MODAL
+========================================================= */
 
 const meetingModal =
     document.getElementById("meetingModal");
+
+const openCreateButton =
+    document.getElementById("openCreateButton");
 
 const closeModal =
     document.getElementById("closeModal");
@@ -107,6 +108,11 @@ const meetingTime =
 const meetingDescription =
     document.getElementById("meetingDescription");
 
+
+/* =========================================================
+   DELETE MODAL
+========================================================= */
+
 const deleteModal =
     document.getElementById("deleteModal");
 
@@ -116,22 +122,19 @@ const cancelDelete =
 const confirmDelete =
     document.getElementById("confirmDelete");
 
-const logoutButton =
-    document.getElementById("logoutButton");
 
-const menuButton =
-    document.getElementById("menuButton");
+/* =========================================================
+   DATA
+========================================================= */
 
-const sidebar =
-    document.getElementById("sidebar");
+let meetings = [];
 
-const sidebarOverlay =
-    document.getElementById("sidebarOverlay");
+let currentDeleteId = null;
 
 
-/* =========================================
-   OFFICER DISPLAY
-========================================= */
+/* =========================================================
+   TOPBAR
+========================================================= */
 
 if (topOfficerName) {
     topOfficerName.textContent =
@@ -140,7 +143,7 @@ if (topOfficerName) {
 
 if (topOfficerId) {
     topOfficerId.textContent =
-        officerId;
+        officerId || "Officer ID";
 }
 
 if (topAvatar) {
@@ -149,29 +152,44 @@ if (topAvatar) {
 }
 
 
-/* =========================================
-   MEETING DATA
-========================================= */
-
-let meetings = [];
-
-let meetingToDelete = null;
-
-
-/* =========================================
-   LOAD MEETINGS FROM LARAVEL
-========================================= */
+/* =========================================================
+   LOAD MEETINGS
+========================================================= */
 
 async function loadMeetings() {
 
+    if (meetingsGrid) {
+
+        meetingsGrid.innerHTML = `
+            <div style="
+                grid-column:1/-1;
+                text-align:center;
+                padding:40px;
+                color:#888;
+            ">
+                Loading meetings...
+            </div>
+        `;
+
+    }
+
+
     try {
 
-        showLoading();
+        if (!officerId) {
+
+            throw new Error(
+                "Officer ID is missing."
+            );
+
+        }
 
 
         const response =
             await fetch(
-                `${API_BASE}/meetings?officer_id=${encodeURIComponent(officerId)}`,
+                `${API_BASE}/meetings?officer_id=${encodeURIComponent(
+                    officerId
+                )}`,
                 {
                     method: "GET",
 
@@ -188,7 +206,7 @@ async function loadMeetings() {
 
 
         console.log(
-            "Meetings response:",
+            "DOMINEXUS meetings:",
             data
         );
 
@@ -206,7 +224,7 @@ async function loadMeetings() {
         meetings =
             Array.isArray(data)
                 ? data
-                : [];
+                : data.meetings || [];
 
 
         displayMeetings();
@@ -215,7 +233,7 @@ async function loadMeetings() {
     } catch (error) {
 
         console.error(
-            "Load meetings error:",
+            "MEETINGS LOAD ERROR:",
             error
         );
 
@@ -223,30 +241,20 @@ async function loadMeetings() {
         meetings = [];
 
 
-        meetingsGrid.innerHTML = "";
+        if (meetingsGrid) {
 
+            meetingsGrid.innerHTML = `
+                <div style="
+                    grid-column:1/-1;
+                    text-align:center;
+                    padding:40px;
+                    color:#a33;
+                ">
+                    Unable to load meetings.
+                </div>
+            `;
 
-        emptyState.style.display =
-            "block";
-
-
-        emptyState.innerHTML = `
-
-            <div class="empty-icon">
-                !
-            </div>
-
-            <h3>
-                Unable to load meetings
-            </h3>
-
-            <p>
-                ${escapeHTML(
-                    error.message
-                )}
-            </p>
-
-        `;
+        }
 
 
         updateSummary();
@@ -256,119 +264,107 @@ async function loadMeetings() {
 }
 
 
-/* =========================================
+/* =========================================================
    DISPLAY MEETINGS
-========================================= */
+========================================================= */
 
 function displayMeetings() {
 
     const search =
-        searchInput.value
-            .trim()
-            .toLowerCase();
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : "";
 
 
-    const filter =
-        statusFilter.value;
+    const selectedStatus =
+        statusFilter
+            ? statusFilter.value
+            : "all";
 
 
     const filtered =
         meetings.filter(
-            function (meeting) {
+            meeting => {
 
                 const title =
-                    meeting.title ||
-                    "";
+                    String(
+                        meeting.title ||
+                        ""
+                    ).toLowerCase();
 
 
                 const location =
-                    meeting.location ||
-                    "";
-
-
-                const matchesSearch =
-                    title
-                        .toLowerCase()
-                        .includes(search)
-                    ||
-                    location
-                        .toLowerCase()
-                        .includes(search);
+                    String(
+                        meeting.location ||
+                        ""
+                    ).toLowerCase();
 
 
                 const status =
-                    getMeetingStatus(
-                        meeting
+                    normalizeStatus(
+                        meeting.status
                     );
 
 
-                let matchesFilter =
-                    true;
+                const matchesSearch =
+                    !search ||
+                    title.includes(search) ||
+                    location.includes(search);
 
 
-                if (
-                    filter ===
-                    "upcoming"
-                ) {
-
-                    matchesFilter =
-                        status ===
-                        "upcoming";
-
-                }
-
-
-                if (
-                    filter ===
-                    "completed"
-                ) {
-
-                    matchesFilter =
-                        status ===
-                        "completed";
-
-                }
+                const matchesStatus =
+                    selectedStatus === "all" ||
+                    status === selectedStatus;
 
 
                 return (
                     matchesSearch &&
-                    matchesFilter
+                    matchesStatus
                 );
 
             }
         );
 
 
-    meetingsGrid.innerHTML =
-        "";
+    if (meetingsGrid) {
 
-
-    if (
-        filtered.length === 0
-    ) {
-
-        emptyState.style.display =
-            "block";
-
-    } else {
-
-        emptyState.style.display =
-            "none";
+        meetingsGrid.innerHTML = "";
 
     }
 
 
-    filtered.forEach(
-        function (meeting) {
+    if (filtered.length === 0) {
 
-            meetingsGrid.appendChild(
-                createMeetingCard(
-                    meeting
-                )
-            );
+        if (emptyState) {
+
+            emptyState.style.display =
+                "block";
 
         }
-    );
+
+    } else {
+
+        if (emptyState) {
+
+            emptyState.style.display =
+                "none";
+
+        }
+
+
+        filtered.forEach(
+            meeting => {
+
+                createMeetingCard(
+                    meeting
+                );
+
+            }
+        );
+
+    }
 
 
     updateSummary();
@@ -376,27 +372,42 @@ function displayMeetings() {
 }
 
 
-/* =========================================
+/* =========================================================
    CREATE MEETING CARD
-========================================= */
+========================================================= */
 
 function createMeetingCard(
     meeting
 ) {
 
     const card =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     card.className =
         "meeting-card";
 
 
-    const title =
-        meeting.title ||
-        "Untitled Meeting";
+    const status =
+        normalizeStatus(
+            meeting.status
+        );
+
+
+    const date =
+        formatMeetingDate(
+            meeting.date
+        );
+
+
+    const location =
+        meeting.location ||
+        "No location specified";
+
+
+    const time =
+        formatTime(
+            meeting.start_time
+        );
 
 
     const description =
@@ -404,89 +415,10 @@ function createMeetingCard(
         "Organization meeting";
 
 
-    const status =
-        getMeetingStatus(
-            meeting
-        );
-
-
-    const dateObject =
-        parseMeetingDate(
-            meeting
-        );
-
-
-    let month = "—";
-    let day = "—";
-
-
-    if (dateObject) {
-
-        month =
-            dateObject
-                .toLocaleDateString(
-                    "en-US",
-                    {
-                        month: "short"
-                    }
-                )
-                .toUpperCase();
-
-
-        day =
-            dateObject.getDate();
-
-    }
-
-
-    const statusText =
-        status === "completed"
-            ? "COMPLETED"
-            : status === "ongoing"
-                ? "ONGOING"
-                : "UPCOMING";
-
-
     const statusClass =
         status === "completed"
             ? "completed"
             : "";
-
-
-    const location =
-        meeting.location ||
-        "Location not specified";
-
-
-    const dateText =
-        formatDate(
-            meeting.date
-        );
-
-
-    const timeText =
-        formatTime(
-            meeting.start_time
-        );
-
-
-    const endTimeText =
-        formatTime(
-            meeting.end_time
-        );
-
-
-    let fullTime =
-        timeText;
-
-
-    if (endTimeText) {
-
-        fullTime +=
-            " - " +
-            endTimeText;
-
-    }
 
 
     card.innerHTML = `
@@ -496,11 +428,11 @@ function createMeetingCard(
             <div class="meeting-date-box">
 
                 <span class="month">
-                    ${month}
+                    ${escapeHTML(date.month)}
                 </span>
 
                 <span class="day">
-                    ${day}
+                    ${escapeHTML(date.day)}
                 </span>
 
             </div>
@@ -511,7 +443,9 @@ function createMeetingCard(
                 ${statusClass}
             ">
 
-                ${statusText}
+                ${escapeHTML(
+                    capitalize(status)
+                )}
 
             </span>
 
@@ -519,12 +453,19 @@ function createMeetingCard(
 
 
         <h3>
-            ${escapeHTML(title)}
+            ${escapeHTML(
+                meeting.title ||
+                "Untitled Meeting"
+            )}
         </h3>
 
 
         <p class="meeting-description">
-            ${escapeHTML(description)}
+
+            ${escapeHTML(
+                description
+            )}
+
         </p>
 
 
@@ -536,9 +477,7 @@ function createMeetingCard(
                     ◷
                 </span>
 
-                <span>
-                    ${escapeHTML(dateText)}
-                </span>
+                ${escapeHTML(time)}
 
             </div>
 
@@ -546,12 +485,10 @@ function createMeetingCard(
             <div class="info-item">
 
                 <span class="info-icon">
-                    ◴
+                    📍
                 </span>
 
-                <span>
-                    ${escapeHTML(fullTime)}
-                </span>
+                ${escapeHTML(location)}
 
             </div>
 
@@ -559,12 +496,12 @@ function createMeetingCard(
             <div class="info-item">
 
                 <span class="info-icon">
-                    ⌖
+                    ▦
                 </span>
 
-                <span>
-                    ${escapeHTML(location)}
-                </span>
+                ${escapeHTML(
+                    date.full
+                )}
 
             </div>
 
@@ -574,22 +511,20 @@ function createMeetingCard(
         <div class="meeting-actions">
 
             <button
+                type="button"
                 class="edit-button"
-                data-action="edit"
-                data-id="${meeting.id}">
-
+                data-id="${meeting.id}"
+            >
                 Edit
-
             </button>
 
 
             <button
+                type="button"
                 class="delete-meeting-button"
-                data-action="delete"
-                data-id="${meeting.id}">
-
+                data-id="${meeting.id}"
+            >
                 Delete
-
             </button>
 
         </div>
@@ -597,139 +532,171 @@ function createMeetingCard(
     `;
 
 
-    return card;
-
-}
-
-
-/* =========================================
-   CARD BUTTONS
-========================================= */
-
-meetingsGrid.addEventListener(
-    "click",
-    function (event) {
-
-        const button =
-            event.target.closest(
-                "button"
-            );
-
-
-        if (!button) {
-            return;
-        }
-
-
-        const id =
-            button.dataset.id;
-
-
-        const action =
-            button.dataset.action;
-
-
-        if (
-            action === "edit"
-        ) {
-
-            openEditMeeting(
-                id
-            );
-
-        }
-
-
-        if (
-            action === "delete"
-        ) {
-
-            openDeleteMeeting(
-                id
-            );
-
-        }
-
-    }
-);
-
-
-/* =========================================
-   CREATE MEETING
-========================================= */
-
-openCreateButton.addEventListener(
-    "click",
-    function () {
-
-        meetingForm.reset();
-
-        editingMeetingId.value =
-            "";
-
-        modalTitle.textContent =
-            "Create Meeting";
-
-
-        meetingModal.classList.add(
-            "show"
-        );
-
-    }
-);
-
-
-/* =========================================
-   OPEN EDIT
-========================================= */
-
-function openEditMeeting(id) {
-
-    /*
-     * Your backend currently has no PUT/PATCH
-     * update route, so we don't pretend that
-     * Edit is working.
-     */
-
-    alert(
-        "Edit Meeting is not available yet. We will connect it after the meeting update API is added."
+    meetingsGrid.appendChild(
+        card
     );
 
 }
 
 
-/* =========================================
-   CLOSE CREATE MODAL
-========================================= */
+/* =========================================================
+   CARD BUTTONS
+========================================================= */
 
-closeModal.addEventListener(
-    "click",
-    closeMeetingModal
-);
+if (meetingsGrid) {
+
+    meetingsGrid.addEventListener(
+        "click",
+        event => {
+
+            const editButton =
+                event.target.closest(
+                    ".edit-button"
+                );
 
 
-cancelButton.addEventListener(
-    "click",
-    closeMeetingModal
-);
+            const deleteButton =
+                event.target.closest(
+                    ".delete-meeting-button"
+                );
 
 
-meetingModal.addEventListener(
-    "click",
-    function (event) {
+            if (editButton) {
 
-        if (
-            event.target ===
-            meetingModal
-        ) {
+                const meeting =
+                    meetings.find(
+                        item =>
+                            String(item.id) ===
+                            String(
+                                editButton.dataset.id
+                            )
+                    );
 
-            closeMeetingModal();
+
+                if (meeting) {
+
+                    openEditModal(
+                        meeting
+                    );
+
+                }
+
+                return;
+            }
+
+
+            if (deleteButton) {
+
+                currentDeleteId =
+                    deleteButton.dataset.id;
+
+                openDeleteModal();
+
+            }
 
         }
+    );
+
+}
+
+
+/* =========================================================
+   OPEN CREATE MODAL
+========================================================= */
+
+if (openCreateButton) {
+
+    openCreateButton.addEventListener(
+        "click",
+        () => {
+
+            resetMeetingForm();
+
+            modalTitle.textContent =
+                "Create Meeting";
+
+            meetingModal.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   OPEN EDIT MODAL
+========================================================= */
+
+function openEditModal(
+    meeting
+) {
+
+    resetMeetingForm();
+
+
+    modalTitle.textContent =
+        "Edit Meeting";
+
+
+    editingMeetingId.value =
+        meeting.id;
+
+
+    meetingTitle.value =
+        meeting.title || "";
+
+
+    meetingDate.value =
+        formatDateForInput(
+            meeting.date
+        );
+
+
+    meetingTime.value =
+        formatTimeForInput(
+            meeting.start_time
+        );
+
+
+    meetingDescription.value =
+        meeting.description || "";
+
+
+    meetingModal.classList.add(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   RESET FORM
+========================================================= */
+
+function resetMeetingForm() {
+
+    if (meetingForm) {
+
+        meetingForm.reset();
 
     }
-);
 
+
+    if (editingMeetingId) {
+
+        editingMeetingId.value =
+            "";
+
+    }
+
+}
+
+
+/* =========================================================
+   CLOSE MEETING MODAL
+========================================================= */
 
 function closeMeetingModal() {
 
@@ -737,105 +704,135 @@ function closeMeetingModal() {
         "show"
     );
 
+    resetMeetingForm();
+
 }
 
 
-/* =========================================
-   CREATE MEETING
-========================================= */
+if (closeModal) {
 
-meetingForm.addEventListener(
-    "submit",
-    async function (event) {
+    closeModal.addEventListener(
+        "click",
+        closeMeetingModal
+    );
 
-        event.preventDefault();
-
-
-        const title =
-            meetingTitle.value.trim();
+}
 
 
-        const date =
-            meetingDate.value;
+if (cancelButton) {
+
+    cancelButton.addEventListener(
+        "click",
+        closeMeetingModal
+    );
+
+}
 
 
-        const startTime =
-            meetingTime.value;
+if (meetingModal) {
 
+    meetingModal.addEventListener(
+        "click",
+        event => {
 
-        const description =
-            meetingDescription.value.trim();
+            if (
+                event.target ===
+                meetingModal
+            ) {
 
+                closeMeetingModal();
 
-        if (
-            !title ||
-            !date ||
-            !startTime
-        ) {
-
-            alert(
-                "Please complete the meeting title, date, and time."
-            );
-
-            return;
+            }
 
         }
+    );
+
+}
 
 
-        /*
-         * The backend currently accepts:
-         *
-         * officer_id
-         * title
-         * date
-         * start_time
-         * end_time
-         * location
-         * status
-         *
-         * The HTML currently has no end-time
-         * or location field, so those remain null.
-         */
+/* =========================================================
+   CREATE / UPDATE
+========================================================= */
 
-        const payload = {
+if (meetingForm) {
 
-            officer_id:
-                officerId,
+    meetingForm.addEventListener(
+        "submit",
+        async event => {
 
-            title:
-                title,
-
-            date:
-                date,
-
-            start_time:
-                startTime,
-
-            end_time:
-                null,
-
-            location:
-                null,
-
-            status:
-                "upcoming"
-
-        };
+            event.preventDefault();
 
 
-        const saveButton =
-            meetingForm.querySelector(
-                ".save-button"
-            );
+            const id =
+                editingMeetingId.value;
 
 
-        const originalText =
-            saveButton
-                ? saveButton.textContent
-                : "Save Meeting";
+            const isEditing =
+                Boolean(id);
 
 
-        try {
+            const title =
+                meetingTitle.value.trim();
+
+
+            const date =
+                meetingDate.value;
+
+
+            const time =
+                meetingTime.value;
+
+
+            const description =
+                meetingDescription.value.trim();
+
+
+            if (
+                !title ||
+                !date ||
+                !time
+            ) {
+
+                alert(
+                    "Please complete the required meeting fields."
+                );
+
+                return;
+
+            }
+
+
+            const payload = {
+
+                officer_id:
+                    officerId,
+
+                title:
+                    title,
+
+                date:
+                    date,
+
+                start_time:
+                    time,
+
+                end_time:
+                    null,
+
+                location:
+                    null,
+
+                status:
+                    null
+
+            };
+
+
+            const saveButton =
+                meetingForm.querySelector(
+                    ".save-button"
+                );
+
 
             if (saveButton) {
 
@@ -843,111 +840,128 @@ meetingForm.addEventListener(
                     true;
 
                 saveButton.textContent =
-                    "Saving...";
+                    isEditing
+                        ? "Updating..."
+                        : "Saving...";
 
             }
 
 
-            const response =
-                await fetch(
-                    `${API_BASE}/meetings`,
-                    {
-                        method: "POST",
+            try {
 
-                        headers: {
+                const url =
+                    isEditing
+                        ? `${API_BASE}/meetings/${id}`
+                        : `${API_BASE}/meetings`;
 
-                            "Content-Type":
-                                "application/json",
 
-                            "Accept":
-                                "application/json"
+                const method =
+                    isEditing
+                        ? "PUT"
+                        : "POST";
 
-                        },
 
-                        body:
-                            JSON.stringify(
-                                payload
-                            )
+                const response =
+                    await fetch(
+                        url,
+                        {
+                            method:
+                                method,
 
-                    }
+                            headers: {
+
+                                "Accept":
+                                    "application/json",
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    payload
+                                )
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    "MEETING SAVE:",
+                    data
                 );
 
 
-            const data =
-                await response.json();
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to save meeting."
+                    );
+
+                }
 
 
-            console.log(
-                "Create meeting response:",
-                data
-            );
+                /*
+                 * The current backend does not
+                 * have a description column in the
+                 * Meeting model.
+                 *
+                 * Therefore the description field
+                 * is intentionally not sent.
+                 */
 
 
-            if (!response.ok) {
+                closeMeetingModal();
 
-                throw new Error(
-                    getValidationMessage(
-                        data
-                    )
+
+                await loadMeetings();
+
+
+            } catch (error) {
+
+                console.error(
+                    "MEETING SAVE ERROR:",
+                    error
                 );
 
-            }
+
+                alert(
+                    error.message ||
+                    "Unable to save meeting."
+                );
 
 
-            closeMeetingModal();
+            } finally {
 
+                if (saveButton) {
 
-            meetingForm.reset();
+                    saveButton.disabled =
+                        false;
 
+                    saveButton.textContent =
+                        "Save Meeting";
 
-            await loadMeetings();
-
-
-            alert(
-                "Meeting created successfully."
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Create meeting error:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Unable to create meeting."
-            );
-
-        } finally {
-
-            if (saveButton) {
-
-                saveButton.disabled =
-                    false;
-
-                saveButton.textContent =
-                    originalText;
+                }
 
             }
 
         }
+    );
 
-    }
-);
+}
 
 
-/* =========================================
-   DELETE MEETING
-========================================= */
+/* =========================================================
+   DELETE MODAL
+========================================================= */
 
-function openDeleteMeeting(id) {
-
-    meetingToDelete =
-        id;
-
+function openDeleteModal() {
 
     deleteModal.classList.add(
         "show"
@@ -956,149 +970,153 @@ function openDeleteMeeting(id) {
 }
 
 
-cancelDelete.addEventListener(
-    "click",
-    function () {
+function closeDeleteModal() {
 
-        meetingToDelete =
-            null;
+    deleteModal.classList.remove(
+        "show"
+    );
 
+    currentDeleteId =
+        null;
 
-        deleteModal.classList.remove(
-            "show"
-        );
-
-    }
-);
+}
 
 
-confirmDelete.addEventListener(
-    "click",
-    async function () {
+if (cancelDelete) {
 
-        if (!meetingToDelete) {
-            return;
+    cancelDelete.addEventListener(
+        "click",
+        closeDeleteModal
+    );
+
+}
+
+
+if (deleteModal) {
+
+    deleteModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                deleteModal
+            ) {
+
+                closeDeleteModal();
+
+            }
+
         }
+    );
+
+}
 
 
-        const id =
-            meetingToDelete;
+/* =========================================================
+   DELETE MEETING
+========================================================= */
 
+if (confirmDelete) {
 
-        try {
+    confirmDelete.addEventListener(
+        "click",
+        async () => {
+
+            if (!currentDeleteId) {
+                return;
+            }
+
 
             confirmDelete.disabled =
                 true;
-
 
             confirmDelete.textContent =
                 "Deleting...";
 
 
-            const response =
-                await fetch(
-                    `${API_BASE}/meetings/${encodeURIComponent(id)}?officer_id=${encodeURIComponent(officerId)}`,
-                    {
-                        method: "DELETE",
+            try {
 
-                        headers: {
-                            "Accept":
-                                "application/json"
+                const response =
+                    await fetch(
+                        `${API_BASE}/meetings/${currentDeleteId}`,
+                        {
+                            method:
+                                "DELETE",
+
+                            headers: {
+
+                                "Accept":
+                                    "application/json",
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    officer_id:
+                                        officerId
+                                })
+
                         }
-                    }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to delete meeting."
+                    );
+
+                }
+
+
+                closeDeleteModal();
+
+
+                await loadMeetings();
+
+
+            } catch (error) {
+
+                console.error(
+                    "DELETE MEETING ERROR:",
+                    error
                 );
 
 
-            const data =
-                await response.json();
-
-
-            console.log(
-                "Delete meeting response:",
-                data
-            );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
+                alert(
+                    error.message ||
                     "Unable to delete meeting."
                 );
 
+
+            } finally {
+
+                confirmDelete.disabled =
+                    false;
+
+                confirmDelete.textContent =
+                    "Delete";
+
             }
 
-
-            deleteModal.classList.remove(
-                "show"
-            );
-
-
-            meetingToDelete =
-                null;
-
-
-            await loadMeetings();
-
-
-            alert(
-                "Meeting deleted successfully."
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Delete meeting error:",
-                error
-            );
-
-
-            alert(
-                error.message ||
-                "Unable to delete meeting."
-            );
-
-        } finally {
-
-            confirmDelete.disabled =
-                false;
-
-            confirmDelete.textContent =
-                "Delete";
-
         }
+    );
 
-    }
-);
-
-
-deleteModal.addEventListener(
-    "click",
-    function (event) {
-
-        if (
-            event.target ===
-            deleteModal
-        ) {
-
-            meetingToDelete =
-                null;
+}
 
 
-            deleteModal.classList.remove(
-                "show"
-            );
-
-        }
-
-    }
-);
-
-
-/* =========================================
+/* =========================================================
    SUMMARY
-========================================= */
+========================================================= */
 
 function updateSummary() {
 
@@ -1108,501 +1126,117 @@ function updateSummary() {
 
     const upcoming =
         meetings.filter(
-            function (meeting) {
-
-                return (
-                    getMeetingStatus(
-                        meeting
-                    ) === "upcoming"
-                );
-
-            }
+            meeting =>
+                normalizeStatus(
+                    meeting.status
+                ) ===
+                "upcoming"
         ).length;
 
 
     const completed =
         meetings.filter(
-            function (meeting) {
-
-                return (
-                    getMeetingStatus(
-                        meeting
-                    ) === "completed"
-                );
-
-            }
+            meeting =>
+                normalizeStatus(
+                    meeting.status
+                ) ===
+                "completed"
         ).length;
 
 
-    totalMeetings.textContent =
-        total;
+    if (totalMeetings) {
+
+        totalMeetings.textContent =
+            total;
+
+    }
 
 
-    upcomingMeetings.textContent =
-        upcoming;
+    if (upcomingMeetings) {
+
+        upcomingMeetings.textContent =
+            upcoming;
+
+    }
 
 
-    completedMeetings.textContent =
-        completed;
+    if (completedMeetings) {
+
+        completedMeetings.textContent =
+            completed;
+
+    }
 
 }
 
 
-/* =========================================
-   MEETING STATUS
-========================================= */
+/* =========================================================
+   SEARCH
+========================================================= */
 
-function getMeetingStatus(
-    meeting
-) {
+if (searchInput) {
 
-    const backendStatus =
-        String(
-            meeting.status ||
-            ""
-        ).toLowerCase();
-
-
-    /*
-     * Trust backend status first.
-     */
-
-    if (
-        backendStatus ===
-        "cancelled"
-    ) {
-
-        return "cancelled";
-
-    }
-
-
-    if (
-        backendStatus ===
-        "completed"
-    ) {
-
-        return "completed";
-
-    }
-
-
-    if (
-        backendStatus ===
-        "ongoing"
-    ) {
-
-        return "ongoing";
-
-    }
-
-
-    /*
-     * If backend says upcoming,
-     * keep it upcoming.
-     */
-
-    if (
-        backendStatus ===
-        "upcoming"
-    ) {
-
-        return "upcoming";
-
-    }
-
-
-    /*
-     * Fallback based on date/time.
-     */
-
-    const date =
-        parseMeetingDate(
-            meeting
-        );
-
-
-    if (!date) {
-
-        return "upcoming";
-
-    }
-
-
-    return date < new Date()
-        ? "completed"
-        : "upcoming";
-
-}
-
-
-/* =========================================
-   PARSE MEETING DATE
-========================================= */
-
-function parseMeetingDate(
-    meeting
-) {
-
-    if (!meeting.date) {
-
-        return null;
-
-    }
-
-
-    const time =
-        meeting.start_time ||
-        "00:00";
-
-
-    const date =
-        new Date(
-            `${meeting.date}T${time}`
-        );
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return null;
-
-    }
-
-
-    return date;
-
-}
-
-
-/* =========================================
-   FORMAT DATE
-========================================= */
-
-function formatDate(
-    value
-) {
-
-    if (!value) {
-
-        return "No date";
-
-    }
-
-
-    const date =
-        new Date(
-            `${value}T00:00`
-        );
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return value;
-
-    }
-
-
-    return date.toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }
+    searchInput.addEventListener(
+        "input",
+        displayMeetings
     );
 
 }
 
 
-/* =========================================
-   FORMAT TIME
-========================================= */
+/* =========================================================
+   FILTER
+========================================================= */
 
-function formatTime(
-    value
-) {
+if (statusFilter) {
 
-    if (!value) {
-
-        return "";
-
-    }
-
-
-    const parts =
-        String(value)
-            .split(":");
-
-
-    if (
-        parts.length < 2
-    ) {
-
-        return value;
-
-    }
-
-
-    let hour =
-        parseInt(
-            parts[0],
-            10
-        );
-
-
-    const minute =
-        parts[1];
-
-
-    if (
-        Number.isNaN(hour)
-    ) {
-
-        return value;
-
-    }
-
-
-    const period =
-        hour >= 12
-            ? "PM"
-            : "AM";
-
-
-    hour =
-        hour % 12;
-
-
-    if (hour === 0) {
-
-        hour = 12;
-
-    }
-
-
-    return `${hour}:${minute} ${period}`;
-
-}
-
-
-/* =========================================
-   LOADING STATE
-========================================= */
-
-function showLoading() {
-
-    meetingsGrid.innerHTML = `
-
-        <div style="
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-        ">
-
-            Loading meetings...
-
-        </div>
-
-    `;
-
-
-    emptyState.style.display =
-        "none";
-
-}
-
-
-/* =========================================
-   VALIDATION ERROR
-========================================= */
-
-function getValidationMessage(
-    data
-) {
-
-    if (
-        data &&
-        data.errors
-    ) {
-
-        const firstField =
-            Object.keys(
-                data.errors
-            )[0];
-
-
-        if (
-            firstField &&
-            data.errors[firstField] &&
-            data.errors[firstField][0]
-        ) {
-
-            return data.errors[
-                firstField
-            ][0];
-
-        }
-
-    }
-
-
-    return (
-        data.message ||
-        "Unable to complete the request."
+    statusFilter.addEventListener(
+        "change",
+        displayMeetings
     );
 
 }
 
 
-/* =========================================
-   INITIALS
-========================================= */
-
-function getInitials(
-    name
-) {
-
-    if (!name) {
-
-        return "OF";
-
-    }
-
-
-    const parts =
-        name
-            .trim()
-            .split(/\s+/);
-
-
-    if (
-        parts.length === 1
-    ) {
-
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-
-    return (
-        parts[0].charAt(0) +
-        parts[
-            parts.length - 1
-        ].charAt(0)
-    ).toUpperCase();
-
-}
-
-
-/* =========================================
-   ESCAPE HTML
-========================================= */
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-/* =========================================
+/* =========================================================
    LOGOUT
-========================================= */
+========================================================= */
 
-logoutButton.addEventListener(
-    "click",
-    function () {
+if (logoutButton) {
 
-        const confirmLogout =
-            confirm(
-                "Are you sure you want to log out?"
+    logoutButton.addEventListener(
+        "click",
+        () => {
+
+            sessionStorage.removeItem(
+                "officerLoggedIn"
+            );
+
+            sessionStorage.removeItem(
+                "officerId"
+            );
+
+            sessionStorage.removeItem(
+                "officerName"
+            );
+
+            sessionStorage.removeItem(
+                "officerOrganization"
             );
 
 
-        if (!confirmLogout) {
-
-            return;
+            window.location.href =
+                "officer-login.html";
 
         }
+    );
+
+}
 
 
-        sessionStorage.removeItem(
-            "officerLoggedIn"
-        );
-
-        sessionStorage.removeItem(
-            "officerId"
-        );
-
-        sessionStorage.removeItem(
-            "officerName"
-        );
-
-        sessionStorage.removeItem(
-            "officerRole"
-        );
-
-        sessionStorage.removeItem(
-            "officerStatus"
-        );
-
-        sessionStorage.removeItem(
-            "officerOrganizationId"
-        );
-
-        sessionStorage.removeItem(
-            "officerOrganization"
-        );
-
-        sessionStorage.removeItem(
-            "officerClubRole"
-        );
-
-
-        window.location.href =
-            "officer-login.html";
-
-    }
-);
-
-
-/* =========================================
+/* =========================================================
    MOBILE MENU
-========================================= */
+========================================================= */
 
 if (
     menuButton &&
@@ -1612,7 +1246,7 @@ if (
 
     menuButton.addEventListener(
         "click",
-        function () {
+        () => {
 
             sidebar.classList.add(
                 "open"
@@ -1647,28 +1281,313 @@ function closeSidebar() {
 }
 
 
-/* =========================================
-   SEARCH
-========================================= */
+/* =========================================================
+   STATUS
+========================================================= */
 
-searchInput.addEventListener(
-    "input",
-    displayMeetings
-);
+function normalizeStatus(
+    status
+) {
 
-
-/* =========================================
-   FILTER
-========================================= */
-
-statusFilter.addEventListener(
-    "change",
-    displayMeetings
-);
+    const value =
+        String(
+            status ||
+            "upcoming"
+        ).toLowerCase();
 
 
-/* =========================================
+    if (
+        value ===
+        "completed"
+    ) {
+
+        return "completed";
+
+    }
+
+
+    if (
+        value ===
+        "ongoing"
+    ) {
+
+        return "ongoing";
+
+    }
+
+
+    if (
+        value ===
+        "cancelled"
+    ) {
+
+        return "cancelled";
+
+    }
+
+
+    return "upcoming";
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function formatMeetingDate(
+    value
+) {
+
+    if (!value) {
+
+        return {
+            month: "---",
+            day: "--",
+            full: "---"
+        };
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return {
+            month: "---",
+            day: "--",
+            full: String(value)
+        };
+
+    }
+
+
+    return {
+
+        month:
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    month: "short"
+                }
+            ),
+
+        day:
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    day: "numeric"
+                }
+            ),
+
+        full:
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            )
+
+    };
+
+}
+
+
+/* =========================================================
+   DATE FOR INPUT
+========================================================= */
+
+function formatDateForInput(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    return String(
+        value
+    ).substring(
+        0,
+        10
+    );
+
+}
+
+
+/* =========================================================
+   TIME
+========================================================= */
+
+function formatTime(
+    value
+) {
+
+    if (!value) {
+
+        return "Time not specified";
+
+    }
+
+
+    const parts =
+        String(value).split(":");
+
+
+    let hour =
+        Number(parts[0]);
+
+
+    const minute =
+        parts[1] ||
+        "00";
+
+
+    const suffix =
+        hour >= 12
+            ? "PM"
+            : "AM";
+
+
+    hour =
+        hour % 12 ||
+        12;
+
+
+    return `${hour}:${minute} ${suffix}`;
+
+}
+
+
+function formatTimeForInput(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    return String(
+        value
+    ).substring(
+        0,
+        5
+    );
+
+}
+
+
+/* =========================================================
+   CAPITALIZE
+========================================================= */
+
+function capitalize(
+    value
+) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    return (
+        value.charAt(0).toUpperCase() +
+        value.slice(1)
+    );
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function getInitials(
+    name
+) {
+
+    const value =
+        String(
+            name ||
+            "Officer"
+        ).trim();
+
+
+    const parts =
+        value.split(
+            /\s+/
+        );
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[
+            parts.length - 1
+        ].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
    INITIALIZE
-========================================= */
+========================================================= */
 
 loadMeetings();
