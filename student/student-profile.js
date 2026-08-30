@@ -1,9 +1,10 @@
 /* =========================================================
    DOMINEXUS — STUDENT PROFILE
-   LARAVEL / MYSQL VERSION
+   LARAVEL / MYSQL CONNECTED
 ========================================================= */
 
-const API_BASE = "http://127.0.0.1:8000/api";
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -11,9 +12,14 @@ const API_BASE = "http://127.0.0.1:8000/api";
 ========================================================= */
 
 if (
-    sessionStorage.getItem("studentLoggedIn") !== "true"
+    sessionStorage.getItem(
+        "studentLoggedIn"
+    ) !== "true"
 ) {
-    window.location.href = "student-login.html";
+
+    window.location.href =
+        "student-login.html";
+
 }
 
 
@@ -23,33 +29,31 @@ if (
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
-
-        loadProfile();
+    async function () {
 
         setupNavigation();
 
         setupLogout();
+
+        await loadProfile();
 
     }
 );
 
 
 /* =========================================================
-   LOAD PROFILE FROM LARAVEL
+   LOAD PROFILE
 ========================================================= */
 
 async function loadProfile() {
 
     const studentId =
-        sessionStorage.getItem("studentId");
+        sessionStorage.getItem(
+            "studentId"
+        );
 
 
     if (!studentId) {
-
-        alert(
-            "Student session is missing. Please log in again."
-        );
 
         sessionStorage.clear();
 
@@ -83,27 +87,8 @@ async function loadProfile() {
             );
 
 
-        let data = {};
-
-
-        try {
-
-            data =
-                await response.json();
-
-        } catch (error) {
-
-            console.warn(
-                "Server did not return JSON."
-            );
-
-        }
-
-
-        console.log(
-            "Profile API response:",
-            data
-        );
+        const data =
+            await response.json();
 
 
         if (!response.ok) {
@@ -122,293 +107,24 @@ async function loadProfile() {
             data;
 
 
-        /* =================================================
-           STUDENT DATA
-        ================================================= */
-
-        const name =
-            student.name ||
-            "Student";
-
-
-        const actualStudentId =
-            student.student_id ||
-            studentId;
-
-
-        const uniqueId =
-            student.unique_id ||
-            "—";
-
-
-        const section =
-            student.section ||
-            "—";
-
-
-        const clubRole =
-            student.club_role ||
-            student.role ||
-            "Member";
-
-
-        const accountType =
-            "Student";
-
-
-        /*
-         * Organization can be returned as:
-         *
-         * student.organization.name
-         *
-         * or organization_id
-         */
-
-        let organization = "—";
-
-
-        if (
-            student.organization &&
-            typeof student.organization === "object"
-        ) {
-
-            organization =
-                student.organization.name ||
-                student.organization.organization_name ||
-                "—";
-
-        }
-
-
-        /*
-         * Fallback if backend only returns organization_id.
-         */
-
-        if (
-            organization === "—" &&
-            student.organization_id
-        ) {
-
-            organization =
-                `Organization #${student.organization_id}`;
-
-        }
-
-
-        /* =================================================
-           TOPBAR
-        ================================================= */
-
-        const topStudentName =
-            document.getElementById(
-                "topStudentName"
-            );
-
-
-        const topStudentId =
-            document.getElementById(
-                "topStudentId"
-            );
-
-
-        const topAvatar =
-            document.getElementById(
-                "topAvatar"
-            );
-
-
-        if (topStudentName) {
-
-            topStudentName.textContent =
-                name;
-
-        }
-
-
-        if (topStudentId) {
-
-            topStudentId.textContent =
-                actualStudentId;
-
-        }
-
-
-        if (topAvatar) {
-
-            topAvatar.textContent =
-                getInitials(name);
-
-        }
-
-
-        /* =================================================
-           PROFILE HEADER
-        ================================================= */
-
-        const profileAvatar =
-            document.getElementById(
-                "profileAvatar"
-            );
-
-
-        const profileName =
-            document.getElementById(
-                "profileName"
-            );
-
-
-        const profileRole =
-            document.getElementById(
-                "profileRole"
-            );
-
-
-        const profileUniqueId =
-            document.getElementById(
-                "profileUniqueId"
-            );
-
-
-        if (profileAvatar) {
-
-            profileAvatar.textContent =
-                getInitials(name);
-
-        }
-
-
-        if (profileName) {
-
-            profileName.textContent =
-                name;
-
-        }
-
-
-        if (profileRole) {
-
-            profileRole.textContent =
-                clubRole;
-
-        }
-
-
-        if (profileUniqueId) {
-
-            profileUniqueId.textContent =
-                uniqueId;
-
-        }
-
-
-        /* =================================================
-           PERSONAL INFORMATION
-        ================================================= */
-
-        const fullNameElement =
-            document.getElementById(
-                "fullName"
-            );
-
-
-        const studentIdElement =
-            document.getElementById(
-                "studentId"
-            );
-
-
-        const uniqueIdElement =
-            document.getElementById(
-                "uniqueId"
-            );
-
-
-        const sectionElement =
-            document.getElementById(
-                "section"
-            );
-
-
-        const organizationElement =
-            document.getElementById(
-                "organization"
-            );
-
-
-        const clubRoleElement =
-            document.getElementById(
-                "clubRole"
-            );
-
-
-        if (fullNameElement) {
-
-            fullNameElement.textContent =
-                name;
-
-        }
-
-
-        if (studentIdElement) {
-
-            studentIdElement.textContent =
-                actualStudentId;
-
-        }
-
-
-        if (uniqueIdElement) {
-
-            uniqueIdElement.textContent =
-                uniqueId;
-
-        }
-
-
-        if (sectionElement) {
-
-            sectionElement.textContent =
-                section;
-
-        }
-
-
-        if (organizationElement) {
-
-            organizationElement.textContent =
-                organization;
-
-        }
-
-
-        if (clubRoleElement) {
-
-            clubRoleElement.textContent =
-                clubRole;
-
-        }
-
-
-        /* =================================================
-           ACCOUNT INFORMATION
-        ================================================= */
-
-        const accountTypeElement =
-            document.getElementById(
-                "accountType"
-            );
-
-
-        if (accountTypeElement) {
-
-            accountTypeElement.textContent =
-                accountType;
-
-        }
-
-
         console.log(
-            "Student profile loaded successfully."
+            "Student profile:",
+            student
+        );
+
+
+        displayProfile(
+            student
+        );
+
+
+        /*
+         * Keep the session data synchronized
+         * with the database.
+         */
+
+        saveStudentSession(
+            student
         );
 
 
@@ -420,12 +136,433 @@ async function loadProfile() {
         );
 
 
-        alert(
-            "Unable to load your profile.\n\n" +
+        showProfileError(
             error.message
         );
 
     }
+
+}
+
+
+/* =========================================================
+   DISPLAY PROFILE
+========================================================= */
+
+function displayProfile(
+    student
+) {
+
+    const name =
+        student.name ||
+        "Student";
+
+
+    const studentId =
+        student.student_id ||
+        "—";
+
+
+    const uniqueId =
+        student.unique_id ||
+        "—";
+
+
+    const section =
+        student.section ||
+        "—";
+
+
+    const clubRole =
+        student.club_role ||
+        student.role ||
+        "Member";
+
+
+    const accountType =
+        "Student";
+
+
+    /*
+     * Organization
+     */
+
+    let organization =
+        "—";
+
+
+    if (
+        student.organization &&
+        typeof student.organization === "object"
+    ) {
+
+        organization =
+            student.organization.name ||
+            student.organization.organization_name ||
+            "—";
+
+    }
+
+
+    /*
+     * Fallback to organization ID.
+     */
+
+    if (
+        organization === "—" &&
+        student.organization_id !== null &&
+        student.organization_id !== undefined
+    ) {
+
+        organization =
+            `Organization #${student.organization_id}`;
+
+    }
+
+
+    /*
+     * Account status
+     */
+
+    const accountStatus =
+        student.status ||
+        "Active";
+
+
+    /* =====================================================
+       TOPBAR
+    ===================================================== */
+
+    setText(
+        "topStudentName",
+        name
+    );
+
+
+    setText(
+        "topStudentId",
+        studentId
+    );
+
+
+    setText(
+        "topAvatar",
+        getInitials(name)
+    );
+
+
+    /* =====================================================
+       PROFILE HEADER
+    ===================================================== */
+
+    setText(
+        "profileAvatar",
+        getInitials(name)
+    );
+
+
+    setText(
+        "profileName",
+        name
+    );
+
+
+    setText(
+        "profileRole",
+        clubRole
+    );
+
+
+    setText(
+        "profileUniqueId",
+        uniqueId
+    );
+
+
+    /* =====================================================
+       PERSONAL INFORMATION
+    ===================================================== */
+
+    setText(
+        "fullName",
+        name
+    );
+
+
+    setText(
+        "studentId",
+        studentId
+    );
+
+
+    setText(
+        "uniqueId",
+        uniqueId
+    );
+
+
+    setText(
+        "section",
+        section
+    );
+
+
+    setText(
+        "organization",
+        organization
+    );
+
+
+    setText(
+        "clubRole",
+        clubRole
+    );
+
+
+    /* =====================================================
+       ACCOUNT INFORMATION
+    ===================================================== */
+
+    setText(
+        "accountType",
+        accountType
+    );
+
+
+    /*
+     * Update the account status if the HTML
+     * contains elements for it.
+     */
+
+    updateAccountStatus(
+        accountStatus
+    );
+
+
+    console.log(
+        "Student profile loaded successfully."
+    );
+
+}
+
+
+/* =========================================================
+   SAVE STUDENT SESSION
+========================================================= */
+
+function saveStudentSession(
+    student
+) {
+
+    if (!student) {
+        return;
+    }
+
+
+    if (student.name) {
+
+        sessionStorage.setItem(
+            "studentName",
+            student.name
+        );
+
+    }
+
+
+    if (student.student_id) {
+
+        sessionStorage.setItem(
+            "studentId",
+            student.student_id
+        );
+
+    }
+
+
+    if (
+        student.organization_id !== null &&
+        student.organization_id !== undefined
+    ) {
+
+        sessionStorage.setItem(
+            "studentOrganizationId",
+            student.organization_id
+        );
+
+    }
+
+
+    if (student.section) {
+
+        sessionStorage.setItem(
+            "studentSection",
+            student.section
+        );
+
+    }
+
+
+    if (student.unique_id) {
+
+        sessionStorage.setItem(
+            "studentUniqueId",
+            student.unique_id
+        );
+
+    }
+
+
+    if (student.club_role) {
+
+        sessionStorage.setItem(
+            "studentClubRole",
+            student.club_role
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SET TEXT SAFELY
+========================================================= */
+
+function setText(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        value ?? "—";
+
+}
+
+
+/* =========================================================
+   ACCOUNT STATUS
+========================================================= */
+
+function updateAccountStatus(
+    status
+) {
+
+    const normalized =
+        String(
+            status || "Active"
+        ).toLowerCase();
+
+
+    const active =
+        normalized === "active";
+
+
+    /*
+     * Find the account status elements
+     * without changing the existing HTML.
+     */
+
+    const accountRows =
+        document.querySelectorAll(
+            ".account-row"
+        );
+
+
+    if (
+        accountRows.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const statusRow =
+        accountRows[0];
+
+
+    const strong =
+        statusRow.querySelector(
+            "strong"
+        );
+
+
+    const badge =
+        statusRow.querySelector(
+            ".account-badge"
+        );
+
+
+    if (strong) {
+
+        strong.textContent =
+            capitalize(status);
+
+    }
+
+
+    if (badge) {
+
+        badge.textContent =
+            capitalize(status);
+
+
+        badge.classList.toggle(
+            "inactive",
+            !active
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PROFILE ERROR
+========================================================= */
+
+function showProfileError(
+    message
+) {
+
+    console.error(
+        "Profile error:",
+        message
+    );
+
+
+    /*
+     * Keep the page visible instead of
+     * redirecting immediately.
+     */
+
+    setText(
+        "profileName",
+        "Unable to load profile"
+    );
+
+
+    setText(
+        "profileRole",
+        "Please refresh the page"
+    );
+
+
+    setText(
+        "profileUniqueId",
+        "—"
+    );
 
 }
 
@@ -473,6 +610,7 @@ function setupNavigation() {
                 "open"
             );
 
+
             overlay.classList.add(
                 "show"
             );
@@ -488,15 +626,19 @@ function setupNavigation() {
 
 
     document
-        .querySelectorAll(".nav-item")
-        .forEach(function (link) {
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(
+            function (link) {
 
-            link.addEventListener(
-                "click",
-                closeSidebar
-            );
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
 
-        });
+            }
+        );
 
 
     function closeSidebar() {
@@ -504,6 +646,7 @@ function setupNavigation() {
         sidebar.classList.remove(
             "open"
         );
+
 
         overlay.classList.remove(
             "show"
@@ -537,13 +680,13 @@ function setupLogout() {
         "click",
         function () {
 
-            const confirmLogout =
+            const confirmed =
                 confirm(
                     "Are you sure you want to log out?"
                 );
 
 
-            if (!confirmLogout) {
+            if (!confirmed) {
 
                 return;
 
@@ -563,10 +706,12 @@ function setupLogout() {
 
 
 /* =========================================================
-   GET INITIALS
+   INITIALS
 ========================================================= */
 
-function getInitials(name) {
+function getInitials(
+    name
+) {
 
     if (!name) {
 
@@ -598,5 +743,32 @@ function getInitials(name) {
             parts.length - 1
         ].charAt(0)
     ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   CAPITALIZE
+========================================================= */
+
+function capitalize(
+    value
+) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    const text =
+        String(value);
+
+
+    return (
+        text.charAt(0).toUpperCase() +
+        text.slice(1)
+    );
 
 }
