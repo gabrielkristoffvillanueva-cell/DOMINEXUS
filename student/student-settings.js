@@ -524,11 +524,11 @@ async function changePassword(
 
 
     if (
-        newPassword.length < 6
+        newPassword.length < 8
     ) {
 
         showPasswordMessage(
-            "New password must be at least 6 characters.",
+            "New password must be at least 8 characters.",
             "error"
         );
 
