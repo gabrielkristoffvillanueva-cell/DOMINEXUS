@@ -1,46 +1,40 @@
 /* =========================================
-   DOMINEXUS STUDENT MEETINGS
-   Laravel API Connected
+   DOMINEXUS — STUDENT MEETINGS
+   Laravel / MySQL Connected
 ========================================= */
 
 const API_URL = "http://127.0.0.1:8000/api";
+
+let currentStudent = null;
 
 
 /* =========================================
    INITIALIZE
 ========================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+document.addEventListener("DOMContentLoaded", async function () {
 
-        if (!checkStudentLogin()) {
-            return;
-        }
-
-        loadStudentInformation();
-
-        loadMeetings();
-
-        setupNavigation();
-
-        setupLogout();
-
+    if (!checkStudentLogin()) {
+        return;
     }
-);
+
+    setupNavigation();
+    setupLogout();
+
+    await loadStudentInformation();
+    await loadMeetings();
+
+});
 
 
 /* =========================================
-   CHECK LOGIN
+   LOGIN CHECK
 ========================================= */
 
 function checkStudentLogin() {
 
     const loggedIn =
-        sessionStorage.getItem(
-            "studentLoggedIn"
-        );
-
+        sessionStorage.getItem("studentLoggedIn");
 
     if (loggedIn !== "true") {
 
@@ -48,12 +42,9 @@ function checkStudentLogin() {
             "student-login.html";
 
         return false;
-
     }
 
-
     return true;
-
 }
 
 
@@ -61,65 +52,218 @@ function checkStudentLogin() {
    LOAD STUDENT INFORMATION
 ========================================= */
 
-function loadStudentInformation() {
-
-    const name =
-        sessionStorage.getItem(
-            "studentName"
-        ) || "Student";
-
+async function loadStudentInformation() {
 
     const studentId =
-        sessionStorage.getItem(
-            "studentId"
-        ) || "Student ID";
+        sessionStorage.getItem("studentId");
+
+    if (!studentId) {
+
+        window.location.href =
+            "student-login.html";
+
+        return;
+    }
 
 
-    document.getElementById(
-        "topStudentName"
-    ).textContent =
-        name;
+    try {
+
+        const response = await fetch(
+            `${API_URL}/students/by-student-id/${encodeURIComponent(studentId)}`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
 
 
-    document.getElementById(
-        "topStudentId"
-    ).textContent =
-        studentId;
+        const data = await response.json();
 
 
-    document.getElementById(
-        "topAvatar"
-    ).textContent =
-        getInitials(name);
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load student information."
+            );
+        }
+
+
+        currentStudent =
+            data.student ||
+            data.data ||
+            data;
+
+
+        const name =
+            currentStudent.name ||
+            "Student";
+
+
+        const actualStudentId =
+            currentStudent.student_id ||
+            studentId;
+
+
+        /* =====================================
+           UPDATE TOPBAR
+        ===================================== */
+
+        const nameElement =
+            document.getElementById("topStudentName");
+
+
+        const idElement =
+            document.getElementById("topStudentId");
+
+
+        const avatarElement =
+            document.getElementById("topAvatar");
+
+
+        if (nameElement) {
+
+            nameElement.textContent =
+                name;
+
+        }
+
+
+        if (idElement) {
+
+            idElement.textContent =
+                actualStudentId;
+
+        }
+
+
+        if (avatarElement) {
+
+            avatarElement.textContent =
+                getInitials(name);
+
+        }
+
+
+        /* =====================================
+           SAVE STUDENT DATA
+        ===================================== */
+
+        sessionStorage.setItem(
+            "studentName",
+            name
+        );
+
+
+        sessionStorage.setItem(
+            "studentId",
+            actualStudentId
+        );
+
+
+        if (
+            currentStudent.organization_id !== null &&
+            currentStudent.organization_id !== undefined
+        ) {
+
+            sessionStorage.setItem(
+                "studentOrganizationId",
+                currentStudent.organization_id
+            );
+
+        }
+
+
+        if (currentStudent.section) {
+
+            sessionStorage.setItem(
+                "studentSection",
+                currentStudent.section
+            );
+
+        }
+
+
+        if (currentStudent.unique_id) {
+
+            sessionStorage.setItem(
+                "studentUniqueId",
+                currentStudent.unique_id
+            );
+
+        }
+
+
+        if (currentStudent.club_role) {
+
+            sessionStorage.setItem(
+                "studentClubRole",
+                currentStudent.club_role
+            );
+
+        }
+
+
+        console.log(
+            "Current student:",
+            currentStudent
+        );
+
+
+        console.log(
+            "Student organization ID:",
+            currentStudent.organization_id
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Student information error:",
+            error
+        );
+
+
+        showPageError(
+            "Unable to load your student information."
+        );
+
+    }
 
 }
 
 
 /* =========================================
-   LOAD MEETINGS FROM LARAVEL
+   LOAD MEETINGS
 ========================================= */
 
 async function loadMeetings() {
 
     try {
 
-        const response =
-            await fetch(
-                `${API_URL}/meetings`,
-                {
-                    method: "GET",
+        const response = await fetch(
+            `${API_URL}/meetings`,
+            {
+                method: "GET",
 
-                    headers: {
-                        "Accept":
-                            "application/json"
-                    }
+                headers: {
+                    "Accept":
+                        "application/json"
                 }
-            );
+            }
+        );
+
+
+        const data =
+            await response.json();
 
 
         if (!response.ok) {
 
             throw new Error(
+                data.message ||
                 "Failed to load meetings."
             );
 
@@ -127,36 +271,82 @@ async function loadMeetings() {
 
 
         const meetings =
-            await response.json();
+            Array.isArray(data)
+                ? data
+                : data.data ||
+                  data.meetings ||
+                  [];
 
 
-        const studentOrganizationId =
-            sessionStorage.getItem(
-                "studentOrganizationId"
-            );
+        console.log(
+            "All meetings:",
+            meetings
+        );
 
 
         /*
-         * Only show meetings belonging
-         * to the student's organization.
+         * Get the student's organization.
+         * Prefer the value directly loaded
+         * from Laravel.
          */
 
-        const organizationMeetings =
-            meetings.filter(
-                function (meeting) {
+        const studentOrganizationId =
+            currentStudent
+                ? currentStudent.organization_id
+                : sessionStorage.getItem(
+                    "studentOrganizationId"
+                );
 
-                    return String(
-                        meeting.organization_id
-                    ) === String(
-                        studentOrganizationId
-                    );
 
-                }
-            );
+        console.log(
+            "Filtering meetings for organization:",
+            studentOrganizationId
+        );
 
+
+        /*
+         * Filter meetings by organization.
+         */
+
+        let organizationMeetings =
+            meetings;
+
+
+        if (
+            studentOrganizationId !== null &&
+            studentOrganizationId !== undefined &&
+            studentOrganizationId !== ""
+        ) {
+
+            organizationMeetings =
+                meetings.filter(
+                    function (meeting) {
+
+                        return String(
+                            meeting.organization_id
+                        ) === String(
+                            studentOrganizationId
+                        );
+
+                    }
+                );
+
+        }
+
+
+        console.log(
+            "Student organization meetings:",
+            organizationMeetings
+        );
+
+
+        /* =====================================
+           SEPARATE UPCOMING / PREVIOUS
+        ===================================== */
 
         const today =
             new Date();
+
 
         today.setHours(
             0,
@@ -167,7 +357,6 @@ async function loadMeetings() {
 
 
         const upcoming = [];
-
         const previous = [];
 
 
@@ -175,7 +364,9 @@ async function loadMeetings() {
             function (meeting) {
 
                 const meetingDate =
-                    getMeetingDate(meeting);
+                    getMeetingDate(
+                        meeting
+                    );
 
 
                 if (!meetingDate) {
@@ -183,7 +374,13 @@ async function loadMeetings() {
                 }
 
 
-                meetingDate.setHours(
+                const comparisonDate =
+                    new Date(
+                        meetingDate.getTime()
+                    );
+
+
+                comparisonDate.setHours(
                     0,
                     0,
                     0,
@@ -191,17 +388,33 @@ async function loadMeetings() {
                 );
 
 
+                const status =
+                    String(
+                        meeting.status ||
+                        ""
+                    ).toLowerCase();
+
+
+                /*
+                 * Upcoming meetings
+                 */
+
                 if (
-                    meetingDate >= today
-                    &&
-                    meeting.status !== "cancelled"
+                    comparisonDate >= today &&
+                    status !== "cancelled"
                 ) {
 
                     upcoming.push(
                         meeting
                     );
 
-                } else {
+                }
+
+                /*
+                 * Previous meetings
+                 */
+
+                else {
 
                     previous.push(
                         meeting
@@ -212,6 +425,11 @@ async function loadMeetings() {
             }
         );
 
+
+        /*
+         * Upcoming:
+         * earliest first
+         */
 
         upcoming.sort(
             function (a, b) {
@@ -224,6 +442,11 @@ async function loadMeetings() {
             }
         );
 
+
+        /*
+         * Previous:
+         * newest first
+         */
 
         previous.sort(
             function (a, b) {
@@ -269,6 +492,52 @@ async function loadMeetings() {
 
 
 /* =========================================
+   GET MEETING DATE
+========================================= */
+
+function getMeetingDate(meeting) {
+
+    if (
+        !meeting ||
+        !meeting.date
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+     * Laravel returns dates like:
+     *
+     * 2026-09-01T00:00:00.000000Z
+     *
+     * JavaScript can parse this directly.
+     */
+
+    const date =
+        new Date(
+            meeting.date
+        );
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================
    DISPLAY MEETINGS
 ========================================= */
 
@@ -291,10 +560,23 @@ function displayMeetings(
         );
 
 
+    if (
+        !container ||
+        !emptyState
+    ) {
+
+        return;
+
+    }
+
+
     container.innerHTML = "";
 
 
-    if (!meetings.length) {
+    if (
+        !Array.isArray(meetings) ||
+        meetings.length === 0
+    ) {
 
         emptyState.style.display =
             "block";
@@ -348,11 +630,15 @@ function createMeetingCard(
 
 
     const date =
-        getMeetingDate(meeting);
+        getMeetingDate(
+            meeting
+        );
 
 
     const dateInfo =
-        formatDateParts(date);
+        formatDateParts(
+            date
+        );
 
 
     const meetingName =
@@ -360,10 +646,20 @@ function createMeetingCard(
         "Organization Meeting";
 
 
-    const organization =
-        meeting.organization
-            ? meeting.organization.name
-            : "Student Organization";
+    let organization =
+        "Student Organization";
+
+
+    if (
+        meeting.organization &&
+        typeof meeting.organization === "object"
+    ) {
+
+        organization =
+            meeting.organization.name ||
+            "Student Organization";
+
+    }
 
 
     const location =
@@ -389,13 +685,16 @@ function createMeetingCard(
         );
 
 
-    let attendanceText = "";
+    let attendanceText =
+        "";
 
 
-    if (type === "previous") {
+    if (
+        type === "previous"
+    ) {
 
         attendanceText =
-            "Attendance will be connected next.";
+            "Previous meeting";
 
     }
 
@@ -405,15 +704,21 @@ function createMeetingCard(
         <div class="date-box">
 
             <span class="month">
-                ${dateInfo.month}
+                ${escapeHTML(
+                    dateInfo.month
+                )}
             </span>
 
             <span class="day">
-                ${dateInfo.day}
+                ${escapeHTML(
+                    dateInfo.day
+                )}
             </span>
 
             <span class="year">
-                ${dateInfo.year}
+                ${escapeHTML(
+                    dateInfo.year
+                )}
             </span>
 
         </div>
@@ -422,29 +727,44 @@ function createMeetingCard(
         <div class="meeting-info">
 
             <h4>
-                ${escapeHTML(meetingName)}
+                ${escapeHTML(
+                    meetingName
+                )}
             </h4>
 
+
             <p>
-                ${escapeHTML(organization)}
+                ${escapeHTML(
+                    organization
+                )}
             </p>
 
 
             <div class="meeting-meta">
 
                 <span>
-                    🕐 ${escapeHTML(startTime)}
+                    🕐
+                    ${escapeHTML(
+                        startTime
+                    )}
+
                     ${
                         endTime
                             ? " - " +
-                              escapeHTML(endTime)
+                              escapeHTML(
+                                  endTime
+                              )
                             : ""
                     }
+
                 </span>
 
 
                 <span>
-                    📍 ${escapeHTML(location)}
+                    📍
+                    ${escapeHTML(
+                        location
+                    )}
                 </span>
 
             </div>
@@ -454,17 +774,30 @@ function createMeetingCard(
 
         <div class="meeting-status">
 
-            <span class="status-badge ${getStatusClass(meeting.status)}">
-                ${escapeHTML(status)}
+            <span
+                class="status-badge ${getStatusClass(
+                    meeting.status
+                )}">
+
+                ${escapeHTML(
+                    status
+                )}
+
             </span>
+
 
             ${
                 attendanceText
-                    ? `<span class="attendance-status">
+                    ? `
+                        <span
+                            class="attendance-status">
+
                             ${escapeHTML(
                                 attendanceText
                             )}
-                       </span>`
+
+                        </span>
+                    `
                     : ""
             }
 
@@ -479,34 +812,7 @@ function createMeetingCard(
 
 
 /* =========================================
-   GET MEETING DATE
-========================================= */
-
-function getMeetingDate(meeting) {
-
-    if (!meeting.date) {
-        return null;
-    }
-
-
-    const date =
-        new Date(
-            meeting.date + "T00:00:00"
-        );
-
-
-    if (isNaN(date.getTime())) {
-        return null;
-    }
-
-
-    return date;
-
-}
-
-
-/* =========================================
-   FORMAT DATE
+   DATE FORMAT
 ========================================= */
 
 function formatDateParts(date) {
@@ -554,22 +860,30 @@ function formatDateParts(date) {
 
 
 /* =========================================
-   FORMAT TIME
+   TIME FORMAT
 ========================================= */
 
 function formatTime(time) {
 
     if (!time) {
+
         return "";
+
     }
 
 
     const parts =
-        time.split(":");
+        String(
+            time
+        ).split(":");
 
 
-    if (parts.length < 2) {
+    if (
+        parts.length < 2
+    ) {
+
         return time;
+
     }
 
 
@@ -600,33 +914,32 @@ function formatTime(time) {
 
 
 /* =========================================
-   FORMAT STATUS
+   STATUS
 ========================================= */
 
 function formatStatus(status) {
 
     if (!status) {
+
         return "Upcoming";
+
     }
 
 
-    return status
-        .charAt(0)
-        .toUpperCase() +
-        status.slice(1);
+    return (
+        status.charAt(0).toUpperCase() +
+        status.slice(1)
+    );
 
 }
 
 
-/* =========================================
-   STATUS CLASS
-========================================= */
-
 function getStatusClass(status) {
 
     const normalized =
-        String(status)
-            .toLowerCase();
+        String(
+            status || ""
+        ).toLowerCase();
 
 
     if (
@@ -657,7 +970,44 @@ function getStatusClass(status) {
 
 
 /* =========================================
-   SHOW API ERROR
+   PAGE ERROR
+========================================= */
+
+function showPageError(message) {
+
+    const upcomingEmpty =
+        document.getElementById(
+            "upcomingEmpty"
+        );
+
+
+    if (!upcomingEmpty) {
+        return;
+    }
+
+
+    upcomingEmpty.style.display =
+        "block";
+
+
+    const text =
+        upcomingEmpty.querySelector(
+            "p"
+        );
+
+
+    if (text) {
+
+        text.textContent =
+            message;
+
+    }
+
+}
+
+
+/* =========================================
+   MEETING ERROR
 ========================================= */
 
 function showMeetingError() {
@@ -679,10 +1029,12 @@ function showMeetingError() {
         upcomingEmpty.style.display =
             "block";
 
+
         const text =
             upcomingEmpty.querySelector(
                 "p"
             );
+
 
         if (text) {
 
@@ -728,6 +1080,17 @@ function setupNavigation() {
         );
 
 
+    if (
+        !menuButton ||
+        !sidebar ||
+        !overlay
+    ) {
+
+        return;
+
+    }
+
+
     menuButton.addEventListener(
         "click",
         function () {
@@ -746,46 +1109,37 @@ function setupNavigation() {
 
     overlay.addEventListener(
         "click",
-        function () {
-
-            sidebar.classList.remove(
-                "open"
-            );
-
-            overlay.classList.remove(
-                "show"
-            );
-
-        }
+        closeSidebar
     );
 
 
-    const navLinks =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             ".nav-item"
+        )
+        .forEach(
+            function (link) {
+
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
         );
 
 
-    navLinks.forEach(
-        function (link) {
+    function closeSidebar() {
 
-            link.addEventListener(
-                "click",
-                function () {
+        sidebar.classList.remove(
+            "open"
+        );
 
-                    sidebar.classList.remove(
-                        "open"
-                    );
+        overlay.classList.remove(
+            "show"
+        );
 
-                    overlay.classList.remove(
-                        "show"
-                    );
-
-                }
-            );
-
-        }
-    );
+    }
 
 }
 
@@ -796,11 +1150,24 @@ function setupNavigation() {
 
 function setupLogout() {
 
-    document.getElementById(
-        "logoutButton"
-    ).addEventListener(
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+
+    if (!logoutButton) {
+        return;
+    }
+
+
+    logoutButton.addEventListener(
         "click",
-        logoutStudent
+        function () {
+
+            logoutStudent();
+
+        }
     );
 
 }
@@ -808,13 +1175,13 @@ function setupLogout() {
 
 function logoutStudent() {
 
-    const confirmLogout =
+    const confirmed =
         confirm(
             "Are you sure you want to log out?"
         );
 
 
-    if (!confirmLogout) {
+    if (!confirmed) {
         return;
     }
 
@@ -829,21 +1196,27 @@ function logoutStudent() {
 
 
 /* =========================================
-   GET INITIALS
+   INITIALS
 ========================================= */
 
 function getInitials(name) {
 
     if (!name) {
+
         return "ST";
+
     }
 
 
     const parts =
-        name.trim().split(/\s+/);
+        name
+            .trim()
+            .split(/\s+/);
 
 
-    if (parts.length === 1) {
+    if (
+        parts.length === 1
+    ) {
 
         return parts[0]
             .substring(0, 2)
@@ -854,7 +1227,9 @@ function getInitials(name) {
 
     return (
         parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
+        parts[
+            parts.length - 1
+        ].charAt(0)
     ).toUpperCase();
 
 }
