@@ -10,10 +10,9 @@ const API_URL = "http://127.0.0.1:8000/api";
    CHECK LOGIN
 ========================================= */
 
-const loggedIn =
-    sessionStorage.getItem("studentLoggedIn");
-
-if (loggedIn !== "true") {
+if (
+    sessionStorage.getItem("studentLoggedIn") !== "true"
+) {
 
     window.location.href =
         "student-login.html";
@@ -22,7 +21,7 @@ if (loggedIn !== "true") {
 
 
 /* =========================================
-   GET CURRENT STUDENT
+   CURRENT STUDENT
 ========================================= */
 
 const currentStudentId =
@@ -77,89 +76,99 @@ const sidebarOverlay =
 
 
 /* =========================================
+   START DASHBOARD
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        if (!currentStudentId) {
+
+            window.location.href =
+                "student-login.html";
+
+            return;
+
+        }
+
+
+        loadStudent();
+
+        loadAttendance();
+
+        setupLogout();
+
+        setupMobileMenu();
+
+    }
+);
+
+
+/* =========================================
    LOAD STUDENT FROM LARAVEL
 ========================================= */
 
 async function loadStudent() {
 
-    if (!currentStudentId) {
-        window.location.href = "student-login.html";
-        return;
-    }
-
     try {
 
-        /*
-         * For now we use the login information
-         * stored in sessionStorage.
-         *
-         * The login response already contains:
-         * name
-         * student_id
-         * section
-         * organization
-         * club_role
-         * unique_id
-         * role
-         * status
-         */
+        const response =
+            await fetch(
+                `${API_URL}/students/by-student-id/${encodeURIComponent(currentStudentId)}`,
+                {
+                    method: "GET",
 
-        const student = {
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
 
-            student_id:
-                sessionStorage.getItem("studentId") || "",
 
-            name:
-                sessionStorage.getItem("studentName") ||
-                "Student",
+        const data =
+            await response.json();
 
-            section:
-                sessionStorage.getItem("studentSection") ||
-                "",
 
-            organization:
-                sessionStorage.getItem(
-                    "studentOrganization"
-                ) || "",
+        if (!response.ok) {
 
-            club_role:
-                sessionStorage.getItem(
-                    "studentClubRole"
-                ) || "",
+            throw new Error(
+                data.message ||
+                "Unable to load student information."
+            );
 
-            unique_id:
-                sessionStorage.getItem(
-                    "studentUniqueId"
-                ) || "",
+        }
 
-            role:
-                sessionStorage.getItem(
-                    "studentRole"
-                ) || "student",
 
-            status:
-                sessionStorage.getItem(
-                    "studentStatus"
-                ) || "Active"
-
-        };
+        const student =
+            data.student ||
+            data.data ||
+            data;
 
 
         displayStudent(student);
 
-        /*
-         * Attendance will be connected to Laravel
-         * after the attendance API is created.
-         */
-
-        displayAttendance([]);
 
     } catch (error) {
 
         console.error(
-            "Dashboard error:",
+            "Student loading error:",
             error
         );
+
+
+        /*
+         * If the API temporarily fails,
+         * use the Student ID from session.
+         */
+
+        if (topStudentId) {
+
+            topStudentId.textContent =
+                currentStudentId;
+
+        }
 
     }
 
@@ -167,22 +176,25 @@ async function loadStudent() {
 
 
 /* =========================================
-   DISPLAY STUDENT INFORMATION
+   DISPLAY STUDENT
 ========================================= */
 
 function displayStudent(student) {
 
-    const studentName =
-        student.name || "Student";
+    const name =
+        student.name ||
+        "Student";
+
 
     const studentId =
-        student.student_id || "Student ID";
+        student.student_id ||
+        currentStudentId;
 
 
     if (welcomeName) {
 
         welcomeName.textContent =
-            getFirstName(studentName);
+            getFirstName(name);
 
     }
 
@@ -190,7 +202,7 @@ function displayStudent(student) {
     if (topStudentName) {
 
         topStudentName.textContent =
-            studentName;
+            name;
 
     }
 
@@ -206,93 +218,141 @@ function displayStudent(student) {
     if (topAvatar) {
 
         topAvatar.textContent =
-            getInitials(studentName);
+            getInitials(name);
 
     }
 
 
     /*
-     * Save current information locally
-     * for other frontend pages to use.
+     * Keep only useful session information
+     * for the other Student Access pages.
      */
+
+    sessionStorage.setItem(
+        "studentName",
+        name
+    );
+
 
     sessionStorage.setItem(
         "studentId",
         studentId
     );
 
-    sessionStorage.setItem(
-        "studentName",
-        studentName
-    );
 
-    sessionStorage.setItem(
-        "studentSection",
-        student.section || ""
-    );
+    if (student.section) {
 
-    sessionStorage.setItem(
-        "studentOrganization",
-        student.organization || ""
-    );
+        sessionStorage.setItem(
+            "studentSection",
+            student.section
+        );
 
-    sessionStorage.setItem(
-        "studentClubRole",
-        student.club_role || ""
-    );
+    }
 
-    sessionStorage.setItem(
-        "studentUniqueId",
-        student.unique_id || ""
-    );
+
+    if (student.unique_id) {
+
+        sessionStorage.setItem(
+            "studentUniqueId",
+            student.unique_id
+        );
+
+    }
+
+
+    if (student.club_role) {
+
+        sessionStorage.setItem(
+            "studentClubRole",
+            student.club_role
+        );
+
+    }
 
 }
 
 
 /* =========================================
-   CREATE INITIALS
+   LOAD ATTENDANCE FROM LARAVEL
 ========================================= */
 
-function getFirstName(name) {
+async function loadAttendance() {
 
-    if (!name) {
-        return "Student";
-    }
+    if (!currentStudentId) {
 
-    return name
-        .trim()
-        .split(/\s+/)[0];
+        displayAttendance([]);
 
-}
-
-
-function getInitials(name) {
-
-    if (!name) {
-        return "ST";
-    }
-
-    const parts =
-        name.trim().split(/\s+/);
-
-    if (parts.length === 1) {
-
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
+        return;
 
     }
 
-    return (
-        parts[0].charAt(0) +
-        parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/attendances?student_id=${encodeURIComponent(currentStudentId)}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load attendance."
+            );
+
+        }
+
+
+        const records =
+            Array.isArray(data)
+                ? data
+                : data.data ||
+                  data.attendances ||
+                  [];
+
+
+        console.log(
+            "Dashboard attendance:",
+            records
+        );
+
+
+        displayAttendance(
+            records
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Attendance loading error:",
+            error
+        );
+
+
+        displayAttendance([]);
+
+    }
 
 }
 
 
 /* =========================================
-   ATTENDANCE
+   DISPLAY ATTENDANCE
 ========================================= */
 
 function displayAttendance(
@@ -319,35 +379,11 @@ function displayAttendance(
 
         }
 
-        if (recordCount) {
 
-            recordCount.textContent =
-                "0";
-
-        }
-
-        if (totalAttendance) {
-
-            totalAttendance.textContent =
-                "0";
-
-        }
-
-        if (meetingsAttended) {
-
-            meetingsAttended.textContent =
-                "0";
-
-        }
-
-        if (attendanceRate) {
-
-            attendanceRate.textContent =
-                "0%";
-
-        }
+        updateAttendanceSummary([]);
 
         return;
+
     }
 
 
@@ -359,122 +395,219 @@ function displayAttendance(
     }
 
 
-    attendanceRecords.forEach(record => {
+    /*
+     * Sort newest first.
+     */
 
-        const row =
-            document.createElement("tr");
+    const sortedRecords =
+        [...attendanceRecords].sort(
+            function (a, b) {
 
+                return (
+                    getRecordDate(b) -
+                    getRecordDate(a)
+                );
 
-        const meetingCell =
-            document.createElement("td");
-
-        meetingCell.textContent =
-            record.meeting ||
-            record.meetingName ||
-            "Organization Meeting";
-
-
-        const dateCell =
-            document.createElement("td");
-
-        dateCell.textContent =
-            record.date || "--";
+            }
+        );
 
 
-        const timeCell =
-            document.createElement("td");
+    /*
+     * Show only recent records
+     * on the dashboard.
+     */
 
-        timeCell.textContent =
-            record.time ||
-            record.timeIn ||
-            "--";
-
-
-        const statusCell =
-            document.createElement("td");
+    const recentRecords =
+        sortedRecords.slice(0, 5);
 
 
-        const status =
-            document.createElement("span");
+    recentRecords.forEach(
+        function (record) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
 
-        const recordStatus =
-            record.status ||
-            "Present";
+            const meeting =
+                record.meeting;
 
 
-        status.textContent =
-            recordStatus;
+            const meetingName =
+                meeting
+                    ? meeting.title
+                    : record.meeting_name ||
+                      record.meetingName ||
+                      "Organization Meeting";
 
 
-        const normalizedStatus =
-            recordStatus.toLowerCase();
+            const date =
+                meeting
+                    ? meeting.date
+                    : record.date ||
+                      record.scanned_at;
 
 
-        if (normalizedStatus === "present") {
+            const time =
+                record.scanned_at
+                    ? formatTime(
+                        record.scanned_at
+                    )
+                    : record.time ||
+                      record.timeIn ||
+                      "--";
 
-            status.className =
-                "attendance-status status-present";
-
-        } else if (
-            normalizedStatus === "late"
-        ) {
-
-            status.className =
-                "attendance-status status-late";
-
-        } else if (
-            normalizedStatus === "excused"
-        ) {
-
-            status.className =
-                "attendance-status status-excused";
-
-        } else {
-
-            status.className =
-                "attendance-status status-absent";
-
-        }
-
-
-        statusCell.appendChild(status);
-
-
-        row.appendChild(meetingCell);
-        row.appendChild(dateCell);
-        row.appendChild(timeCell);
-        row.appendChild(statusCell);
-
-
-        attendanceTable.appendChild(row);
-
-    });
-
-
-    const total =
-        attendanceRecords.length;
-
-
-    const present =
-        attendanceRecords.filter(record => {
 
             const status =
-                (record.status || "")
-                    .toLowerCase();
+                formatStatus(
+                    record.status
+                );
 
-            return (
-                status === "present" ||
-                status === "late"
+
+            /*
+             * Meeting
+             */
+
+            const meetingCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            meetingCell.textContent =
+                meetingName;
+
+
+            /*
+             * Date
+             */
+
+            const dateCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            dateCell.textContent =
+                formatDate(date);
+
+
+            /*
+             * Time
+             */
+
+            const timeCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            timeCell.textContent =
+                time;
+
+
+            /*
+             * Status
+             */
+
+            const statusCell =
+                document.createElement(
+                    "td"
+                );
+
+
+            const statusBadge =
+                document.createElement(
+                    "span"
+                );
+
+
+            statusBadge.textContent =
+                status;
+
+
+            statusBadge.className =
+                "attendance-status " +
+                getStatusClass(status);
+
+
+            statusCell.appendChild(
+                statusBadge
             );
 
-        }).length;
+
+            row.appendChild(
+                meetingCell
+            );
+
+
+            row.appendChild(
+                dateCell
+            );
+
+
+            row.appendChild(
+                timeCell
+            );
+
+
+            row.appendChild(
+                statusCell
+            );
+
+
+            attendanceTable.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    updateAttendanceSummary(
+        sortedRecords
+    );
+
+}
+
+
+/* =========================================
+   ATTENDANCE SUMMARY
+========================================= */
+
+function updateAttendanceSummary(
+    records
+) {
+
+    const total =
+        records.length;
+
+
+    const attended =
+        records.filter(
+            function (record) {
+
+                const status =
+                    String(
+                        record.status ||
+                        "present"
+                    ).toLowerCase();
+
+
+                return (
+                    status === "present" ||
+                    status === "late"
+                );
+
+            }
+        ).length;
 
 
     const rate =
         total > 0
             ? Math.round(
-                (present / total) * 100
+                (attended / total) * 100
             )
             : 0;
 
@@ -498,7 +631,7 @@ function displayAttendance(
     if (meetingsAttended) {
 
         meetingsAttended.textContent =
-            present;
+            attended;
 
     }
 
@@ -514,22 +647,243 @@ function displayAttendance(
 
 
 /* =========================================
+   STATUS HELPERS
+========================================= */
+
+function formatStatus(status) {
+
+    if (!status) {
+
+        return "Present";
+
+    }
+
+
+    return (
+        status.charAt(0).toUpperCase() +
+        status.slice(1)
+    );
+
+}
+
+
+function getStatusClass(status) {
+
+    switch (
+        String(status).toLowerCase()
+    ) {
+
+        case "present":
+            return "status-present";
+
+        case "late":
+            return "status-late";
+
+        case "excused":
+            return "status-excused";
+
+        case "absent":
+            return "status-absent";
+
+        default:
+            return "status-present";
+
+    }
+
+}
+
+
+/* =========================================
+   DATE HELPERS
+========================================= */
+
+function getRecordDate(record) {
+
+    if (record.scanned_at) {
+
+        return new Date(
+            record.scanned_at
+        );
+
+    }
+
+
+    if (
+        record.meeting &&
+        record.meeting.date
+    ) {
+
+        return new Date(
+            record.meeting.date +
+            "T00:00:00"
+        );
+
+    }
+
+
+    if (record.date) {
+
+        return new Date(
+            record.date
+        );
+
+    }
+
+
+    return new Date(0);
+
+}
+
+
+function formatDate(value) {
+
+    if (!value) {
+
+        return "--";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function formatTime(value) {
+
+    if (!value) {
+
+        return "--";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "--";
+
+    }
+
+
+    return date.toLocaleTimeString(
+        "en-US",
+        {
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================
+   NAME HELPERS
+========================================= */
+
+function getFirstName(name) {
+
+    if (!name) {
+
+        return "Student";
+
+    }
+
+
+    return name
+        .trim()
+        .split(/\s+/)[0];
+
+}
+
+
+function getInitials(name) {
+
+    if (!name) {
+
+        return "ST";
+
+    }
+
+
+    const parts =
+        name
+            .trim()
+            .split(/\s+/);
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[
+            parts.length - 1
+        ].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+/* =========================================
    LOGOUT
 ========================================= */
 
-if (logoutButton) {
+function setupLogout() {
+
+    if (!logoutButton) {
+        return;
+    }
+
 
     logoutButton.addEventListener(
         "click",
-        () => {
+        function () {
 
-            const confirmLogout =
+            const confirmed =
                 confirm(
                     "Are you sure you want to log out?"
                 );
 
 
-            if (!confirmLogout) {
+            if (!confirmed) {
                 return;
             }
 
@@ -550,19 +904,30 @@ if (logoutButton) {
    MOBILE MENU
 ========================================= */
 
-if (
-    menuButton &&
-    sidebar &&
-    sidebarOverlay
-) {
+function setupMobileMenu() {
+
+    if (
+        !menuButton ||
+        !sidebar ||
+        !sidebarOverlay
+    ) {
+
+        return;
+
+    }
+
 
     menuButton.addEventListener(
         "click",
-        () => {
+        function () {
 
-            sidebar.classList.add("open");
+            sidebar.classList.add(
+                "open"
+            );
 
-            sidebarOverlay.classList.add("show");
+            sidebarOverlay.classList.add(
+                "show"
+            );
 
         }
     );
@@ -573,56 +938,40 @@ if (
         closeSidebar
     );
 
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(
+            function (link) {
+
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
+        );
+
 }
 
-
-/* =========================================
-   CLOSE SIDEBAR
-========================================= */
 
 function closeSidebar() {
 
     if (sidebar) {
 
-        sidebar.classList.remove("open");
+        sidebar.classList.remove(
+            "open"
+        );
 
     }
 
+
     if (sidebarOverlay) {
 
-        sidebarOverlay.classList.remove("show");
+        sidebarOverlay.classList.remove(
+            "show"
+        );
 
     }
 
 }
-
-
-/* =========================================
-   CLOSE MOBILE MENU
-========================================= */
-
-const navigationLinks =
-    document.querySelectorAll(
-        ".nav-item"
-    );
-
-
-navigationLinks.forEach(link => {
-
-    link.addEventListener(
-        "click",
-        () => {
-
-            closeSidebar();
-
-        }
-    );
-
-});
-
-
-/* =========================================
-   START DASHBOARD
-========================================= */
-
-loadStudent();
