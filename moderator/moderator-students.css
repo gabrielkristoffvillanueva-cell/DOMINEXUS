@@ -961,3 +961,215 @@ td {
 .delete-button:hover {
     background: #f7eeee;
 }
+
+/* =========================================
+   RESET PASSWORD MODAL
+========================================= */
+
+.reset-password-modal {
+    max-width: 520px;
+}
+
+
+.reset-password-notice {
+
+    grid-column: 1 / -1;
+
+    padding: 14px;
+
+    border:
+        1px solid
+        #ead9a0;
+
+    border-radius: 8px;
+
+    background:
+        #fff8e5;
+
+    color:
+        #6d5920;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+
+}
+
+
+.reset-password-notice strong {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 11px;
+
+}
+
+
+.reset-password-notice p {
+
+    margin: 0;
+
+}
+
+
+.temporary-password-box {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 12px;
+
+    border:
+        1px solid
+        #e4e0d9;
+
+    border-radius: 8px;
+
+    background:
+        #faf9f6;
+
+}
+
+
+.temporary-password-box strong {
+
+    color:
+        #7b1113;
+
+    font-family:
+        monospace;
+
+    font-size: 16px;
+
+    letter-spacing: 1px;
+
+    word-break: break-all;
+
+}
+
+
+.copy-password-button {
+
+    flex-shrink: 0;
+
+    padding: 8px 12px;
+
+    border:
+        1px solid
+        #7b1113;
+
+    border-radius: 7px;
+
+    background:
+        white;
+
+    color:
+        #7b1113;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.copy-password-button:hover {
+
+    background:
+        #f7eeee;
+
+}
+
+
+.copy-password-message {
+
+    grid-column: 1 / -1;
+
+    min-height: 16px;
+
+    text-align: center;
+
+    color:
+        #198754;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.reset-done-button {
+
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    padding: 11px;
+
+    border:
+        none;
+
+    border-radius: 7px;
+
+    background:
+        #7b1113;
+
+    color:
+        white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+
+.reset-done-button:hover {
+
+    background:
+        #641013;
+
+}
+
+
+@media (max-width: 700px) {
+
+    .reset-password-modal {
+
+        max-width:
+            100%;
+
+    }
+
+
+    .temporary-password-box {
+
+        align-items:
+            stretch;
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .copy-password-button {
+
+        width:
+            100%;
+
+    }
+
+}

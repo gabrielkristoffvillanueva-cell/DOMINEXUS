@@ -109,6 +109,46 @@ const moderatorAvatar =
 
 
 /* =========================================================
+   RESET PASSWORD MODAL ELEMENTS
+========================================================= */
+
+const resetPasswordModal =
+    document.getElementById(
+        "resetPasswordModal"
+    );
+
+const resetStudentName =
+    document.getElementById(
+        "resetStudentName"
+    );
+
+const temporaryPasswordElement =
+    document.getElementById(
+        "temporaryPassword"
+    );
+
+const closeResetPasswordModal =
+    document.getElementById(
+        "closeResetPasswordModal"
+    );
+
+const doneResetPassword =
+    document.getElementById(
+        "doneResetPassword"
+    );
+
+const copyTemporaryPassword =
+    document.getElementById(
+        "copyTemporaryPassword"
+    );
+
+const copyPasswordMessage =
+    document.getElementById(
+        "copyPasswordMessage"
+    );
+
+
+/* =========================================================
    DATA
 ========================================================= */
 
@@ -182,6 +222,7 @@ async function loadStudents() {
                             "application/json"
 
                     }
+
                 }
             );
 
@@ -227,14 +268,26 @@ async function loadStudents() {
                 data.moderator.name
             ) {
 
-                moderatorNameElement.textContent =
-                    data.moderator.name;
+                if (
+                    moderatorNameElement
+                ) {
+
+                    moderatorNameElement.textContent =
+                        data.moderator.name;
+
+                }
 
 
-                moderatorAvatar.textContent =
-                    getInitials(
-                        data.moderator.name
-                    );
+                if (
+                    moderatorAvatar
+                ) {
+
+                    moderatorAvatar.textContent =
+                        getInitials(
+                            data.moderator.name
+                        );
+
+                }
 
 
                 sessionStorage.setItem(
@@ -755,23 +808,10 @@ async function resetStudentPassword(
     }
 
 
-    const confirmed =
-        confirm(
-            `Reset the password for ${studentName}?\n\nA new temporary password will be generated.`
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
     try {
 
         /*
-         * Disable buttons temporarily.
+         * Disable the reset button temporarily.
          */
 
         const buttons =
@@ -803,6 +843,10 @@ async function resetStudentPassword(
             }
         );
 
+
+        /*
+         * SEND RESET REQUEST
+         */
 
         const response =
             await fetch(
@@ -845,6 +889,10 @@ async function resetStudentPassword(
         );
 
 
+        /*
+         * HANDLE ERROR
+         */
+
         if (!response.ok) {
 
             throw new Error(
@@ -856,32 +904,50 @@ async function resetStudentPassword(
 
 
         /*
-         * Show temporary password.
-         *
-         * It is returned only from
-         * this reset request.
+         * SHOW CUSTOM SUCCESS MODAL
          */
 
-        alert(
+        if (
+            resetStudentName
+        ) {
 
-            "Password reset successfully.\n\n" +
-
-            "Student: " +
-            (
+            resetStudentName.textContent =
                 data.student?.name ||
-                studentName
-            ) +
+                studentName;
 
-            "\n\nTemporary Password:\n" +
+        }
 
-            (
+
+        if (
+            temporaryPasswordElement
+        ) {
+
+            temporaryPasswordElement.textContent =
                 data.temporary_password ||
-                "Unavailable"
-            ) +
+                "Unavailable";
 
-            "\n\nGive this temporary password to the student."
+        }
 
-        );
+
+        if (
+            copyPasswordMessage
+        ) {
+
+            copyPasswordMessage.textContent =
+                "";
+
+        }
+
+
+        if (
+            resetPasswordModal
+        ) {
+
+            resetPasswordModal.classList.remove(
+                "hidden"
+            );
+
+        }
 
 
     } catch (error) {
@@ -901,7 +967,7 @@ async function resetStudentPassword(
     } finally {
 
         /*
-         * Restore button.
+         * Restore reset button.
          */
 
         const buttons =
@@ -939,169 +1005,212 @@ async function resetStudentPassword(
 
 
 /* =========================================================
-   SHOW STUDENT
+   CLOSE STUDENT MODAL
 ========================================================= */
 
-function showStudent(
-    student
+if (
+    closeModal
 ) {
 
-    document.getElementById(
-        "detailName"
-    ).textContent =
-        student.name ||
-        "—";
-
-
-    document.getElementById(
-        "detailStudentId"
-    ).textContent =
-        student.student_id ||
-        "—";
-
-
-    document.getElementById(
-        "detailUniqueId"
-    ).textContent =
-        student.unique_id ||
-        "—";
-
-
-    document.getElementById(
-        "detailSection"
-    ).textContent =
-        student.section ||
-        "—";
-
-
-    document.getElementById(
-        "detailRole"
-    ).textContent =
-        student.club_role ||
-        student.role ||
-        "—";
-
-
-    document.getElementById(
-        "detailOrganization"
-    ).textContent =
-        getOrganizationName(
-            student.organization
-        );
-
-
-    /*
-     * DIGITAL SIGNATURE
-     */
-
-    const signatureImage =
-        document.getElementById(
-            "detailSignature"
-        );
-
-
-    const signatureUnavailable =
-        document.getElementById(
-            "signatureUnavailable"
-        );
-
-
-    const signature =
-        student.digital_signature ||
-        "";
-
-
-    if (
-        signature &&
-        signatureImage
-    ) {
-
-        signatureImage.src =
-            signature;
-
-
-        signatureImage.style.display =
-            "block";
-
-
-        if (
-            signatureUnavailable
-        ) {
-
-            signatureUnavailable.style.display =
-                "none";
-
-        }
-
-    } else {
-
-        if (
-            signatureImage
-        ) {
-
-            signatureImage.removeAttribute(
-                "src"
-            );
-
-
-            signatureImage.style.display =
-                "none";
-
-        }
-
-
-        if (
-            signatureUnavailable
-        ) {
-
-            signatureUnavailable.style.display =
-                "inline";
-
-        }
-
-    }
-
-
-    modal.classList.remove(
-        "hidden"
-    );
-
-}
-
-
-/* =========================================================
-   CLOSE MODAL
-========================================================= */
-
-closeModal.addEventListener(
-    "click",
-    function() {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-    }
-);
-
-
-modal.addEventListener(
-    "click",
-    function(event) {
-
-        if (
-            event.target ===
-            modal
-        ) {
+    closeModal.addEventListener(
+        "click",
+        function() {
 
             modal.classList.add(
                 "hidden"
             );
 
         }
+    );
+
+}
+
+
+if (
+    modal
+) {
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                modal
+            ) {
+
+                modal.classList.add(
+                    "hidden"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RESET PASSWORD MODAL CONTROLS
+========================================================= */
+
+function closeResetModal() {
+
+    if (
+        resetPasswordModal
+    ) {
+
+        resetPasswordModal.classList.add(
+            "hidden"
+        );
 
     }
-);
+
+
+    if (
+        copyPasswordMessage
+    ) {
+
+        copyPasswordMessage.textContent =
+            "";
+
+    }
+
+}
+
+
+if (
+    closeResetPasswordModal
+) {
+
+    closeResetPasswordModal.addEventListener(
+        "click",
+        closeResetModal
+    );
+
+}
+
+
+if (
+    doneResetPassword
+) {
+
+    doneResetPassword.addEventListener(
+        "click",
+        closeResetModal
+    );
+
+}
+
+
+if (
+    resetPasswordModal
+) {
+
+    resetPasswordModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                resetPasswordModal
+            ) {
+
+                closeResetModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   COPY TEMPORARY PASSWORD
+========================================================= */
+
+if (
+    copyTemporaryPassword
+) {
+
+    copyTemporaryPassword.addEventListener(
+        "click",
+        async function() {
+
+            const password =
+                temporaryPasswordElement
+                    ?.textContent
+                    ?.trim();
+
+
+            if (
+                !password ||
+                password === "—" ||
+                password === "Unavailable"
+            ) {
+
+                return;
+
+            }
+
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    password
+                );
+
+
+                if (
+                    copyPasswordMessage
+                ) {
+
+                    copyPasswordMessage.textContent =
+                        "Temporary password copied.";
+
+                }
+
+
+                copyTemporaryPassword.textContent =
+                    "Copied!";
+
+
+                setTimeout(
+                    function() {
+
+                        copyTemporaryPassword.textContent =
+                            "Copy";
+
+                    },
+                    1500
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "COPY PASSWORD ERROR:",
+                    error
+                );
+
+
+                if (
+                    copyPasswordMessage
+                ) {
+
+                    copyPasswordMessage.textContent =
+                        "Unable to copy password.";
+
+                }
+
+            }
+
+        }
+    );
+
+}
 
 
 /* =========================================================
@@ -1117,9 +1226,32 @@ document.addEventListener(
             "Escape"
         ) {
 
-            modal.classList.add(
-                "hidden"
-            );
+            if (
+                resetPasswordModal &&
+                !resetPasswordModal.classList.contains(
+                    "hidden"
+                )
+            ) {
+
+                closeResetModal();
+
+                return;
+
+            }
+
+
+            if (
+                modal &&
+                !modal.classList.contains(
+                    "hidden"
+                )
+            ) {
+
+                modal.classList.add(
+                    "hidden"
+                );
+
+            }
 
         }
 
@@ -1133,8 +1265,14 @@ document.addEventListener(
 
 function updateSummary() {
 
-    totalStudents.textContent =
-        students.length;
+    if (
+        totalStudents
+    ) {
+
+        totalStudents.textContent =
+            students.length;
+
+    }
 
 
     const organizations =
@@ -1166,8 +1304,14 @@ function updateSummary() {
     );
 
 
-    totalOrganizations.textContent =
-        organizations.size;
+    if (
+        totalOrganizations
+    ) {
+
+        totalOrganizations.textContent =
+            organizations.size;
+
+    }
 
 
     const active =
@@ -1187,8 +1331,14 @@ function updateSummary() {
         );
 
 
-    activeStudents.textContent =
-        active.length;
+    if (
+        activeStudents
+    ) {
+
+        activeStudents.textContent =
+            active.length;
+
+    }
 
 }
 
@@ -1197,63 +1347,69 @@ function updateSummary() {
    LOGOUT
 ========================================================= */
 
-logoutButton.addEventListener(
-    "click",
-    function() {
+if (
+    logoutButton
+) {
 
-        const confirmed =
-            confirm(
-                "Are you sure you want to log out?"
+    logoutButton.addEventListener(
+        "click",
+        function() {
+
+            const confirmed =
+                confirm(
+                    "Are you sure you want to log out?"
+                );
+
+
+            if (!confirmed) {
+
+                return;
+
+            }
+
+
+            sessionStorage.removeItem(
+                "moderatorLoggedIn"
             );
 
 
-        if (!confirmed) {
+            sessionStorage.removeItem(
+                "moderatorId"
+            );
 
-            return;
+
+            sessionStorage.removeItem(
+                "moderatorName"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorRole"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorStatus"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorOrganizationId"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorOrganization"
+            );
+
+
+            window.location.href =
+                "moderator-login.html";
 
         }
+    );
 
-
-        sessionStorage.removeItem(
-            "moderatorLoggedIn"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorId"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorName"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorRole"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorStatus"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorOrganizationId"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorOrganization"
-        );
-
-
-        window.location.href =
-            "moderator-login.html";
-
-    }
-);
+}
 
 
 /* =========================================================

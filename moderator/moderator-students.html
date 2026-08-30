@@ -428,6 +428,117 @@
 
     </div>
 
+    <!-- RESET PASSWORD SUCCESS MODAL -->
+
+<div
+    class="modal-overlay hidden"
+    id="resetPasswordModal"
+>
+
+    <div class="modal reset-password-modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    Password Reset Successful
+                </h2>
+
+                <p>
+                    A temporary password has been generated.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="close-button"
+                id="closeResetPasswordModal"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+            <div class="reset-password-notice">
+
+                <strong>
+                    Important
+                </strong>
+
+                <p>
+                    Give this temporary password to the
+                    student. They must create a new password
+                    when they log in.
+                </p>
+
+            </div>
+
+
+            <div class="detail-item full">
+
+                <span>
+                    STUDENT
+                </span>
+
+                <strong id="resetStudentName">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="detail-item full">
+
+                <span>
+                    TEMPORARY PASSWORD
+                </span>
+
+                <div class="temporary-password-box">
+
+                    <strong
+                        id="temporaryPassword"
+                    >
+                        —
+                    </strong>
+
+                    <button
+                        type="button"
+                        id="copyTemporaryPassword"
+                        class="copy-password-button"
+                    >
+                        Copy
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="copyPasswordMessage"
+                class="copy-password-message"
+            ></div>
+
+
+            <button
+                type="button"
+                id="doneResetPassword"
+                class="reset-done-button"
+            >
+                Done
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 
     <script src="moderator-students.js"></script>
 
