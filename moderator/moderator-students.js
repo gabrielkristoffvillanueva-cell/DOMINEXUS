@@ -1,7 +1,12 @@
 /* =========================================================
    DOMINEXUS
-   MODERATOR - STUDENT RECORDS
+   MODERATOR — STUDENT RECORDS
+   Laravel / MySQL Connected
+   Organization-Isolated
 ========================================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -13,17 +18,29 @@ if (
         "moderatorLoggedIn"
     ) !== "true"
 ) {
+
     window.location.href =
         "moderator-login.html";
+
 }
 
 
-/* =========================================================
-   STORAGE
-========================================================= */
+const moderatorId =
+    sessionStorage.getItem(
+        "moderatorId"
+    );
 
-const STUDENTS_KEY =
-    "dominexus_students";
+
+if (!moderatorId) {
+
+    alert(
+        "Moderator session not found. Please log in again."
+    );
+
+    window.location.href =
+        "moderator-login.html";
+
+}
 
 
 /* =========================================================
@@ -80,125 +97,339 @@ const logoutButton =
         "logoutButton"
     );
 
+const moderatorNameElement =
+    document.getElementById(
+        "moderatorName"
+    );
+
+const moderatorAvatar =
+    document.getElementById(
+        "moderatorAvatar"
+    );
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+let students = [];
+
+let filteredStudents = [];
+
 
 /* =========================================================
    MODERATOR INFORMATION
 ========================================================= */
 
-const moderatorName =
+const savedModeratorName =
     sessionStorage.getItem(
         "moderatorName"
     ) ||
-    "System Moderator";
+    "Moderator";
 
 
-document.getElementById(
-    "moderatorName"
-).textContent =
-    moderatorName;
+if (
+    moderatorNameElement
+) {
+
+    moderatorNameElement.textContent =
+        savedModeratorName;
+
+}
 
 
-document.getElementById(
-    "moderatorAvatar"
-).textContent =
-    getInitials(
-        moderatorName
-    );
+if (
+    moderatorAvatar
+) {
 
+    moderatorAvatar.textContent =
+        getInitials(
+            savedModeratorName
+        );
 
-/* =========================================================
-   STUDENT DATA
-========================================================= */
-
-let students =
-    getStudents();
+}
 
 
 /* =========================================================
    INITIALIZE
 ========================================================= */
 
-updateSummary();
+loadStudents();
 
-renderStudents(
-    students
-);
+
+/* =========================================================
+   LOAD STUDENTS
+========================================================= */
+
+async function loadStudents() {
+
+    showLoading();
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/moderator-students?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+
+                        "Accept":
+                            "application/json"
+
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "MODERATOR STUDENTS RESPONSE:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load student records."
+            );
+
+        }
+
+
+        students =
+            Array.isArray(
+                data.students
+            )
+                ? data.students
+                : [];
+
+
+        /*
+         * Update moderator name
+         * directly from backend.
+         */
+
+        if (
+            data.moderator
+        ) {
+
+            if (
+                data.moderator.name
+            ) {
+
+                moderatorNameElement.textContent =
+                    data.moderator.name;
+
+
+                moderatorAvatar.textContent =
+                    getInitials(
+                        data.moderator.name
+                    );
+
+
+                sessionStorage.setItem(
+                    "moderatorName",
+                    data.moderator.name
+                );
+
+            }
+
+
+            if (
+                data.moderator.organization_id
+                !== undefined
+            ) {
+
+                sessionStorage.setItem(
+                    "moderatorOrganizationId",
+                    data.moderator.organization_id
+                );
+
+            }
+
+        }
+
+
+        filteredStudents =
+            [...students];
+
+
+        updateSummary();
+
+
+        renderStudents(
+            filteredStudents
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "STUDENT RECORD ERROR:",
+            error
+        );
+
+
+        students =
+            [];
+
+
+        filteredStudents =
+            [];
+
+
+        updateSummary();
+
+
+        studentTableBody.innerHTML =
+            "";
+
+
+        emptyState.classList.remove(
+            "hidden"
+        );
+
+
+        emptyState.textContent =
+            error.message ||
+            "Unable to load student records.";
+
+    }
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function showLoading() {
+
+    studentTableBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="7"
+                style="text-align:center;"
+            >
+
+                Loading student records...
+
+            </td>
+
+        </tr>
+
+    `;
+
+
+    emptyState.classList.add(
+        "hidden"
+    );
+
+}
 
 
 /* =========================================================
    SEARCH
 ========================================================= */
 
-searchInput.addEventListener(
-    "input",
-    function () {
+if (
+    searchInput
+) {
 
-        const query =
-            searchInput.value
-                .trim()
-                .toLowerCase();
+    searchInput.addEventListener(
+        "input",
+        function() {
 
-
-        if (!query) {
-
-            renderStudents(
-                students
-            );
-
-            return;
-
-        }
+            const query =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
 
 
-        const filtered =
-            students.filter(
-                function (student) {
+            if (!query) {
 
-                    const values = [
-
-                        student.fullName,
-
-                        student.name,
-
-                        student.studentId,
-
-                        student.uniqueId,
-
-                        student.section,
-
-                        student.clubRole,
-
-                        student.role,
-
-                        student.organization
-
-                    ];
+                filteredStudents =
+                    [...students];
 
 
-                    return values.some(
-                        function (value) {
+                renderStudents(
+                    filteredStudents
+                );
 
-                            return String(
-                                value || ""
-                            )
-                            .toLowerCase()
-                            .includes(
-                                query
+
+                return;
+
+            }
+
+
+            filteredStudents =
+                students.filter(
+                    function(student) {
+
+                        const organization =
+                            getOrganizationName(
+                                student.organization
                             );
 
-                        }
-                    );
 
-                }
+                        const values = [
+
+                            student.name,
+
+                            student.student_id,
+
+                            student.unique_id,
+
+                            student.section,
+
+                            student.club_role,
+
+                            student.role,
+
+                            organization
+
+                        ];
+
+
+                        return values.some(
+                            function(value) {
+
+                                return String(
+                                    value ||
+                                    ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    query
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            renderStudents(
+                filteredStudents
             );
 
+        }
+    );
 
-        renderStudents(
-            filtered
-        );
-
-    }
-);
+}
 
 
 /* =========================================================
@@ -225,6 +456,13 @@ function renderStudents(
             "hidden"
         );
 
+
+        emptyState.textContent =
+            searchInput.value.trim()
+                ? "No student records match your search."
+                : "No student records found.";
+
+
         return;
 
     }
@@ -236,7 +474,7 @@ function renderStudents(
 
 
     list.forEach(
-        function (student) {
+        function(student) {
 
             const row =
                 document.createElement(
@@ -245,18 +483,17 @@ function renderStudents(
 
 
             const name =
-                student.fullName ||
                 student.name ||
                 "Unknown Student";
 
 
             const studentId =
-                student.studentId ||
+                student.student_id ||
                 "—";
 
 
             const uniqueId =
-                student.uniqueId ||
+                student.unique_id ||
                 "—";
 
 
@@ -266,14 +503,15 @@ function renderStudents(
 
 
             const role =
-                student.clubRole ||
+                student.club_role ||
                 student.role ||
                 "—";
 
 
             const organization =
-                student.organization ||
-                "—";
+                getOrganizationName(
+                    student.organization
+                );
 
 
             row.innerHTML = `
@@ -281,42 +519,70 @@ function renderStudents(
                 <td>
 
                     <div class="student-name">
-                        ${escapeHtml(name)}
+
+                        ${escapeHtml(
+                            name
+                        )}
+
                     </div>
 
                     <div class="student-section">
-                        ${escapeHtml(section)}
+
+                        ${escapeHtml(
+                            section
+                        )}
+
                     </div>
 
                 </td>
 
 
                 <td>
-                    ${escapeHtml(studentId)}
+
+                    ${escapeHtml(
+                        studentId
+                    )}
+
                 </td>
 
 
                 <td>
 
                     <span class="unique-id">
-                        ${escapeHtml(uniqueId)}
+
+                        ${escapeHtml(
+                            uniqueId
+                        )}
+
                     </span>
 
                 </td>
 
 
                 <td>
-                    ${escapeHtml(section)}
+
+                    ${escapeHtml(
+                        section
+                    )}
+
                 </td>
 
 
                 <td>
-                    ${escapeHtml(role)}
+
+                    ${escapeHtml(
+                        role
+                    )}
+
                 </td>
 
 
                 <td>
-                    ${escapeHtml(organization)}
+
+                    ${escapeHtml(
+                        organization
+                    )}
+
                 </td>
 
 
@@ -328,19 +594,27 @@ function renderStudents(
                             type="button"
                             class="view-button"
                             data-action="view"
-                            data-unique-id="${escapeHtml(uniqueId)}"
+                            data-id="${escapeHtml(
+                                student.id
+                            )}"
                         >
+
                             View
+
                         </button>
 
 
                         <button
                             type="button"
-                            class="delete-button"
-                            data-action="delete"
-                            data-unique-id="${escapeHtml(uniqueId)}"
+                            class="reset-button"
+                            data-action="reset-password"
+                            data-id="${escapeHtml(
+                                student.id
+                            )}"
                         >
-                            Delete
+
+                            Reset Password
+
                         </button>
 
                     </div>
@@ -366,7 +640,7 @@ function renderStudents(
 
 studentTableBody.addEventListener(
     "click",
-    function (event) {
+    function(event) {
 
         const button =
             event.target.closest(
@@ -385,74 +659,66 @@ studentTableBody.addEventListener(
             button.dataset.action;
 
 
-        const uniqueId =
-            button.dataset.uniqueId;
+        const id =
+            button.dataset.id;
 
 
-        if (!uniqueId) {
+        const student =
+            students.find(
+                function(item) {
+
+                    return (
+                        String(
+                            item.id
+                        ) ===
+                        String(
+                            id
+                        )
+                    );
+
+                }
+            );
+
+
+        if (!student) {
+
+            alert(
+                "Student record could not be found."
+            );
 
             return;
 
         }
 
 
-        /* =========================================
-           VIEW
-        ========================================= */
+        /*
+         * VIEW
+         */
 
         if (
             action === "view"
         ) {
 
-            const student =
-                students.find(
-                    function (item) {
-
-                        return (
-                            String(
-                                item.uniqueId ||
-                                ""
-                            ).trim() ===
-                            String(
-                                uniqueId
-                            ).trim()
-                        );
-
-                    }
-                );
-
-
-            if (!student) {
-
-                alert(
-                    "Student record could not be found."
-                );
-
-                return;
-
-            }
-
-
             showStudent(
                 student
             );
-
 
             return;
 
         }
 
 
-        /* =========================================
-           DELETE
-        ========================================= */
+        /*
+         * RESET PASSWORD
+         */
 
         if (
-            action === "delete"
+            action ===
+            "reset-password"
         ) {
 
-            deleteStudent(
-                uniqueId
+            resetStudentPassword(
+                student
             );
 
         }
@@ -462,35 +728,26 @@ studentTableBody.addEventListener(
 
 
 /* =========================================================
-   DELETE STUDENT
+   RESET STUDENT PASSWORD
 ========================================================= */
 
-function deleteStudent(
-    uniqueId
+async function resetStudentPassword(
+    student
 ) {
 
-    const student =
-        students.find(
-            function (item) {
-
-                return (
-                    String(
-                        item.uniqueId ||
-                        ""
-                    ).trim() ===
-                    String(
-                        uniqueId
-                    ).trim()
-                );
-
-            }
-        );
+    const studentName =
+        student.name ||
+        "this student";
 
 
-    if (!student) {
+    const studentId =
+        student.student_id;
+
+
+    if (!studentId) {
 
         alert(
-            "Student record could not be found."
+            "This student does not have a valid Student ID."
         );
 
         return;
@@ -498,17 +755,9 @@ function deleteStudent(
     }
 
 
-    const name =
-        student.fullName ||
-        student.name ||
-        "this student";
-
-
     const confirmed =
         confirm(
-            "Are you sure you want to delete the student record for " +
-            name +
-            "?\n\nThis will permanently remove the student's registered account data from this browser."
+            `Reset the password for ${studentName}?\n\nA new temporary password will be generated.`
         );
 
 
@@ -519,121 +768,172 @@ function deleteStudent(
     }
 
 
-    /*
-     * Remove the selected student
-     * from the local array.
-     */
+    try {
 
-    students =
-        students.filter(
-            function (item) {
+        /*
+         * Disable buttons temporarily.
+         */
 
-                return (
+        const buttons =
+            document.querySelectorAll(
+                `[data-id="${CSS.escape(
                     String(
-                        item.uniqueId ||
-                        ""
-                    ).trim() !==
-                    String(
-                        uniqueId
-                    ).trim()
-                );
+                        student.id
+                    )
+                )}"]`
+            );
+
+
+        buttons.forEach(
+            function(button) {
+
+                if (
+                    button.dataset.action ===
+                    "reset-password"
+                ) {
+
+                    button.disabled =
+                        true;
+
+                    button.textContent =
+                        "Resetting...";
+
+                }
 
             }
         );
 
 
-    /*
-     * Save the updated records.
-     */
+        const response =
+            await fetch(
+                `${API_BASE}/moderator/reset-student-password`,
+                {
+                    method: "POST",
 
-    saveStudents(
-        students
-    );
+                    headers: {
 
+                        "Content-Type":
+                            "application/json",
 
-    /*
-     * Close the modal if it is open.
-     */
+                        "Accept":
+                            "application/json"
 
-    modal.classList.add(
-        "hidden"
-    );
+                    },
 
+                    body:
+                        JSON.stringify({
 
-    /*
-     * Update the page.
-     */
+                            moderator_id:
+                                moderatorId,
 
-    updateSummary();
+                            student_id:
+                                studentId
 
-
-    const query =
-        searchInput.value
-            .trim()
-            .toLowerCase();
-
-
-    if (query) {
-
-        const filtered =
-            students.filter(
-                function (student) {
-
-                    const values = [
-
-                        student.fullName,
-
-                        student.name,
-
-                        student.studentId,
-
-                        student.uniqueId,
-
-                        student.section,
-
-                        student.clubRole,
-
-                        student.role,
-
-                        student.organization
-
-                    ];
-
-
-                    return values.some(
-                        function (value) {
-
-                            return String(
-                                value || ""
-                            )
-                            .toLowerCase()
-                            .includes(
-                                query
-                            );
-
-                        }
-                    );
+                        })
 
                 }
             );
 
 
-        renderStudents(
-            filtered
+        const data =
+            await response.json();
+
+
+        console.log(
+            "RESET PASSWORD RESPONSE:",
+            data
         );
 
-    } else {
 
-        renderStudents(
-            students
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to reset student password."
+            );
+
+        }
+
+
+        /*
+         * Show temporary password.
+         *
+         * It is returned only from
+         * this reset request.
+         */
+
+        alert(
+
+            "Password reset successfully.\n\n" +
+
+            "Student: " +
+            (
+                data.student?.name ||
+                studentName
+            ) +
+
+            "\n\nTemporary Password:\n" +
+
+            (
+                data.temporary_password ||
+                "Unavailable"
+            ) +
+
+            "\n\nGive this temporary password to the student."
+
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "PASSWORD RESET ERROR:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to reset student password."
+        );
+
+
+    } finally {
+
+        /*
+         * Restore button.
+         */
+
+        const buttons =
+            document.querySelectorAll(
+                `[data-id="${CSS.escape(
+                    String(
+                        student.id
+                    )
+                )}"]`
+            );
+
+
+        buttons.forEach(
+            function(button) {
+
+                if (
+                    button.dataset.action ===
+                    "reset-password"
+                ) {
+
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        "Reset Password";
+
+                }
+
+            }
         );
 
     }
-
-
-    alert(
-        "Student record deleted successfully."
-    );
 
 }
 
@@ -649,7 +949,6 @@ function showStudent(
     document.getElementById(
         "detailName"
     ).textContent =
-        student.fullName ||
         student.name ||
         "—";
 
@@ -657,14 +956,14 @@ function showStudent(
     document.getElementById(
         "detailStudentId"
     ).textContent =
-        student.studentId ||
+        student.student_id ||
         "—";
 
 
     document.getElementById(
         "detailUniqueId"
     ).textContent =
-        student.uniqueId ||
+        student.unique_id ||
         "—";
 
 
@@ -678,7 +977,7 @@ function showStudent(
     document.getElementById(
         "detailRole"
     ).textContent =
-        student.clubRole ||
+        student.club_role ||
         student.role ||
         "—";
 
@@ -686,8 +985,9 @@ function showStudent(
     document.getElementById(
         "detailOrganization"
     ).textContent =
-        student.organization ||
-        "—";
+        getOrganizationName(
+            student.organization
+        );
 
 
     /*
@@ -707,8 +1007,7 @@ function showStudent(
 
 
     const signature =
-        student.digitalSignature ||
-        student.signature ||
+        student.digital_signature ||
         "";
 
 
@@ -776,7 +1075,7 @@ function showStudent(
 
 closeModal.addEventListener(
     "click",
-    function () {
+    function() {
 
         modal.classList.add(
             "hidden"
@@ -788,7 +1087,7 @@ closeModal.addEventListener(
 
 modal.addEventListener(
     "click",
-    function (event) {
+    function(event) {
 
         if (
             event.target ===
@@ -811,7 +1110,7 @@ modal.addEventListener(
 
 document.addEventListener(
     "keydown",
-    function (event) {
+    function(event) {
 
         if (
             event.key ===
@@ -843,17 +1142,18 @@ function updateSummary() {
 
 
     students.forEach(
-        function (student) {
+        function(student) {
 
             const organization =
-                String(
-                    student.organization ||
-                    ""
-                ).trim();
+                getOrganizationName(
+                    student.organization
+                );
 
 
             if (
-                organization
+                organization &&
+                organization !==
+                "Unknown Organization"
             ) {
 
                 organizations.add(
@@ -872,11 +1172,15 @@ function updateSummary() {
 
     const active =
         students.filter(
-            function (student) {
+            function(student) {
 
                 return (
-                    student.active !== false &&
-                    student.status !== "inactive"
+                    String(
+                        student.status ||
+                        ""
+                    )
+                    .toLowerCase() ===
+                    "active"
                 );
 
             }
@@ -890,113 +1194,20 @@ function updateSummary() {
 
 
 /* =========================================================
-   GET STUDENTS
-========================================================= */
-
-function getStudents() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                STUDENTS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (
-            Array.isArray(
-                parsed
-            )
-        ) {
-
-            return parsed;
-
-        }
-
-
-        return [];
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Unable to load students:",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   SAVE STUDENTS
-========================================================= */
-
-function saveStudents(
-    studentList
-) {
-
-    try {
-
-        localStorage.setItem(
-            STUDENTS_KEY,
-            JSON.stringify(
-                studentList
-            )
-        );
-
-
-        console.log(
-            "DOMINEXUS: Student records updated."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Unable to save students:",
-            error
-        );
-
-
-        alert(
-            "The student record could not be saved."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
    LOGOUT
 ========================================================= */
 
 logoutButton.addEventListener(
     "click",
-    function () {
+    function() {
 
-        if (
-            !confirm(
+        const confirmed =
+            confirm(
                 "Are you sure you want to log out?"
-            )
-        ) {
+            );
+
+
+        if (!confirmed) {
 
             return;
 
@@ -1018,6 +1229,26 @@ logoutButton.addEventListener(
         );
 
 
+        sessionStorage.removeItem(
+            "moderatorRole"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorStatus"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorOrganizationId"
+        );
+
+
+        sessionStorage.removeItem(
+            "moderatorOrganization"
+        );
+
+
         window.location.href =
             "moderator-login.html";
 
@@ -1029,33 +1260,56 @@ logoutButton.addEventListener(
    HELPERS
 ========================================================= */
 
+function getOrganizationName(
+    organization
+) {
+
+    if (!organization) {
+
+        return "Unknown Organization";
+
+    }
+
+
+    if (
+        typeof organization ===
+        "object"
+    ) {
+
+        return (
+            organization.name ||
+            organization.title ||
+            "Unknown Organization"
+        );
+
+    }
+
+
+    return String(
+        organization
+    );
+
+}
+
+
 function escapeHtml(
     value
 ) {
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(
+            value ??
+            ""
+        );
+
+
+    return div.innerHTML;
 
 }
 
@@ -1064,10 +1318,19 @@ function getInitials(
     name
 ) {
 
+    if (!name) {
+
+        return "MO";
+
+    }
+
+
     const parts =
-        name
-            .trim()
-            .split(/\s+/);
+        String(
+            name
+        )
+        .trim()
+        .split(/\s+/);
 
 
     if (
@@ -1085,10 +1348,10 @@ function getInitials(
 
 
     return (
-        parts[0][0] +
+        parts[0].charAt(0) +
         parts[
             parts.length - 1
-        ][0]
+        ].charAt(0)
     ).toUpperCase();
 
 }

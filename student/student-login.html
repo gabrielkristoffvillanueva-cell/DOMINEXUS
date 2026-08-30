@@ -93,10 +93,9 @@
                             <span>Remember me</span>
                         </label>
 
-                        <a href="#" id="forgotPassword">
+                        <a href="#" id="forgotPasswordLink">
                             Forgot Password?
                         </a>
-
                     </div>
 
 
@@ -139,7 +138,47 @@
         </section>
 
     </main>
+    <!-- FORGOT PASSWORD MODAL -->
 
+    <div id="forgotPasswordModal" class="forgot-password-overlay hidden">
+
+        <div class="forgot-password-modal">
+
+            <button type="button" id="closeForgotPassword" class="forgot-password-close">
+                ×
+            </button>
+
+
+            <div class="forgot-password-icon">
+                🔑
+            </div>
+
+
+            <h2>
+                Forgot Password?
+            </h2>
+
+
+            <p>
+                Please contact your organization
+                moderator to reset your password.
+            </p>
+
+
+            <p class="forgot-password-note">
+                After the reset, your moderator will
+                provide you with a temporary password.
+                You should change it after logging in.
+            </p>
+
+
+            <button type="button" id="forgotPasswordOkay" class="forgot-password-button">
+                Got it
+            </button>
+
+        </div>
+
+    </div>
 
     <script src="student-login.js?v=2"></script>
 

@@ -835,3 +835,129 @@ td {
     background: #f7eeee;
 }
 
+/* =========================================
+   ACTION BUTTONS
+========================================= */
+
+.action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================
+   VIEW BUTTON
+========================================= */
+
+.view-button {
+    padding: 7px 10px;
+
+    border:
+        1px solid
+        #d8d4cc;
+
+    border-radius: 7px;
+
+    background: white;
+
+    color: #7b1113;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+
+.view-button:hover {
+    background: #f7f5f1;
+
+    border-color: #c8c2b8;
+}
+
+
+/* =========================================
+   RESET PASSWORD BUTTON
+========================================= */
+
+.reset-button {
+    padding: 7px 10px;
+
+    border:
+        1px solid
+        #7b1113;
+
+    border-radius: 7px;
+
+    background: #7b1113;
+
+    color: white;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        opacity .2s ease;
+}
+
+
+.reset-button:hover {
+    background: #641013;
+
+    border-color: #641013;
+}
+
+
+/* Disabled while resetting */
+
+.reset-button:disabled {
+    opacity: .55;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   DELETE BUTTON
+   Kept for compatibility if needed later
+========================================= */
+
+.delete-button {
+    padding: 7px 10px;
+
+    border:
+        1px solid
+        #d8d4cc;
+
+    border-radius: 7px;
+
+    background: white;
+
+    color: #7b1113;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.delete-button:hover {
+    background: #f7eeee;
+}

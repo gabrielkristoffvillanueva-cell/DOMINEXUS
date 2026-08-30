@@ -357,19 +357,128 @@ function showMessage(
    FORGOT PASSWORD
 ========================================================= */
 
-forgotPassword.addEventListener(
-    "click",
-    function (event) {
+const forgotPasswordLink =
+    document.getElementById(
+        "forgotPasswordLink"
+    );
 
-        event.preventDefault();
+const forgotPasswordModal =
+    document.getElementById(
+        "forgotPasswordModal"
+    );
 
-        alert(
-            "Please contact your organization moderator or administrator to reset your password."
-        );
+const closeForgotPassword =
+    document.getElementById(
+        "closeForgotPassword"
+    );
+
+const forgotPasswordOkay =
+    document.getElementById(
+        "forgotPasswordOkay"
+    );
+
+
+function openForgotPasswordModal() {
+
+    forgotPasswordModal.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+function closeForgotPasswordModal() {
+
+    forgotPasswordModal.classList.add(
+        "hidden"
+    );
+
+}
+
+
+if (
+    forgotPasswordLink
+) {
+
+    forgotPasswordLink.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            openForgotPasswordModal();
+
+        }
+    );
+
+}
+
+
+if (
+    closeForgotPassword
+) {
+
+    closeForgotPassword.addEventListener(
+        "click",
+        closeForgotPasswordModal
+    );
+
+}
+
+
+if (
+    forgotPasswordOkay
+) {
+
+    forgotPasswordOkay.addEventListener(
+        "click",
+        closeForgotPasswordModal
+    );
+
+}
+
+
+if (
+    forgotPasswordModal
+) {
+
+    forgotPasswordModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                forgotPasswordModal
+            ) {
+
+                closeForgotPasswordModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape" &&
+            forgotPasswordModal &&
+            !forgotPasswordModal.classList.contains(
+                "hidden"
+            )
+        ) {
+
+            closeForgotPasswordModal();
+
+        }
 
     }
 );
-
 
 /* =========================================================
    REGISTER
