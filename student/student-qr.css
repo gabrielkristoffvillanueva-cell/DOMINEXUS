@@ -752,3 +752,88 @@ body {
     }
 
 }
+
+/* =========================================================
+   QR ACTION BUTTONS
+========================================================= */
+
+.qr-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 22px;
+}
+
+.qr-actions button {
+    flex: 1;
+    height: 46px;
+    border-radius: 7px;
+    border: 1px solid #a90000;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+/* Download Button */
+
+#downloadQrButton {
+    background: #a90000;
+    color: #ffffff;
+}
+
+#downloadQrButton:hover {
+    background: #850000;
+    border-color: #850000;
+    transform: translateY(-1px);
+}
+
+#downloadQrButton:active {
+    transform: translateY(0);
+}
+
+
+/* Print Button */
+
+#printQrButton {
+    background: #ffffff;
+    color: #a90000;
+}
+
+#printQrButton:hover {
+    background: #fff5f5;
+    border-color: #850000;
+    color: #850000;
+    transform: translateY(-1px);
+}
+
+#printQrButton:active {
+    transform: translateY(0);
+}
+
+
+/* Disabled */
+
+.qr-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+
+    .qr-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .qr-actions button {
+        width: 100%;
+    }
+
+}

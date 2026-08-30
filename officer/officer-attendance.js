@@ -12,44 +12,24 @@ const API_BASE =
 ========================================================= */
 
 if (
-    sessionStorage.getItem(
-        "officerLoggedIn"
-    ) !== "true"
+    sessionStorage.getItem("officerLoggedIn") !== "true"
 ) {
-
     window.location.href =
         "officer-login.html";
-
 }
 
 
 /* =========================================================
-   OFFICER SESSION
+   OFFICER INFORMATION
 ========================================================= */
 
 const officerId =
-    sessionStorage.getItem(
-        "officerId"
-    );
+    sessionStorage.getItem("officerId") ||
+    "";
 
 const officerName =
-    sessionStorage.getItem(
-        "officerName"
-    ) || "Officer";
-
-
-if (!officerId) {
-
-    alert(
-        "Officer session expired. Please log in again."
-    );
-
-    sessionStorage.clear();
-
-    window.location.href =
-        "officer-login.html";
-
-}
+    sessionStorage.getItem("officerName") ||
+    "Officer";
 
 
 /* =========================================================
@@ -57,9 +37,7 @@ if (!officerId) {
 ========================================================= */
 
 const meetingSelect =
-    document.getElementById(
-        "meetingSelect"
-    );
+    document.getElementById("meetingSelect");
 
 const startScannerButton =
     document.getElementById(
@@ -72,14 +50,10 @@ const stopScannerButton =
     );
 
 const qrScannerContainer =
-    document.getElementById(
-        "qrScanner"
-    );
+    document.getElementById("qrScanner");
 
 const scanResult =
-    document.getElementById(
-        "scanResult"
-    );
+    document.getElementById("scanResult");
 
 const scannedStudentName =
     document.getElementById(
@@ -126,11 +100,6 @@ const emptyAttendance =
         "emptyAttendance"
     );
 
-const selectedMeetingText =
-    document.getElementById(
-        "selectedMeetingText"
-    );
-
 const totalMembers =
     document.getElementById(
         "totalMembers"
@@ -144,6 +113,11 @@ const presentMembers =
 const attendanceRate =
     document.getElementById(
         "attendanceRate"
+    );
+
+const selectedMeetingText =
+    document.getElementById(
+        "selectedMeetingText"
     );
 
 const topOfficerName =
@@ -186,15 +160,17 @@ const sidebarOverlay =
    VARIABLES
 ========================================================= */
 
-let dominexusQRScanner = null;
+let dominexusQRScanner =
+    null;
 
-let qrScannerRunning = false;
+let qrScannerRunning =
+    false;
 
-let currentScannedStudent = null;
+let currentScannedStudent =
+    null;
 
-let processingScan = false;
-
-let currentAttendance = [];
+let processingScan =
+    false;
 
 
 /* =========================================================
@@ -208,14 +184,12 @@ if (topOfficerName) {
 
 }
 
-
 if (topOfficerId) {
 
     topOfficerId.textContent =
         officerId;
 
 }
-
 
 if (topAvatar) {
 
@@ -239,11 +213,9 @@ async function loadMeetings() {
 
 
     meetingSelect.innerHTML = `
-
         <option value="">
             Loading meetings...
         </option>
-
     `;
 
 
@@ -251,7 +223,7 @@ async function loadMeetings() {
 
         const response =
             await fetch(
-                `${API_BASE}/meetings?officer_id=${encodeURIComponent(officerId)}`,
+                `${API_BASE}/meetings`,
                 {
                     method: "GET",
 
@@ -263,24 +235,23 @@ async function loadMeetings() {
             );
 
 
+        if (!response.ok) {
+
+            throw new Error(
+                `Failed to load meetings (${response.status})`
+            );
+
+        }
+
+
         const data =
             await response.json();
 
 
         console.log(
-            "Officer meetings:",
+            "DOMINEXUS meetings:",
             data
         );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.message ||
-                "Unable to load meetings."
-            );
-
-        }
 
 
         const meetings =
@@ -292,16 +263,14 @@ async function loadMeetings() {
 
 
         meetingSelect.innerHTML = `
-
             <option value="">
                 Select a meeting
             </option>
-
         `;
 
 
         meetings.forEach(
-            function (meeting) {
+            function(meeting) {
 
                 const option =
                     document.createElement(
@@ -315,6 +284,8 @@ async function loadMeetings() {
 
                 option.textContent =
                     meeting.title ||
+                    meeting.name ||
+                    meeting.meeting_name ||
                     `Meeting #${meeting.id}`;
 
 
@@ -331,11 +302,9 @@ async function loadMeetings() {
         ) {
 
             meetingSelect.innerHTML = `
-
                 <option value="">
                     No meetings available
                 </option>
-
             `;
 
         }
@@ -350,420 +319,100 @@ async function loadMeetings() {
 
 
         meetingSelect.innerHTML = `
-
             <option value="">
                 Unable to load meetings
             </option>
-
         `;
 
-
-        alert(
-            "Unable to load meetings.\n\n" +
-            error.message
-        );
-
     }
 
 }
 
 
 /* =========================================================
-   MEETING SELECTED
+   MEETING CHANGE
 ========================================================= */
 
-meetingSelect.addEventListener(
-    "change",
-    async function () {
+if (meetingSelect) {
 
-        const meetingId =
-            meetingSelect.value;
+    meetingSelect.addEventListener(
+        "change",
+        async function() {
 
+            currentScannedStudent =
+                null;
 
-        currentScannedStudent =
-            null;
+            processingScan =
+                false;
 
 
-        if (scanResult) {
+            if (scanResult) {
 
-            scanResult.style.display =
-                "none";
-
-        }
-
-
-        if (!meetingId) {
-
-            selectedMeetingText.textContent =
-                "Select a meeting to view attendance.";
-
-
-            clearAttendanceTable();
-
-            return;
-
-        }
-
-
-        const selectedOption =
-            meetingSelect.options[
-                meetingSelect.selectedIndex
-            ];
-
-
-        selectedMeetingText.textContent =
-            `Attendance for ${selectedOption.textContent}`;
-
-
-        await loadAttendance(
-            meetingId
-        );
-
-    }
-);
-
-
-/* =========================================================
-   LOAD ATTENDANCE
-========================================================= */
-
-async function loadAttendance(
-    meetingId
-) {
-
-    try {
-
-        if (attendanceTable) {
-
-            attendanceTable.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="5"
-                        style="text-align:center;padding:30px;"
-                    >
-                        Loading attendance...
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-
-
-        const response =
-            await fetch(
-                `${API_BASE}/attendances?meeting_id=${encodeURIComponent(meetingId)}`,
-                {
-                    method: "GET",
-
-                    headers: {
-                        "Accept":
-                            "application/json"
-                    }
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "Attendance records:",
-            data
-        );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.message ||
-                "Unable to load attendance."
-            );
-
-        }
-
-
-        currentAttendance =
-            Array.isArray(data)
-                ? data
-                : data.attendance ||
-                  data.data ||
-                  [];
-
-
-        displayAttendance(
-            currentAttendance
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Attendance loading error:",
-            error
-        );
-
-
-        currentAttendance = [];
-
-
-        clearAttendanceTable();
-
-
-        if (emptyAttendance) {
-
-            emptyAttendance.style.display =
-                "block";
-
-            emptyAttendance.innerHTML = `
-
-                <div class="empty-icon">
-                    !
-                </div>
-
-                <h3>
-                    Unable to load attendance
-                </h3>
-
-                <p>
-                    ${escapeHTML(
-                        error.message
-                    )}
-                </p>
-
-            `;
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   DISPLAY ATTENDANCE
-========================================================= */
-
-function displayAttendance(
-    records
-) {
-
-    if (!attendanceTable) {
-        return;
-    }
-
-
-    attendanceTable.innerHTML =
-        "";
-
-
-    if (
-        !records ||
-        records.length === 0
-    ) {
-
-        if (emptyAttendance) {
-
-            emptyAttendance.style.display =
-                "block";
-
-        }
-
-
-        updateAttendanceSummary(
-            records
-        );
-
-        return;
-
-    }
-
-
-    if (emptyAttendance) {
-
-        emptyAttendance.style.display =
-            "none";
-
-    }
-
-
-    records.forEach(
-        function (record) {
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            const student =
-                record.student ||
-                {};
-
-
-            const name =
-                student.name ||
-                student.full_name ||
-                "Unknown Student";
-
-
-            const studentId =
-                student.student_id ||
-                "--";
-
-
-            const status =
-                record.status ||
-                "present";
-
-
-            const timeIn =
-                record.scanned_at ||
-                "--";
-
-
-            const remarks =
-                record.officer_remarks ||
-                "—";
-
-
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHTML(name)}
-                </td>
-
-                <td>
-                    ${escapeHTML(studentId)}
-                </td>
-
-                <td>
-
-                    <span class="attendance-status">
-
-                        ${escapeHTML(
-                            capitalize(
-                                status
-                            )
-                        )}
-
-                    </span>
-
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        formatDateTime(
-                            timeIn
-                        )
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        remarks
-                    )}
-                </td>
-
-            `;
-
-
-            attendanceTable.appendChild(
-                row
-            );
-
-        }
-    );
-
-
-    updateAttendanceSummary(
-        records
-    );
-
-}
-
-
-/* =========================================================
-   ATTENDANCE SUMMARY
-========================================================= */
-
-function updateAttendanceSummary(
-    records
-) {
-
-    const total =
-        records.length;
-
-
-    const present =
-        records.filter(
-            function (record) {
-
-                return (
-                    record.status ===
-                    "present" ||
-                    record.status ===
-                    "late"
-                );
+                scanResult.style.display =
+                    "none";
 
             }
-        ).length;
 
 
-    const rate =
-        total > 0
-            ? Math.round(
-                (
-                    present /
-                    total
-                ) * 100
-            )
-            : 0;
+            if (
+                confirmAttendanceButton
+            ) {
+
+                confirmAttendanceButton.disabled =
+                    true;
+
+            }
 
 
-    /*
-     * We currently don't have an API endpoint
-     * that returns ALL organization members.
-     *
-     * Therefore we don't pretend that the
-     * attendance-record count is the member count.
-     *
-     * Total Members will remain 0 until we add
-     * the Officer Members endpoint.
-     */
-
-    if (totalMembers) {
-
-        totalMembers.textContent =
-            "—";
-
-    }
+            const selectedOption =
+                meetingSelect.options[
+                    meetingSelect.selectedIndex
+                ];
 
 
-    if (presentMembers) {
+            if (
+                !meetingSelect.value
+            ) {
 
-        presentMembers.textContent =
-            present;
+                if (
+                    selectedMeetingText
+                ) {
 
-    }
+                    selectedMeetingText.textContent =
+                        "Select a meeting to view attendance.";
+
+                }
 
 
-    if (attendanceRate) {
+                clearAttendanceTable();
 
-        attendanceRate.textContent =
-            rate + "%";
+                return;
 
-    }
+            }
+
+
+            if (
+                selectedMeetingText
+            ) {
+
+                selectedMeetingText.textContent =
+                    `Attendance for ${selectedOption.textContent}`;
+
+            }
+
+
+            await loadAttendance(
+                meetingSelect.value
+            );
+
+        }
+    );
 
 }
 
 
 /* =========================================================
-   FIND STUDENT
+   FIND STUDENT FROM LARAVEL
 ========================================================= */
 
 async function findStudent(
@@ -783,6 +432,12 @@ async function findStudent(
         );
 
     }
+
+
+    console.log(
+        "Looking up student:",
+        cleanedId
+    );
 
 
     const response =
@@ -810,14 +465,14 @@ async function findStudent(
     } catch (error) {
 
         console.warn(
-            "Student response was not JSON."
+            "Response was not JSON."
         );
 
     }
 
 
     console.log(
-        "Student lookup:",
+        "Student API response:",
         data
     );
 
@@ -859,6 +514,7 @@ function showStudent(
         scannedStudentName.textContent =
             student.name ||
             student.full_name ||
+            student.fullName ||
             "Student";
 
     }
@@ -868,6 +524,7 @@ function showStudent(
 
         scannedStudentId.textContent =
             student.student_id ||
+            student.studentId ||
             "--";
 
     }
@@ -877,6 +534,7 @@ function showStudent(
 
         scannedStudentUniqueId.textContent =
             student.unique_id ||
+            student.uniqueId ||
             scannedValue;
 
     }
@@ -890,7 +548,9 @@ function showStudent(
     }
 
 
-    if (confirmAttendanceButton) {
+    if (
+        confirmAttendanceButton
+    ) {
 
         confirmAttendanceButton.disabled =
             false;
@@ -925,7 +585,7 @@ async function handleScannedStudent(
 
 
     console.log(
-        "QR DETECTED:",
+        "DOMINEXUS QR DETECTED:",
         scannedValue
     );
 
@@ -952,6 +612,12 @@ async function handleScannedStudent(
             );
 
 
+        console.log(
+            "STUDENT FOUND:",
+            student
+        );
+
+
         showStudent(
             student,
             scannedValue
@@ -961,13 +627,20 @@ async function handleScannedStudent(
         if (status) {
 
             status.textContent =
-                "Student found. Please confirm attendance.";
+                "Student found. Please mark attendance.";
 
         }
 
 
-        await stopQRScanner();
-
+        /*
+         * IMPORTANT:
+         *
+         * DO NOT stop the camera.
+         *
+         * The scanner stays active so
+         * another student can be scanned
+         * after attendance is recorded.
+         */
 
     } catch (error) {
 
@@ -1013,7 +686,9 @@ async function handleScannedStudent(
         }
 
 
-        if (confirmAttendanceButton) {
+        if (
+            confirmAttendanceButton
+        ) {
 
             confirmAttendanceButton.disabled =
                 true;
@@ -1029,16 +704,16 @@ async function handleScannedStudent(
         }
 
 
-        alert(
-            error.message ||
-            "Student was not found."
-        );
+        /*
+         * No alert here.
+         *
+         * The scanner remains available.
+         */
+
+        processingScan =
+            false;
 
     }
-
-
-    processingScan =
-        false;
 
 }
 
@@ -1049,8 +724,19 @@ async function handleScannedStudent(
 
 async function startQRScanner() {
 
+    console.log(
+        "DOMINEXUS: Start QR Scanner clicked."
+    );
+
+
     if (qrScannerRunning) {
+
+        console.log(
+            "Scanner is already running."
+        );
+
         return;
+
     }
 
 
@@ -1058,10 +744,6 @@ async function startQRScanner() {
         !meetingSelect ||
         !meetingSelect.value
     ) {
-
-        alert(
-            "Please select a meeting first."
-        );
 
         return;
 
@@ -1073,8 +755,19 @@ async function startQRScanner() {
         "undefined"
     ) {
 
-        alert(
-            "QR Scanner library is not loaded."
+        console.error(
+            "Html5Qrcode library is not loaded."
+        );
+
+        return;
+
+    }
+
+
+    if (!qrScannerContainer) {
+
+        console.error(
+            "QR scanner container not found."
         );
 
         return;
@@ -1084,7 +777,6 @@ async function startQRScanner() {
 
     currentScannedStudent =
         null;
-
 
     processingScan =
         false;
@@ -1098,13 +790,19 @@ async function startQRScanner() {
     }
 
 
-    if (confirmAttendanceButton) {
+    if (
+        confirmAttendanceButton
+    ) {
 
         confirmAttendanceButton.disabled =
             true;
 
     }
 
+
+    /* -----------------------------------------
+       CREATE SCANNER AREA
+    ----------------------------------------- */
 
     qrScannerContainer.innerHTML = `
 
@@ -1113,25 +811,33 @@ async function startQRScanner() {
             class="dominexus-qr-reader">
         </div>
 
-
         <div class="qr-scan-overlay">
 
             <div class="qr-scan-frame">
 
-                <span class="qr-corner top-left"></span>
+                <span
+                    class="qr-corner top-left">
+                </span>
 
-                <span class="qr-corner top-right"></span>
+                <span
+                    class="qr-corner top-right">
+                </span>
 
-                <span class="qr-corner bottom-left"></span>
+                <span
+                    class="qr-corner bottom-left">
+                </span>
 
-                <span class="qr-corner bottom-right"></span>
+                <span
+                    class="qr-corner bottom-right">
+                </span>
 
-                <span class="qr-scan-line"></span>
+                <span
+                    class="qr-scan-line">
+                </span>
 
             </div>
 
         </div>
-
 
         <div class="qr-scanner-status">
 
@@ -1149,6 +855,10 @@ async function startQRScanner() {
     `;
 
 
+    /* -----------------------------------------
+       CREATE SCANNER
+    ----------------------------------------- */
+
     dominexusQRScanner =
         new Html5Qrcode(
             "dominexus-qr-reader"
@@ -1162,7 +872,7 @@ async function startQRScanner() {
 
 
         console.log(
-            "Available cameras:",
+            "DOMINEXUS CAMERA LIST:",
             cameras
         );
 
@@ -1179,9 +889,13 @@ async function startQRScanner() {
         }
 
 
+        /* -------------------------------------
+           CAMERA SELECTION
+        ------------------------------------- */
+
         let selectedCamera =
             cameras.find(
-                function (camera) {
+                function(camera) {
 
                     const label =
                         String(
@@ -1200,6 +914,11 @@ async function startQRScanner() {
             );
 
 
+        /*
+         * Desktop computers normally have
+         * one Integrated Webcam, so use it.
+         */
+
         if (!selectedCamera) {
 
             selectedCamera =
@@ -1208,29 +927,71 @@ async function startQRScanner() {
         }
 
 
+        console.log(
+            "DOMINEXUS CAMERA:",
+            selectedCamera
+        );
+
+
+        /* -------------------------------------
+           SCANNER CONFIG
+        ------------------------------------- */
+
+        const scanConfig = {
+
+            fps: 15,
+
+            qrbox: {
+                width: 300,
+                height: 300
+            },
+
+            aspectRatio: 1,
+
+            disableFlip: false
+
+        };
+
+
+        /* -------------------------------------
+           START CAMERA
+        ------------------------------------- */
+
         await dominexusQRScanner.start(
 
             selectedCamera.id,
 
-            {
-                fps: 10,
+            scanConfig,
 
-                qrbox: {
-                    width: 280,
-                    height: 280
-                },
 
-                aspectRatio: 1,
+            /* ---------------------------------
+               QR SUCCESS CALLBACK
+            --------------------------------- */
 
-                disableFlip: false,
+            function(
+                decodedText,
+                decodedResult
+            ) {
 
-                formatsToSupport: [
-                    Html5QrcodeSupportedFormats.QR_CODE
-                ]
+                console.log(
+                    "QR RAW RESULT:",
+                    decodedText,
+                    decodedResult
+                );
 
-            },
 
-            function (decodedText) {
+                const value =
+                    String(
+                        decodedText || ""
+                    ).trim();
+
+
+                if (!value) {
+
+                    return;
+
+                }
+
 
                 if (
                     processingScan
@@ -1241,21 +1002,32 @@ async function startQRScanner() {
                 }
 
 
+                console.log(
+                    "DOMINEXUS QR DETECTED:",
+                    value
+                );
+
+
                 processingScan =
                     true;
 
 
                 handleScannedStudent(
-                    decodedText
+                    value
                 );
 
             },
 
-            function () {
+
+            /* ---------------------------------
+               QR FAILURE CALLBACK
+            --------------------------------- */
+
+            function(errorMessage) {
 
                 /*
-                 * Ignore continuous
-                 * scanner errors.
+                 * Ignore normal frames where
+                 * no QR code is detected.
                  */
 
             }
@@ -1281,25 +1053,35 @@ async function startQRScanner() {
         }
 
 
-        startScannerButton.disabled =
-            true;
+        if (startScannerButton) {
+
+            startScannerButton.disabled =
+                true;
+
+        }
 
 
-        stopScannerButton.style.display =
-            "inline-flex";
+        if (stopScannerButton) {
+
+            stopScannerButton.style.display =
+                "inline-flex";
+
+            stopScannerButton.disabled =
+                false;
+
+        }
+
+
+        console.log(
+            "DOMINEXUS: Scanner started successfully."
+        );
 
 
     } catch (error) {
 
         console.error(
-            "QR scanner error:",
+            "DOMINEXUS: Scanner failed to start.",
             error
-        );
-
-
-        alert(
-            "Unable to start the QR scanner.\n\n" +
-            error.message
         );
 
 
@@ -1316,11 +1098,18 @@ async function startQRScanner() {
 
 async function stopQRScanner() {
 
+    console.log(
+        "DOMINEXUS: Stopping QR scanner."
+    );
+
+
     if (dominexusQRScanner) {
 
         try {
 
-            if (qrScannerRunning) {
+            if (
+                qrScannerRunning
+            ) {
 
                 await dominexusQRScanner.stop();
 
@@ -1329,7 +1118,7 @@ async function stopQRScanner() {
         } catch (error) {
 
             console.warn(
-                "Scanner stop:",
+                "Scanner stop warning:",
                 error
             );
 
@@ -1343,7 +1132,7 @@ async function stopQRScanner() {
         } catch (error) {
 
             console.warn(
-                "Scanner clear:",
+                "Scanner clear warning:",
                 error
             );
 
@@ -1374,8 +1163,37 @@ async function stopQRScanner() {
 
     if (stopScannerButton) {
 
+        stopScannerButton.disabled =
+            false;
+
         stopScannerButton.style.display =
             "none";
+
+    }
+
+
+    if (qrScannerContainer) {
+
+        qrScannerContainer.innerHTML = `
+
+            <div class="scanner-placeholder">
+
+                <div class="scanner-icon">
+                    ▣
+                </div>
+
+                <h4>
+                    Ready to Scan
+                </h4>
+
+                <p>
+                    Select a meeting first,
+                    then scan the student's QR code.
+                </p>
+
+            </div>
+
+        `;
 
     }
 
@@ -1383,97 +1201,34 @@ async function stopQRScanner() {
 
 
 /* =========================================================
-   CONFIRM ATTENDANCE
+   LOAD ATTENDANCE
 ========================================================= */
 
-async function confirmStudentAttendance() {
+async function loadAttendance(
+    meetingId
+) {
 
-    if (
-        !currentScannedStudent
-    ) {
+    if (!meetingId) {
 
-        alert(
-            "Please scan a student QR code first."
-        );
+        clearAttendanceTable();
 
         return;
 
     }
-
-
-    if (
-        !meetingSelect ||
-        !meetingSelect.value
-    ) {
-
-        alert(
-            "Please select a meeting first."
-        );
-
-        return;
-
-    }
-
-
-    const student =
-        currentScannedStudent;
-
-
-    const meetingId =
-        meetingSelect.value;
-
-
-    const studentId =
-        student.student_id;
-
-
-    if (!studentId) {
-
-        alert(
-            "This student does not have a Student ID."
-        );
-
-        return;
-
-    }
-
-
-    confirmAttendanceButton.disabled =
-        true;
 
 
     try {
 
         const response =
             await fetch(
-                `${API_BASE}/attendances`,
+                `${API_BASE}/attendances?meeting_id=${encodeURIComponent(meetingId)}`,
                 {
-                    method: "POST",
+                    method: "GET",
 
                     headers: {
-
-                        "Content-Type":
-                            "application/json",
-
                         "Accept":
                             "application/json"
-
-                    },
-
-                    body:
-                        JSON.stringify({
-
-                            meeting_id:
-                                meetingId,
-
-                            student_id:
-                                studentId,
-
-                            status:
-                                "present"
-
-                        })
-
+                    }
                 }
             );
 
@@ -1483,7 +1238,7 @@ async function confirmStudentAttendance() {
 
 
         console.log(
-            "Attendance response:",
+            "DOMINEXUS attendance:",
             data
         );
 
@@ -1492,55 +1247,34 @@ async function confirmStudentAttendance() {
 
             throw new Error(
                 data.message ||
-                "Unable to record attendance."
+                "Unable to load attendance."
             );
 
         }
 
 
-        alert(
-            "Attendance recorded successfully for " +
-            (
-                student.name ||
-                "student"
-            ) +
-            "."
-        );
+        const attendance =
+            Array.isArray(data)
+                ? data
+                : data.attendance ||
+                  data.data ||
+                  [];
 
 
-        currentScannedStudent =
-            null;
-
-
-        if (scanResult) {
-
-            scanResult.style.display =
-                "none";
-
-        }
-
-
-        await loadAttendance(
-            meetingId
+        displayAttendance(
+            attendance
         );
 
 
     } catch (error) {
 
         console.error(
-            "Attendance error:",
+            "Attendance loading error:",
             error
         );
 
 
-        alert(
-            error.message ||
-            "Unable to record attendance."
-        );
-
-
-        confirmAttendanceButton.disabled =
-            false;
+        clearAttendanceTable();
 
     }
 
@@ -1548,35 +1282,39 @@ async function confirmStudentAttendance() {
 
 
 /* =========================================================
-   MANUAL UNIQUE ID
+   DISPLAY ATTENDANCE
 ========================================================= */
 
-async function manualFindStudent() {
+function displayAttendance(
+    attendance
+) {
 
-    const value =
-        manualUniqueId
-            ? manualUniqueId.value.trim()
-            : "";
-
-
-    if (!value) {
-
-        alert(
-            "Please enter the student's Unique ID."
-        );
+    if (!attendanceTable) {
 
         return;
 
     }
+
+
+    attendanceTable.innerHTML =
+        "";
 
 
     if (
-        !meetingSelect ||
-        !meetingSelect.value
+        !attendance ||
+        attendance.length === 0
     ) {
 
-        alert(
-            "Please select a meeting first."
+        if (emptyAttendance) {
+
+            emptyAttendance.style.display =
+                "block";
+
+        }
+
+
+        updateStatistics(
+            attendance
         );
 
         return;
@@ -1584,47 +1322,171 @@ async function manualFindStudent() {
     }
 
 
-    manualUniqueIdButton.disabled =
-        true;
+    if (emptyAttendance) {
+
+        emptyAttendance.style.display =
+            "none";
+
+    }
 
 
-    manualUniqueIdMessage.textContent =
-        "Finding student...";
+    attendance.forEach(
+        function(record) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
 
-    try {
+            const student =
+                record.student ||
+                {};
 
-        const student =
-            await findStudent(
-                value
+
+            const name =
+                student.name ||
+                student.full_name ||
+                "Unknown Student";
+
+
+            const studentId =
+                student.student_id ||
+                "--";
+
+
+            const status =
+                record.status ||
+                "present";
+
+
+            const scannedAt =
+                record.scanned_at ||
+                "--";
+
+
+            const remarks =
+                record.officer_remarks ||
+                "—";
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        name
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        studentId
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        capitalize(status)
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        formatDateTime(
+                            scannedAt
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        remarks
+                    )}
+                </td>
+
+            `;
+
+
+            attendanceTable.appendChild(
+                row
             );
 
-
-        showStudent(
-            student,
-            value
-        );
+        }
+    );
 
 
-        manualUniqueIdMessage.textContent =
-            "Student found. Please confirm attendance.";
+    updateStatistics(
+        attendance
+    );
+
+}
 
 
-    } catch (error) {
+/* =========================================================
+   UPDATE STATISTICS
+========================================================= */
 
-        console.error(
-            error
-        );
+function updateStatistics(
+    attendance
+) {
+
+    const records =
+        Array.isArray(attendance)
+            ? attendance
+            : [];
 
 
-        manualUniqueIdMessage.textContent =
-            error.message ||
-            "Student not found.";
+    const total =
+        records.length;
 
-    } finally {
 
-        manualUniqueIdButton.disabled =
-            false;
+    const present =
+        records.filter(
+            function(record) {
+
+                return (
+                    record.status ===
+                    "present" ||
+
+                    record.status ===
+                    "late"
+                );
+
+            }
+        ).length;
+
+
+    const rate =
+        total > 0
+            ? Math.round(
+                (
+                    present /
+                    total
+                ) * 100
+            )
+            : 0;
+
+
+    if (totalMembers) {
+
+        totalMembers.textContent =
+            "—";
+
+    }
+
+
+    if (presentMembers) {
+
+        presentMembers.textContent =
+            present;
+
+    }
+
+
+    if (attendanceRate) {
+
+        attendanceRate.textContent =
+            rate + "%";
 
     }
 
@@ -1632,7 +1494,7 @@ async function manualFindStudent() {
 
 
 /* =========================================================
-   CLEAR TABLE
+   CLEAR ATTENDANCE TABLE
 ========================================================= */
 
 function clearAttendanceTable() {
@@ -1680,7 +1542,561 @@ function clearAttendanceTable() {
 
 
 /* =========================================================
-   FORMAT DATE/TIME
+   CONFIRM / MARK PRESENT
+========================================================= */
+
+async function confirmStudentAttendance() {
+
+    if (
+        !currentScannedStudent
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !meetingSelect ||
+        !meetingSelect.value
+    ) {
+
+        return;
+
+    }
+
+
+    const student =
+        currentScannedStudent;
+
+
+    const meetingId =
+        meetingSelect.value;
+
+
+    const studentId =
+        student.student_id ||
+        student.studentId;
+
+
+    if (!studentId) {
+
+        return;
+
+    }
+
+
+    if (
+        confirmAttendanceButton
+    ) {
+
+        confirmAttendanceButton.disabled =
+            true;
+
+        confirmAttendanceButton.textContent =
+            "Saving...";
+
+    }
+
+
+    try {
+
+        console.log(
+            "Sending attendance:",
+            {
+                meeting_id:
+                    meetingId,
+
+                student_id:
+                    studentId,
+
+                status:
+                    "present"
+            }
+        );
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/attendances`,
+                {
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Accept":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            meeting_id:
+                                meetingId,
+
+                            student_id:
+                                studentId,
+
+                            status:
+                                "present"
+
+                        })
+
+                }
+            );
+
+
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (error) {
+
+            console.warn(
+                "Attendance response was not JSON."
+            );
+
+        }
+
+
+        console.log(
+            "Attendance API response:",
+            data
+        );
+
+
+        /*
+         * 201 = successfully recorded
+         *
+         * 409 = already recorded
+         *
+         * Both are handled without
+         * browser alert popups.
+         */
+
+        if (
+            response.status === 201 ||
+            response.status === 409
+        ) {
+
+            currentScannedStudent =
+                null;
+
+
+            if (scanResult) {
+
+                scanResult.style.display =
+                    "none";
+
+            }
+
+
+            if (
+                confirmAttendanceButton
+            ) {
+
+                confirmAttendanceButton.textContent =
+                    "Mark Present";
+
+                confirmAttendanceButton.disabled =
+                    true;
+
+            }
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Scanner remains running.
+             */
+
+            processingScan =
+                false;
+
+
+            const status =
+                document.getElementById(
+                    "qrScannerStatus"
+                );
+
+
+            if (status) {
+
+                status.textContent =
+                    "Scanning for QR code...";
+
+            }
+
+
+            await loadAttendance(
+                meetingId
+            );
+
+
+            return;
+
+        }
+
+
+        throw new Error(
+            data.message ||
+            "Unable to record attendance."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Attendance recording error:",
+            error
+        );
+
+
+        if (
+            confirmAttendanceButton
+        ) {
+
+            confirmAttendanceButton.disabled =
+                false;
+
+            confirmAttendanceButton.textContent =
+                "Mark Present";
+
+        }
+
+
+        processingScan =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   MANUAL UNIQUE ID SEARCH
+========================================================= */
+
+async function manualFindStudent() {
+
+    const value =
+        manualUniqueId
+            ? manualUniqueId.value.trim()
+            : "";
+
+
+    if (!value) {
+
+        if (manualUniqueIdMessage) {
+
+            manualUniqueIdMessage.textContent =
+                "Please enter the student's Unique ID.";
+
+        }
+
+        return;
+
+    }
+
+
+    if (
+        !meetingSelect ||
+        !meetingSelect.value
+    ) {
+
+        if (manualUniqueIdMessage) {
+
+            manualUniqueIdMessage.textContent =
+                "Please select a meeting first.";
+
+        }
+
+        return;
+
+    }
+
+
+    if (
+        manualUniqueIdButton
+    ) {
+
+        manualUniqueIdButton.disabled =
+            true;
+
+    }
+
+
+    if (
+        manualUniqueIdMessage
+    ) {
+
+        manualUniqueIdMessage.textContent =
+            "Finding student...";
+
+    }
+
+
+    try {
+
+        const student =
+            await findStudent(
+                value
+            );
+
+
+        showStudent(
+            student,
+            value
+        );
+
+
+        if (
+            manualUniqueIdMessage
+        ) {
+
+            manualUniqueIdMessage.textContent =
+                "Student found. Please mark attendance.";
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Manual student lookup error:",
+            error
+        );
+
+
+        if (
+            manualUniqueIdMessage
+        ) {
+
+            manualUniqueIdMessage.textContent =
+                error.message ||
+                "Student not found.";
+
+        }
+
+    } finally {
+
+        if (
+            manualUniqueIdButton
+        ) {
+
+            manualUniqueIdButton.disabled =
+                false;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   EVENT LISTENERS
+========================================================= */
+
+if (startScannerButton) {
+
+    startScannerButton.addEventListener(
+        "click",
+        startQRScanner
+    );
+
+}
+
+
+if (stopScannerButton) {
+
+    stopScannerButton.addEventListener(
+        "click",
+        stopQRScanner
+    );
+
+}
+
+
+if (
+    confirmAttendanceButton
+) {
+
+    confirmAttendanceButton.addEventListener(
+        "click",
+        confirmStudentAttendance
+    );
+
+}
+
+
+if (
+    manualUniqueIdButton
+) {
+
+    manualUniqueIdButton.addEventListener(
+        "click",
+        manualFindStudent
+    );
+
+}
+
+
+/* =========================================================
+   ENTER KEY FOR MANUAL SEARCH
+========================================================= */
+
+if (manualUniqueId) {
+
+    manualUniqueId.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+                manualFindStudent();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+if (
+    menuButton &&
+    sidebar &&
+    sidebarOverlay
+) {
+
+    menuButton.addEventListener(
+        "click",
+        function() {
+
+            sidebar.classList.add(
+                "open"
+            );
+
+            sidebarOverlay.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+    sidebarOverlay.addEventListener(
+        "click",
+        closeSidebar
+    );
+
+
+    document
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(
+            function(link) {
+
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
+        );
+
+}
+
+
+function closeSidebar() {
+
+    if (sidebar) {
+
+        sidebar.classList.remove(
+            "open"
+        );
+
+    }
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+if (logoutButton) {
+
+    logoutButton.addEventListener(
+        "click",
+        function() {
+
+            if (
+                !confirm(
+                    "Are you sure you want to log out?"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            sessionStorage.removeItem(
+                "officerLoggedIn"
+            );
+
+            sessionStorage.removeItem(
+                "officerId"
+            );
+
+            sessionStorage.removeItem(
+                "officerName"
+            );
+
+            sessionStorage.removeItem(
+                "officerOrganization"
+            );
+
+
+            window.location.href =
+                "officer-login.html";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HELPERS
 ========================================================= */
 
 function formatDateTime(
@@ -1693,9 +2109,7 @@ function formatDateTime(
 
 
     const date =
-        new Date(
-            value
-        );
+        new Date(value);
 
 
     if (
@@ -1723,10 +2137,6 @@ function formatDateTime(
 }
 
 
-/* =========================================================
-   CAPITALIZE
-========================================================= */
-
 function capitalize(
     value
 ) {
@@ -1748,10 +2158,6 @@ function capitalize(
 }
 
 
-/* =========================================================
-   INITIALS
-========================================================= */
-
 function getInitials(
     name
 ) {
@@ -1762,7 +2168,7 @@ function getInitials(
 
 
     const parts =
-        name
+        String(name)
             .trim()
             .split(/\s+/);
 
@@ -1787,10 +2193,6 @@ function getInitials(
 
 }
 
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
 
 function escapeHTML(
     value
@@ -1824,136 +2226,33 @@ function escapeHTML(
 
 
 /* =========================================================
-   LOGOUT
+   CLEANUP
 ========================================================= */
 
-if (logoutButton) {
+window.addEventListener(
+    "beforeunload",
+    function() {
 
-    logoutButton.addEventListener(
-        "click",
-        function () {
+        if (
+            dominexusQRScanner
+        ) {
 
-            if (
-                !confirm(
-                    "Are you sure you want to log out?"
-                )
-            ) {
+            try {
 
-                return;
+                dominexusQRScanner.stop();
+
+            } catch (error) {
+
+                console.log(
+                    error
+                );
 
             }
 
-
-            sessionStorage.clear();
-
-
-            window.location.href =
-                "officer-login.html";
-
         }
-    );
-
-}
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-if (
-    menuButton &&
-    sidebar &&
-    sidebarOverlay
-) {
-
-    menuButton.addEventListener(
-        "click",
-        function () {
-
-            sidebar.classList.add(
-                "open"
-            );
-
-            sidebarOverlay.classList.add(
-                "show"
-            );
-
-        }
-    );
-
-
-    sidebarOverlay.addEventListener(
-        "click",
-        closeSidebar
-    );
-
-}
-
-
-function closeSidebar() {
-
-    if (sidebar) {
-
-        sidebar.classList.remove(
-            "open"
-        );
 
     }
-
-
-    if (sidebarOverlay) {
-
-        sidebarOverlay.classList.remove(
-            "show"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-if (startScannerButton) {
-
-    startScannerButton.addEventListener(
-        "click",
-        startQRScanner
-    );
-
-}
-
-
-if (stopScannerButton) {
-
-    stopScannerButton.addEventListener(
-        "click",
-        stopQRScanner
-    );
-
-}
-
-
-if (confirmAttendanceButton) {
-
-    confirmAttendanceButton.addEventListener(
-        "click",
-        confirmStudentAttendance
-    );
-
-}
-
-
-if (manualUniqueIdButton) {
-
-    manualUniqueIdButton.addEventListener(
-        "click",
-        manualFindStudent
-    );
-
-}
+);
 
 
 /* =========================================================

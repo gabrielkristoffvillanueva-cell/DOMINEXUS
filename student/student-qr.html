@@ -12,53 +12,86 @@
 
 <body>
 
-    <!-- SIDEBAR -->
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
     <aside class="sidebar" id="sidebar">
 
         <div class="sidebar-logo">
-            <div class="logo-circle">D</div>
+
+            <div class="logo-circle">
+                D
+            </div>
 
             <div>
                 <h2>DOMINEXUS</h2>
                 <span>Student Portal</span>
             </div>
+
         </div>
 
 
         <nav class="sidebar-nav">
 
-            <a href="student-dashboard.html" class="nav-item">
+            <a
+                href="student-dashboard.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">⌂</span>
                 <span>Dashboard</span>
             </a>
 
-            <a href="student-qr.html" class="nav-item active">
+
+            <a
+                href="student-qr.html"
+                class="nav-item active"
+            >
                 <span class="nav-icon">▣</span>
                 <span>My QR Code</span>
             </a>
 
-            <a href="student-attendance.html" class="nav-item">
+
+            <a
+                href="student-attendance.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">✓</span>
                 <span>Attendance</span>
             </a>
 
-            <a href="student-profile.html" class="nav-item">
+
+            <a
+                href="student-profile.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">●</span>
                 <span>My Profile</span>
             </a>
 
-            <a href="student-meetings.html" class="nav-item">
+
+            <a
+                href="student-meetings.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">▦</span>
                 <span>Meetings</span>
             </a>
 
-            <a href="student-requests.html" class="nav-item">
+
+            <a
+                href="student-requests.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">✎</span>
                 <span>Requests</span>
             </a>
 
-            <a href="student-settings.html" class="nav-item">
+
+            <a
+                href="student-settings.html"
+                class="nav-item"
+            >
                 <span class="nav-icon">⚙</span>
                 <span>Settings</span>
             </a>
@@ -68,7 +101,11 @@
 
         <div class="sidebar-bottom">
 
-            <button id="logoutButton" class="logout-button">
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
                 <span>↪</span>
                 Logout
             </button>
@@ -78,25 +115,44 @@
     </aside>
 
 
-    <!-- MOBILE OVERLAY -->
+    <!-- =====================================================
+         MOBILE OVERLAY
+    ====================================================== -->
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
 
 
-    <!-- MAIN -->
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
 
     <main class="main-content">
 
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
         <header class="topbar">
 
-            <button class="menu-button" id="menuButton" aria-label="Open menu">
+            <button
+                class="menu-button"
+                id="menuButton"
+                type="button"
+                aria-label="Open menu"
+            >
                 ☰
             </button>
 
 
             <div class="topbar-title">
 
-                <h1>My QR Code</h1>
+                <h1>
+                    My QR Code
+                </h1>
 
                 <p>
                     Your personal attendance QR code
@@ -107,9 +163,13 @@
 
             <div class="topbar-profile">
 
-                <div class="profile-avatar" id="topAvatar">
+                <div
+                    class="profile-avatar"
+                    id="topAvatar"
+                >
                     ST
                 </div>
+
 
                 <div class="top-profile-info">
 
@@ -128,11 +188,19 @@
         </header>
 
 
-        <!-- PAGE CONTENT -->
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
 
         <div class="page-container">
 
+
             <section class="qr-page-card">
+
+
+                <!-- =========================================
+                     QR HEADER
+                ========================================== -->
 
                 <div class="qr-header">
 
@@ -140,7 +208,11 @@
                         PERSONAL ATTENDANCE QR
                     </span>
 
-                    <h2>My QR Code</h2>
+
+                    <h2>
+                        My QR Code
+                    </h2>
+
 
                     <p>
                         Present this QR code to the moderator
@@ -150,41 +222,67 @@
                 </div>
 
 
-                <!-- QR -->
+                <!-- =========================================
+                     QR CODE
+                ========================================== -->
 
                 <div class="qr-wrapper">
 
-                    <div id="qrCode" class="qr-code"></div>
+                    <!--
+                        IMPORTANT:
+                        Keep this ID as qrCode.
+                        student-qr.js uses this element
+                        to generate the QR.
+                    -->
+
+                    <div
+                        id="qrCode"
+                        class="qr-code"
+                    ></div>
 
                 </div>
 
 
-                <!-- STUDENT INFORMATION -->
+                <!-- =========================================
+                     STUDENT INFORMATION
+                ========================================== -->
 
                 <div class="student-info">
+
 
                     <h3 id="studentName">
                         Student Name
                     </h3>
 
+
                     <p>
+
                         Student ID:
+
                         <strong id="studentId">
                             ---
                         </strong>
+
                     </p>
 
+
                     <p>
+
                         Unique ID:
+
                         <strong id="uniqueId">
                             ---
                         </strong>
+
                     </p>
+
 
                 </div>
 
 
-                <!-- STATUS -->
+                <!-- =========================================
+                     QR STATUS
+                ========================================== -->
 
                 <div class="qr-status">
 
@@ -195,24 +293,42 @@
                 </div>
 
 
-                <!-- BUTTONS -->
+                <!-- =========================================
+                     ACTION BUTTONS
+                ========================================== -->
 
                 <div class="qr-actions">
 
-                    <button id="downloadQrButton" class="primary-button">
+
+                    <button
+                        id="downloadQrButton"
+                        type="button"
+                    >
                         Download QR Code
                     </button>
 
-                    <button id="printQrButton" class="secondary-button">
+
+                    <button
+                        id="printQrButton"
+                        type="button"
+                    >
                         Print QR Code
                     </button>
+
 
                 </div>
 
 
+                <!-- =========================================
+                     IMPORTANT NOTE
+                ========================================== -->
+
                 <div class="qr-note">
 
-                    <strong>Important:</strong>
+                    <strong>
+                        Important:
+                    </strong>
+
 
                     <p>
                         Your QR code is linked to your permanent
@@ -222,14 +338,22 @@
 
                 </div>
 
+
             </section>
+
 
         </div>
 
 
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
         <footer class="page-footer">
 
-            <p>© 2026 DOMINEXUS</p>
+            <p>
+                © 2026 DOMINEXUS
+            </p>
 
             <span>
                 Student Organization Attendance Management System
@@ -237,12 +361,30 @@
 
         </footer>
 
+
     </main>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- =====================================================
+         QR CODE LIBRARY
+         
+         IMPORTANT:
+         This must load BEFORE student-qr.js.
+    ====================================================== -->
 
-<script src="student-qr.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+    ></script>
+
+
+    <!-- =====================================================
+         STUDENT QR JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="student-qr.js"
+    ></script>
+
 
 </body>
 
