@@ -1,35 +1,53 @@
-/* =========================================================
+/* =========================================
    DOMINEXUS — STUDENT REQUESTS
-   LARAVEL / MYSQL VERSION
-========================================================= */
+   Laravel / MySQL Connected
+========================================= */
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    if (!isLoggedIn()) return;
-
-    loadStudent();
-    loadMeetings();
-    loadRequests();
-
-    setupForm();
-    setupNavigation();
-    setupLogout();
-
-});
+let currentStudent = null;
 
 
-/* =========================================================
-   LOGIN
-========================================================= */
+/* =========================================
+   INITIALIZE
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+
+        if (!isLoggedIn()) {
+            return;
+        }
+
+        setupNavigation();
+        setupLogout();
+        setupMeetingSelection();
+        setupForm();
+
+        await loadStudent();
+
+        await loadMeetings();
+
+        await loadRequests();
+
+    }
+);
+
+
+/* =========================================
+   LOGIN CHECK
+========================================= */
 
 function isLoggedIn() {
 
-    if (
-        sessionStorage.getItem("studentLoggedIn") !== "true"
-    ) {
+    const loggedIn =
+        sessionStorage.getItem(
+            "studentLoggedIn"
+        );
+
+
+    if (loggedIn !== "true") {
 
         window.location.href =
             "student-login.html";
@@ -38,21 +56,32 @@ function isLoggedIn() {
 
     }
 
+
     return true;
 
 }
 
 
-/* =========================================================
-   LOAD STUDENT
-========================================================= */
+/* =========================================
+   LOAD CURRENT STUDENT
+========================================= */
 
 async function loadStudent() {
 
     const studentId =
-        sessionStorage.getItem("studentId");
+        sessionStorage.getItem(
+            "studentId"
+        );
 
-    if (!studentId) return;
+
+    if (!studentId) {
+
+        window.location.href =
+            "student-login.html";
+
+        return;
+
+    }
 
 
     try {
@@ -61,6 +90,8 @@ async function loadStudent() {
             await fetch(
                 `${API_BASE}/students/by-student-id/${encodeURIComponent(studentId)}`,
                 {
+                    method: "GET",
+
                     headers: {
                         "Accept":
                             "application/json"
@@ -83,34 +114,131 @@ async function loadStudent() {
         }
 
 
-        const student =
+        currentStudent =
             data.student ||
             data.data ||
             data;
 
 
         const name =
-            student.name ||
+            currentStudent.name ||
             "Student";
 
 
-        document.getElementById(
-            "topStudentName"
-        ).textContent =
-            name;
-
-
-        document.getElementById(
-            "topStudentId"
-        ).textContent =
-            student.student_id ||
+        const actualStudentId =
+            currentStudent.student_id ||
             studentId;
 
 
-        document.getElementById(
-            "topAvatar"
-        ).textContent =
-            initials(name);
+        /* =====================================
+           TOP PROFILE
+        ===================================== */
+
+        const nameElement =
+            document.getElementById(
+                "topStudentName"
+            );
+
+
+        const idElement =
+            document.getElementById(
+                "topStudentId"
+            );
+
+
+        const avatarElement =
+            document.getElementById(
+                "topAvatar"
+            );
+
+
+        if (nameElement) {
+
+            nameElement.textContent =
+                name;
+
+        }
+
+
+        if (idElement) {
+
+            idElement.textContent =
+                actualStudentId;
+
+        }
+
+
+        if (avatarElement) {
+
+            avatarElement.textContent =
+                getInitials(name);
+
+        }
+
+
+        /* =====================================
+           SAVE DATA FOR OTHER STUDENT PAGES
+        ===================================== */
+
+        sessionStorage.setItem(
+            "studentName",
+            name
+        );
+
+
+        sessionStorage.setItem(
+            "studentId",
+            actualStudentId
+        );
+
+
+        if (
+            currentStudent.organization_id !== null &&
+            currentStudent.organization_id !== undefined
+        ) {
+
+            sessionStorage.setItem(
+                "studentOrganizationId",
+                currentStudent.organization_id
+            );
+
+        }
+
+
+        if (currentStudent.section) {
+
+            sessionStorage.setItem(
+                "studentSection",
+                currentStudent.section
+            );
+
+        }
+
+
+        if (currentStudent.unique_id) {
+
+            sessionStorage.setItem(
+                "studentUniqueId",
+                currentStudent.unique_id
+            );
+
+        }
+
+
+        if (currentStudent.club_role) {
+
+            sessionStorage.setItem(
+                "studentClubRole",
+                currentStudent.club_role
+            );
+
+        }
+
+
+        console.log(
+            "Current student:",
+            currentStudent
+        );
 
 
     } catch (error) {
@@ -120,14 +248,19 @@ async function loadStudent() {
             error
         );
 
+
+        alert(
+            "Unable to load your student information."
+        );
+
     }
 
 }
 
 
-/* =========================================================
+/* =========================================
    LOAD MEETINGS
-========================================================= */
+========================================= */
 
 async function loadMeetings() {
 
@@ -137,7 +270,9 @@ async function loadMeetings() {
         );
 
 
-    if (!select) return;
+    if (!select) {
+        return;
+    }
 
 
     select.innerHTML = `
@@ -153,6 +288,8 @@ async function loadMeetings() {
             await fetch(
                 `${API_BASE}/meetings`,
                 {
+                    method: "GET",
+
                     headers: {
                         "Accept":
                             "application/json"
@@ -178,8 +315,8 @@ async function loadMeetings() {
         const meetings =
             Array.isArray(data)
                 ? data
-                : data.meetings ||
-                  data.data ||
+                : data.data ||
+                  data.meetings ||
                   [];
 
 
@@ -190,100 +327,103 @@ async function loadMeetings() {
         `;
 
 
+        const organizationId =
+            currentStudent
+                ? currentStudent.organization_id
+                : sessionStorage.getItem(
+                    "studentOrganizationId"
+                );
+
+
+        console.log(
+            "Student organization ID:",
+            organizationId
+        );
+
+
         /*
-         * Get the student's organization.
+         * Only show meetings from the
+         * student's organization.
          */
 
-        const studentId =
-            sessionStorage.getItem(
-                "studentId"
-            );
+        meetings.forEach(
+            function (meeting) {
+
+                if (
+                    organizationId !== null &&
+                    organizationId !== undefined &&
+                    organizationId !== ""
+                ) {
+
+                    if (
+                        String(
+                            meeting.organization_id
+                        ) !== String(
+                            organizationId
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+                }
 
 
-        let studentOrganizationId =
-            null;
+                /*
+                 * Don't allow cancelled meetings
+                 * to be selected.
+                 */
+
+                if (
+                    String(
+                        meeting.status || ""
+                    ).toLowerCase() ===
+                    "cancelled"
+                ) {
+
+                    return;
+
+                }
 
 
-        if (studentId) {
-
-            try {
-
-                const studentResponse =
-                    await fetch(
-                        `${API_BASE}/students/by-student-id/${encodeURIComponent(studentId)}`
+                const option =
+                    document.createElement(
+                        "option"
                     );
 
 
-                const studentData =
-                    await studentResponse.json();
+                option.value =
+                    meeting.id;
 
 
-                const student =
-                    studentData.student ||
-                    studentData.data ||
-                    studentData;
+                option.textContent =
+                    meeting.title ||
+                    `Meeting #${meeting.id}`;
 
 
-                studentOrganizationId =
-                    student.organization_id;
+                /*
+                 * Laravel may return:
+                 *
+                 * 2026-09-01T00:00:00.000000Z
+                 *
+                 * Convert it to:
+                 *
+                 * 2026-09-01
+                 */
 
-            } catch (error) {
+                option.dataset.date =
+                    normalizeDate(
+                        meeting.date
+                    );
 
-                console.warn(
-                    "Could not determine organization:",
-                    error
+
+                select.appendChild(
+                    option
                 );
 
             }
-
-        }
-
-
-        meetings.forEach(function (meeting) {
-
-            /*
-             * Only show meetings belonging
-             * to the student's organization.
-             */
-
-            if (
-                studentOrganizationId &&
-                String(
-                    meeting.organization_id
-                ) !== String(
-                    studentOrganizationId
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-
-            option.value =
-                meeting.id;
-
-
-            option.textContent =
-                meeting.title ||
-                `Meeting #${meeting.id}`;
-
-
-            option.dataset.date =
-                meeting.date || "";
-
-
-            select.appendChild(
-                option
-            );
-
-        });
+        );
 
 
         if (
@@ -297,6 +437,12 @@ async function loadMeetings() {
             `;
 
         }
+
+
+        console.log(
+            "Available request meetings:",
+            select.options.length - 1
+        );
 
 
     } catch (error) {
@@ -318,13 +464,24 @@ async function loadMeetings() {
 }
 
 
-/* =========================================================
+/* =========================================
    MEETING SELECTION
-========================================================= */
+========================================= */
 
-document
-    .getElementById("meetingSelect")
-    ?.addEventListener(
+function setupMeetingSelection() {
+
+    const select =
+        document.getElementById(
+            "meetingSelect"
+        );
+
+
+    if (!select) {
+        return;
+    }
+
+
+    select.addEventListener(
         "change",
         function () {
 
@@ -340,20 +497,30 @@ document
 
             if (date) {
 
-                document.getElementById(
-                    "requestDate"
-                ).value =
-                    date;
+                const dateInput =
+                    document.getElementById(
+                        "requestDate"
+                    );
+
+
+                if (dateInput) {
+
+                    dateInput.value =
+                        date;
+
+                }
 
             }
 
         }
     );
 
+}
 
-/* =========================================================
+
+/* =========================================
    SUBMIT REQUEST
-========================================================= */
+========================================= */
 
 function setupForm() {
 
@@ -363,7 +530,9 @@ function setupForm() {
         );
 
 
-    if (!form) return;
+    if (!form) {
+        return;
+    }
 
 
     form.addEventListener(
@@ -382,7 +551,7 @@ function setupForm() {
             const requestType =
                 document.getElementById(
                     "requestType"
-                ).value;
+                )?.value;
 
 
             const meetingSelect =
@@ -392,37 +561,25 @@ function setupForm() {
 
 
             const meetingId =
-                meetingSelect.value;
+                meetingSelect?.value;
 
 
             const meetingDate =
                 document.getElementById(
                     "requestDate"
-                ).value;
+                )?.value;
 
 
             const reason =
                 document.getElementById(
                     "requestReason"
-                ).value.trim();
+                )?.value.trim();
 
 
             const documentInput =
                 document.getElementById(
                     "supportingDocument"
                 );
-
-
-            const selectedMeeting =
-                meetingSelect.options[
-                    meetingSelect.selectedIndex
-                ];
-
-
-            const supportingDocument =
-                documentInput.files.length > 0
-                    ? documentInput.files[0].name
-                    : null;
 
 
             if (
@@ -442,16 +599,35 @@ function setupForm() {
             }
 
 
+            /*
+             * At this stage the backend expects
+             * the document field as data.
+             *
+             * We send the filename only.
+             */
+
+            const supportingDocument =
+                documentInput &&
+                documentInput.files.length > 0
+                    ? documentInput.files[0].name
+                    : null;
+
+
             const submitButton =
                 form.querySelector(
                     ".submit-button"
                 );
 
 
-            submitButton.disabled = true;
+            if (submitButton) {
 
-            submitButton.textContent =
-                "Submitting...";
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Submitting...";
+
+            }
 
 
             try {
@@ -501,12 +677,35 @@ function setupForm() {
 
 
                 console.log(
-                    "Request API response:",
+                    "Request response:",
                     data
                 );
 
 
                 if (!response.ok) {
+
+                    /*
+                     * Laravel validation errors
+                     */
+
+                    if (
+                        data.errors
+                    ) {
+
+                        const messages =
+                            Object.values(
+                                data.errors
+                            )
+                            .flat()
+                            .join("\n");
+
+
+                        throw new Error(
+                            messages
+                        );
+
+                    }
+
 
                     throw new Error(
                         data.message ||
@@ -517,6 +716,20 @@ function setupForm() {
 
 
                 form.reset();
+
+
+                const dateInput =
+                    document.getElementById(
+                        "requestDate"
+                    );
+
+
+                if (dateInput) {
+
+                    dateInput.value =
+                        "";
+
+                }
 
 
                 await loadRequests();
@@ -543,11 +756,15 @@ function setupForm() {
 
             } finally {
 
-                submitButton.disabled =
-                    false;
+                if (submitButton) {
 
-                submitButton.textContent =
-                    "Submit Request";
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        "Submit Request";
+
+                }
 
             }
 
@@ -557,9 +774,9 @@ function setupForm() {
 }
 
 
-/* =========================================================
+/* =========================================
    LOAD REQUEST HISTORY
-========================================================= */
+========================================= */
 
 async function loadRequests() {
 
@@ -569,7 +786,9 @@ async function loadRequests() {
         );
 
 
-    if (!studentId) return;
+    if (!studentId) {
+        return;
+    }
 
 
     try {
@@ -578,6 +797,8 @@ async function loadRequests() {
             await fetch(
                 `${API_BASE}/requests?student_id=${encodeURIComponent(studentId)}`,
                 {
+                    method: "GET",
+
                     headers: {
                         "Accept":
                             "application/json"
@@ -608,6 +829,12 @@ async function loadRequests() {
                   [];
 
 
+        console.log(
+            "Student requests:",
+            requests
+        );
+
+
         displayRequests(
             requests
         );
@@ -628,9 +855,9 @@ async function loadRequests() {
 }
 
 
-/* =========================================================
+/* =========================================
    DISPLAY REQUESTS
-========================================================= */
+========================================= */
 
 function displayRequests(
     requests
@@ -648,14 +875,22 @@ function displayRequests(
         );
 
 
-    if (!list || !empty) return;
+    if (
+        !list ||
+        !empty
+    ) {
+
+        return;
+
+    }
 
 
-    list.innerHTML = "";
+    list.innerHTML =
+        "";
 
 
     if (
-        !requests ||
+        !Array.isArray(requests) ||
         requests.length === 0
     ) {
 
@@ -669,6 +904,22 @@ function displayRequests(
 
     empty.style.display =
         "none";
+
+
+    /*
+     * Newest requests first.
+     */
+
+    requests.sort(
+        function (a, b) {
+
+            return (
+                getRequestDate(b) -
+                getRequestDate(a)
+            );
+
+        }
+    );
 
 
     requests.forEach(
@@ -691,12 +942,28 @@ function displayRequests(
                 ).toLowerCase();
 
 
-            const statusClass =
+            let statusClass =
+                "pending";
+
+
+            if (
                 status === "approved"
-                    ? "approved"
-                    : status === "rejected"
-                        ? "rejected"
-                        : "pending";
+            ) {
+
+                statusClass =
+                    "approved";
+
+            }
+
+
+            if (
+                status === "rejected"
+            ) {
+
+                statusClass =
+                    "rejected";
+
+            }
 
 
             const meeting =
@@ -704,13 +971,21 @@ function displayRequests(
 
 
             const meetingName =
-                meeting
-                    ? meeting.title
-                    : "Organization Meeting";
+                meeting?.title ||
+                request.meeting_name ||
+                "Organization Meeting";
+
+
+            const meetingDate =
+                request.meeting_date ||
+                meeting?.date ||
+                null;
 
 
             const officerRemarks =
-                request.officer_remarks;
+                request.officer_remarks ||
+                request.remarks ||
+                null;
 
 
             item.innerHTML = `
@@ -719,55 +994,78 @@ function displayRequests(
 
                     <h4>
                         ${safe(
-                            request.request_type
+                            request.request_type ||
+                            "Attendance Request"
                         )}
                     </h4>
 
-                    <p>
-                        <strong>Meeting:</strong>
-                        ${safe(meetingName)}
-                    </p>
 
                     <p>
-                        <strong>Date:</strong>
+                        <strong>
+                            Meeting:
+                        </strong>
+
+                        ${safe(
+                            meetingName
+                        )}
+                    </p>
+
+
+                    <p>
+                        <strong>
+                            Date:
+                        </strong>
+
                         ${safe(
                             formatDate(
-                                request.meeting_date
+                                meetingDate
                             )
                         )}
                     </p>
 
+
                     <p class="request-reason">
+
                         ${safe(
-                            request.reason
+                            request.reason ||
+                            ""
                         )}
+
                     </p>
+
 
                     ${
                         request.supporting_document
                             ? `
                                 <p>
+
                                     <strong>
                                         Document:
                                     </strong>
+
                                     ${safe(
                                         request.supporting_document
                                     )}
+
                                 </p>
                             `
                             : ""
                     }
 
+
                     ${
                         officerRemarks
                             ? `
                                 <p>
+
                                     <strong>
                                         Officer Remark:
                                     </strong>
+
                                     ${safe(
                                         officerRemarks
                                     )}
+
                                 </p>
                             `
                             : ""
@@ -802,9 +1100,225 @@ function displayRequests(
 }
 
 
-/* =========================================================
+/* =========================================
+   REQUEST DATE
+========================================= */
+
+function getRequestDate(request) {
+
+    const value =
+        request.created_at ||
+        request.meeting_date ||
+        "";
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return new Date(0);
+
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================
+   NORMALIZE DATE
+========================================= */
+
+function normalizeDate(value) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    /*
+     * If already YYYY-MM-DD
+     */
+
+    if (
+        /^\d{4}-\d{2}-\d{2}$/.test(
+            value
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+     * Use UTC because Laravel's
+     * serialized date includes Z.
+     */
+
+    return [
+        date.getUTCFullYear(),
+
+        String(
+            date.getUTCMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            date.getUTCDate()
+        ).padStart(
+            2,
+            "0"
+        )
+
+    ].join("-");
+
+}
+
+
+/* =========================================
+   FORMAT DATE
+========================================= */
+
+function formatDate(value) {
+
+    if (!value) {
+        return "---";
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================
+   INITIALS
+========================================= */
+
+function getInitials(name) {
+
+    if (!name) {
+        return "ST";
+    }
+
+
+    const parts =
+        String(name)
+            .trim()
+            .split(/\s+/);
+
+
+    if (
+        parts.length === 1
+    ) {
+
+        return parts[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[
+            parts.length - 1
+        ].charAt(0)
+    ).toUpperCase();
+
+}
+
+
+/* =========================================
+   CAPITALIZE
+========================================= */
+
+function capitalize(value) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    return (
+        value.charAt(0).toUpperCase() +
+        value.slice(1)
+    );
+
+}
+
+
+/* =========================================
+   SAFE HTML
+========================================= */
+
+function safe(value) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        value ?? "";
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================
    MOBILE NAVIGATION
-========================================================= */
+========================================= */
 
 function setupNavigation() {
 
@@ -860,7 +1374,9 @@ function setupNavigation() {
 
 
     document
-        .querySelectorAll(".nav-item")
+        .querySelectorAll(
+            ".nav-item"
+        )
         .forEach(
             function (link) {
 
@@ -888,9 +1404,9 @@ function setupNavigation() {
 }
 
 
-/* =========================================================
+/* =========================================
    LOGOUT
-========================================================= */
+========================================= */
 
 function setupLogout() {
 
@@ -900,7 +1416,9 @@ function setupLogout() {
         );
 
 
-    if (!logoutButton) return;
+    if (!logoutButton) {
+        return;
+    }
 
 
     logoutButton.addEventListener(
@@ -926,100 +1444,5 @@ function setupLogout() {
 
         }
     );
-
-}
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function initials(name) {
-
-    if (!name) {
-        return "ST";
-    }
-
-
-    const parts =
-        String(name)
-            .trim()
-            .split(/\s+/);
-
-
-    if (parts.length === 1) {
-
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-
-    }
-
-
-    return (
-        parts[0][0] +
-        parts[parts.length - 1][0]
-    ).toUpperCase();
-
-}
-
-
-function formatDate(value) {
-
-    if (!value) {
-        return "---";
-    }
-
-
-    const date =
-        new Date(value);
-
-
-    if (
-        isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return value;
-
-    }
-
-
-    return date.toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }
-    );
-
-}
-
-
-function capitalize(value) {
-
-    return value
-        .charAt(0)
-        .toUpperCase() +
-        value.slice(1);
-
-}
-
-
-function safe(value) {
-
-    const div =
-        document.createElement(
-            "div"
-        );
-
-
-    div.textContent =
-        value ?? "";
-
-
-    return div.innerHTML;
 
 }
