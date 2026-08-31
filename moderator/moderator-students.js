@@ -779,6 +779,201 @@ studentTableBody.addEventListener(
     }
 );
 
+/* =========================================================
+   SHOW STUDENT
+========================================================= */
+
+function showStudent(
+    student
+) {
+
+    console.log(
+        "VIEWING STUDENT:",
+        student
+    );
+
+
+    /* =========================================
+       BASIC INFORMATION
+    ========================================= */
+
+    const detailName =
+        document.getElementById(
+            "detailName"
+        );
+
+    const detailStudentId =
+        document.getElementById(
+            "detailStudentId"
+        );
+
+    const detailUniqueId =
+        document.getElementById(
+            "detailUniqueId"
+        );
+
+    const detailSection =
+        document.getElementById(
+            "detailSection"
+        );
+
+    const detailRole =
+        document.getElementById(
+            "detailRole"
+        );
+
+    const detailOrganization =
+        document.getElementById(
+            "detailOrganization"
+        );
+
+
+    /* =========================================
+       PUT DATA INTO MODAL
+    ========================================= */
+
+    if (detailName) {
+
+        detailName.textContent =
+            student.name ||
+            "—";
+
+    }
+
+
+    if (detailStudentId) {
+
+        detailStudentId.textContent =
+            student.student_id ||
+            "—";
+
+    }
+
+
+    if (detailUniqueId) {
+
+        detailUniqueId.textContent =
+            student.unique_id ||
+            "—";
+
+    }
+
+
+    if (detailSection) {
+
+        detailSection.textContent =
+            student.section ||
+            "—";
+
+    }
+
+
+    if (detailRole) {
+
+        detailRole.textContent =
+            student.club_role ||
+            student.role ||
+            "—";
+
+    }
+
+
+    if (detailOrganization) {
+
+        detailOrganization.textContent =
+            getOrganizationName(
+                student.organization
+            );
+
+    }
+
+
+    /* =========================================
+       DIGITAL SIGNATURE
+    ========================================= */
+
+    const signatureImage =
+        document.getElementById(
+            "detailSignature"
+        );
+
+    const signatureUnavailable =
+        document.getElementById(
+            "signatureUnavailable"
+        );
+
+
+    const signature =
+        student.digital_signature ||
+        student.digitalSignature ||
+        student.signature ||
+        "";
+
+
+    if (
+        signature &&
+        signatureImage
+    ) {
+
+        signatureImage.src =
+            signature;
+
+        signatureImage.style.display =
+            "block";
+
+
+        if (
+            signatureUnavailable
+        ) {
+
+            signatureUnavailable.style.display =
+                "none";
+
+        }
+
+    } else {
+
+        if (
+            signatureImage
+        ) {
+
+            signatureImage.removeAttribute(
+                "src"
+            );
+
+            signatureImage.style.display =
+                "none";
+
+        }
+
+
+        if (
+            signatureUnavailable
+        ) {
+
+            signatureUnavailable.style.display =
+                "inline";
+
+        }
+
+    }
+
+
+    /* =========================================
+       OPEN MODAL
+    ========================================= */
+
+    if (
+        modal
+    ) {
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
 
 /* =========================================================
    RESET STUDENT PASSWORD

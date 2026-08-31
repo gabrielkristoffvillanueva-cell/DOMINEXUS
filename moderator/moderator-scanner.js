@@ -1443,80 +1443,121 @@ function clearStudent() {
 
 async function stopScanner() {
 
+    console.log(
+        "DOMINEXUS: Stop Scanner clicked."
+    );
+
+
+    /*
+     * Always update the UI even if the scanner
+     * object has already stopped.
+     */
+
+    scannerRunning =
+        false;
+
+
     if (
-        !html5QrCode
+        html5QrCode
     ) {
 
-        scannerRunning =
-            false;
+        try {
+
+            /*
+             * html5-qrcode states:
+             *
+             * 1 = NOT_STARTED
+             * 2 = SCANNING
+             * 3 = PAUSED
+             */
+
+            let state =
+                null;
 
 
-        if (
-            startScannerButton
-        ) {
+            if (
+                typeof html5QrCode.getState ===
+                "function"
+            ) {
 
-            startScannerButton.disabled =
-                false;
+                state =
+                    html5QrCode.getState();
+
+            }
+
+
+            console.log(
+                "DOMINEXUS scanner state:",
+                state
+            );
+
+
+            /*
+             * Stop whenever the scanner is
+             * actually scanning or paused.
+             */
+
+            if (
+                state === 2 ||
+                state === 3 ||
+                scannerRunning
+            ) {
+
+                try {
+
+                    await html5QrCode.stop();
+
+                }
+
+                catch (stopError) {
+
+                    console.warn(
+                        "DOMINEXUS: Scanner stop warning:",
+                        stopError
+                    );
+
+                }
+
+            }
+
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "DOMINEXUS: Scanner state warning:",
+                error
+            );
 
         }
 
 
-        if (
-            stopScannerButton
-        ) {
+        /*
+         * Clear the scanner UI/container.
+         */
 
-            stopScannerButton.disabled =
-                true;
+        try {
+
+            await html5QrCode.clear();
 
         }
 
+        catch (clearError) {
 
-        setScannerActive(
-            false
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        if (
-            scannerRunning
-        ) {
-
-            await html5QrCode.stop();
+            console.warn(
+                "DOMINEXUS: Scanner clear warning:",
+                clearError
+            );
 
         }
 
     }
 
-    catch (error) {
 
-        console.warn(
-            "CAMERA STOP WARNING:",
-            error
-        );
-
-    }
-
-
-    try {
-
-        await html5QrCode.clear();
-
-    }
-
-    catch (error) {
-
-        console.warn(
-            "CAMERA CLEAR WARNING:",
-            error
-        );
-
-    }
-
+    /*
+     * Completely reset scanner.
+     */
 
     html5QrCode =
         null;
@@ -1526,25 +1567,89 @@ async function stopScanner() {
         false;
 
 
-    startScannerButton.disabled =
-        false;
+    lastDecodedValue =
+        "";
 
 
-    stopScannerButton.disabled =
-        true;
+    lastDecodedAt =
+        0;
 
+
+    /*
+     * Reset buttons.
+     */
+
+    if (
+        startScannerButton
+    ) {
+
+        startScannerButton.disabled =
+            false;
+
+    }
+
+
+    if (
+        stopScannerButton
+    ) {
+
+        stopScannerButton.disabled =
+            true;
+
+    }
+
+
+    /*
+     * Reset scanner indicator.
+     */
 
     setScannerActive(
         false
     );
 
 
-    scannerMessage.textContent =
-        "Scanner stopped.";
+    /*
+     * Reset message.
+     */
+
+    if (
+        scannerMessage
+    ) {
+
+        scannerMessage.textContent =
+            "Scanner stopped.";
+
+    }
+
+
+    console.log(
+        "DOMINEXUS: Scanner completely stopped."
+    );
 
 }
 
 
+/* =========================================================
+   STOP BUTTON CLICK
+========================================================= */
+
+if (
+    stopScannerButton
+) {
+
+    stopScannerButton.addEventListener(
+        "click",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            await stopScanner();
+
+        }
+    );
+
+}
 /* =========================================================
    SCANNER STATUS
 ========================================================= */

@@ -872,3 +872,70 @@ select:focus {
     }
 
 }
+
+/* =========================================================
+   LIVE ATTENDANCE STATUS BADGE
+========================================================= */
+
+.attendance-status {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 90px;
+}
+
+
+.attendance-status .status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 64px;
+    height: 26px;
+
+    padding: 0 12px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    line-height: 1;
+    text-align: center;
+
+    white-space: nowrap;
+
+    box-sizing: border-box;
+}
+
+
+/* PRESENT */
+
+.attendance-status .status.present {
+    background: #e6f5ec;
+    color: #168044;
+}
+
+
+/* LATE */
+
+.attendance-status .status.late {
+    background: #fff1d9;
+    color: #a96d00;
+}
+
+
+/* ABSENT */
+
+.attendance-status .status.absent {
+    background: #fde8e8;
+    color: #b42318;
+}
+
+
+/* EXCUSED */
+
+.attendance-status .status.excused {
+    background: #e8eefb;
+    color: #315b9b;
+}

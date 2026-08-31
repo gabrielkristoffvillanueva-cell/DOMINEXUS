@@ -859,7 +859,7 @@
                 <div class="stat-card">
 
                     <div class="stat-label">
-                        TOTAL STUDENTS
+                        REGISTERED STUDENTS
                     </div>
 
                     <div class="stat-value" id="totalStudents">
@@ -867,7 +867,8 @@
                     </div>
 
                     <div class="stat-description">
-                        Registered student accounts
+                        Students registered in your organization
+
                     </div>
 
                 </div>
@@ -876,7 +877,7 @@
                 <div class="stat-card">
 
                     <div class="stat-label">
-                        PRESENT
+                        PRESENT RECORDS
                     </div>
 
                     <div class="stat-value" id="totalPresent">
@@ -884,7 +885,7 @@
                     </div>
 
                     <div class="stat-description">
-                        Currently marked present
+                        Attendance records marked as present or late
                     </div>
 
                 </div>
@@ -893,7 +894,7 @@
                 <div class="stat-card">
 
                     <div class="stat-label">
-                        ABSENT
+                        ABSENT RECORDS
                     </div>
 
                     <div class="stat-value" id="totalAbsent">
@@ -901,7 +902,7 @@
                     </div>
 
                     <div class="stat-description">
-                        Currently marked absent
+                        Attendance records marked as absent
                     </div>
 
                 </div>
@@ -984,166 +985,149 @@
 
                     <div class="overview-row">
 
-                        <span class="overview-label">
+                        <span>
                             Registered Students
                         </span>
 
-                        <span class="overview-value" id="overviewStudents">
+                        <strong id="overviewStudents">
                             0
-                        </span>
+                        </strong>
 
                     </div>
 
 
                     <div class="overview-row">
 
-                        <span class="overview-label">
-                            Recorded Present
+                        <span>
+                            Present Records
                         </span>
 
-                        <span class="overview-value" id="overviewPresent">
+                        <strong id="overviewPresent">
                             0
-                        </span>
+                        </strong>
 
                     </div>
 
 
                     <div class="overview-row">
 
-                        <span class="overview-label">
-                            Recorded Absent
+                        <span>
+                            Absent Records
                         </span>
 
-                        <span class="overview-value" id="overviewAbsent">
+                        <strong id="overviewAbsent">
                             0
-                        </span>
+                        </strong>
 
                     </div>
 
 
                     <div class="overview-row">
 
-                        <span class="overview-label">
+                        <span>
                             Meetings Recorded
                         </span>
 
-                        <span class="overview-value" id="overviewMeetings">
+                        <strong id="overviewMeetings">
                             0
-                        </span>
+                        </strong>
 
                     </div>
 
+                    <!-- QUICK ACCESS -->
 
-                    <div class="overview-row">
+                    <div class="card">
 
-                        <span class="overview-label">
-                            Storage Mode
-                        </span>
+                        <h2 class="card-title">
+                            Quick Access
+                        </h2>
 
-                        <span class="overview-value" id="storageMode">
-                            Backend / MySQL
-                        </span>
+                        <p class="card-description">
+                            Moderator functions
+                        </p>
+
+
+                        <div class="quick-grid">
+
+
+                            <a href="moderator-meetings.html" class="quick-card">
+
+                                <div class="quick-icon">
+                                    ◫
+                                </div>
+
+                                <div class="quick-title">
+                                    Meetings
+                                </div>
+
+                                <div class="quick-text">
+                                    Create and manage general
+                                    meetings.
+                                </div>
+
+                            </a>
+
+
+                            <a href="moderator-scanner.html" class="quick-card">
+
+                                <div class="quick-icon">
+                                    ▣
+                                </div>
+
+                                <div class="quick-title">
+                                    QR Scanner
+                                </div>
+
+                                <div class="quick-text">
+                                    Record attendance using
+                                    student QR codes.
+                                </div>
+
+                            </a>
+
+
+                            <a href="moderator-students.html" class="quick-card">
+
+                                <div class="quick-icon">
+                                    ♙
+                                </div>
+
+                                <div class="quick-title">
+                                    Students
+                                </div>
+
+                                <div class="quick-text">
+                                    View registered student
+                                    records.
+                                </div>
+
+                            </a>
+
+
+                            <a href="moderator-reports.html" class="quick-card">
+
+                                <div class="quick-icon">
+                                    ▥
+                                </div>
+
+                                <div class="quick-title">
+                                    Reports
+                                </div>
+
+                                <div class="quick-text">
+                                    Review attendance summaries
+                                    and records.
+                                </div>
+
+                            </a>
+
+
+                        </div>
 
                     </div>
 
 
                 </div>
-
-
-                <!-- QUICK ACCESS -->
-
-                <div class="card">
-
-                    <h2 class="card-title">
-                        Quick Access
-                    </h2>
-
-                    <p class="card-description">
-                        Moderator functions
-                    </p>
-
-
-                    <div class="quick-grid">
-
-
-                        <a href="moderator-meetings.html" class="quick-card">
-
-                            <div class="quick-icon">
-                                ◫
-                            </div>
-
-                            <div class="quick-title">
-                                Meetings
-                            </div>
-
-                            <div class="quick-text">
-                                Create and manage general
-                                meetings.
-                            </div>
-
-                        </a>
-
-
-                        <a href="moderator-scanner.html" class="quick-card">
-
-                            <div class="quick-icon">
-                                ▣
-                            </div>
-
-                            <div class="quick-title">
-                                QR Scanner
-                            </div>
-
-                            <div class="quick-text">
-                                Record attendance using
-                                student QR codes.
-                            </div>
-
-                        </a>
-
-
-                        <a href="moderator-students.html" class="quick-card">
-
-                            <div class="quick-icon">
-                                ♙
-                            </div>
-
-                            <div class="quick-title">
-                                Students
-                            </div>
-
-                            <div class="quick-text">
-                                View registered student
-                                records.
-                            </div>
-
-                        </a>
-
-
-                        <a href="moderator-reports.html" class="quick-card">
-
-                            <div class="quick-icon">
-                                ▥
-                            </div>
-
-                            <div class="quick-title">
-                                Reports
-                            </div>
-
-                            <div class="quick-text">
-                                Review attendance summaries
-                                and records.
-                            </div>
-
-                        </a>
-
-
-                    </div>
-
-                </div>
-
-
-            </div>
 
 
         </section>

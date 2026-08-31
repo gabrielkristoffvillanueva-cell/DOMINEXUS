@@ -169,83 +169,6 @@ if (
 
 
 /* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-loadAttendanceHistory();
-
-
-/* =========================================================
-   FILTER EVENTS
-========================================================= */
-
-if (
-    meetingSelect
-) {
-
-    meetingSelect.addEventListener(
-        "change",
-        function () {
-
-            applyFilters();
-
-        }
-    );
-
-}
-
-
-if (
-    searchInput
-) {
-
-    searchInput.addEventListener(
-        "input",
-        function () {
-
-            applyFilters();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   DOWNLOAD EVENT
-========================================================= */
-
-if (
-    downloadAttendanceButton
-) {
-
-    downloadAttendanceButton.addEventListener(
-        "click",
-        function () {
-
-            if (
-                filteredHistory.length ===
-                0
-            ) {
-
-                alert(
-                    "There are no attendance records to download."
-                );
-
-                return;
-
-            }
-
-
-            downloadAttendanceCSV();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
    LOAD ATTENDANCE HISTORY
 ========================================================= */
 
@@ -253,23 +176,153 @@ async function loadAttendanceHistory() {
 
     showLoading();
 
-
     try {
 
-        const response =
+        /* =====================================================
+           1. LOAD ATTENDANCE HISTORY
+        ===================================================== */
+
+        const historyResponse =
             await fetch(
                 `${API_BASE}/moderator-attendance-history?moderator_id=${encodeURIComponent(
                     moderatorId
                 )}`,
                 {
-
-                    method:
-                        "GET",
+                    method: "GET",
 
                     headers: {
-
                         "Accept":
                             "application/json"
+                    }
+                }
+            );
+
+
+        const historyData =
+            await historyResponse.json();
+
+
+        console.log(
+            "ATTENDANCE HISTORY RESPONSE:",
+            historyData
+        );
+
+
+        if (
+            !historyResponse.ok
+        ) {
+
+            throw new Error(
+                historyData.message ||
+                "Unable to load attendance history."
+            );
+
+        }
+
+
+        history =
+            Array.isArray(
+                historyData.history
+            )
+                ? historyData.history
+                : [];
+
+
+        /* =====================================================
+           2. LOAD ALL MODERATOR MEETINGS
+        ===================================================== */
+
+        const meetingsResponse =
+            await fetch(
+                `${API_BASE}/meetings?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        const meetingsData =
+            await meetingsResponse.json();
+
+
+        console.log(
+            "MEETINGS RESPONSE:",
+            meetingsData
+        );
+
+
+        if (
+            !meetingsResponse.ok
+        ) {
+
+            throw new Error(
+                meetingsData.message ||
+                "Unable to load meetings."
+            );
+
+        }
+
+
+        /*
+         * The meetings endpoint normally returns
+         * an array directly.
+         */
+
+        if (
+            Array.isArray(
+                meetingsData
+            )
+        ) {
+
+            meetings =
+                meetingsData;
+
+        } else {
+
+            meetings =
+                meetingsData.meetings ||
+                meetingsData.data ||
+                [];
+
+        }
+
+
+        /* =====================================================
+           3. FALLBACK MEETINGS FROM HISTORY
+        ===================================================== */
+
+        if (
+            meetings.length === 0 &&
+            history.length > 0
+        ) {
+
+            const meetingMap =
+                new Map();
+
+
+            history.forEach(
+                function (
+                    item
+                ) {
+
+                    if (
+                        item.meeting &&
+                        item.meeting.id
+                    ) {
+
+                        meetingMap.set(
+                            String(
+                                item.meeting.id
+                            ),
+                            item.meeting
+                        );
 
                     }
 
@@ -277,113 +330,91 @@ async function loadAttendanceHistory() {
             );
 
 
-        const data =
-            await response.json();
-
-
-        console.log(
-            "MODERATOR ATTENDANCE HISTORY:",
-            data
-        );
-
-
-        if (
-            !response.ok
-        ) {
-
-            throw new Error(
-                data.message ||
-                "Unable to load attendance history."
-            );
+            meetings =
+                Array.from(
+                    meetingMap.values()
+                );
 
         }
 
 
-        meetings =
-            Array.isArray(
-                data.meetings
-            )
-                ? data.meetings
-                : [];
+        console.log(
+            "FINAL MEETINGS FOR DROPDOWN:",
+            meetings
+        );
 
 
-        history =
-            Array.isArray(
-                data.history
-            )
-                ? data.history
-                : [];
- 
-        /* =========================================================
-   BACKEND STATISTICS
-========================================================= */
-
-if (
-    data.statistics
-) {
-
-    if (
-        recordCount
-    ) {
-
-        recordCount.textContent =
-            data.statistics
-                .attendance_records ??
-            0;
-
-    }
-
-
-    if (
-        presentCount
-    ) {
-
-        presentCount.textContent =
-            data.statistics
-                .unique_students_present ??
-            0;
-
-    }
-
-
-    if (
-        absentCount
-    ) {
-
-        absentCount.textContent =
-            data.statistics
-                .absent_records ??
-            0;
-
-    }
-
-
-    if (
-        attendanceRate
-    ) {
-
-        attendanceRate.textContent =
-            (
-                data.statistics
-                    .attendance_rate ??
-                0
-            ) +
-            "%";
-
-    }
-
-}
-
-        /*
-         * Update moderator information
-         */
+        /* =====================================================
+           4. BACKEND STATISTICS
+        ===================================================== */
 
         if (
-            data.moderator
+            historyData.statistics
         ) {
 
             if (
-                data.moderator.name
+                recordCount
+            ) {
+
+                recordCount.textContent =
+                    historyData.statistics
+                        .attendance_records ??
+                    0;
+
+            }
+
+
+            if (
+                presentCount
+            ) {
+
+                presentCount.textContent =
+                    historyData.statistics
+                        .unique_students_present ??
+                    0;
+
+            }
+
+
+            if (
+                absentCount
+            ) {
+
+                absentCount.textContent =
+                    historyData.statistics
+                        .absent_records ??
+                    0;
+
+            }
+
+
+            if (
+                attendanceRate
+            ) {
+
+                attendanceRate.textContent =
+                    (
+                        historyData.statistics
+                            .attendance_rate ??
+                        0
+                    ) +
+                    "%";
+
+            }
+
+        }
+
+
+        /* =====================================================
+           5. MODERATOR INFORMATION
+        ===================================================== */
+
+        if (
+            historyData.moderator
+        ) {
+
+            if (
+                historyData.moderator.name
             ) {
 
                 if (
@@ -391,7 +422,7 @@ if (
                 ) {
 
                     moderatorNameElement.textContent =
-                        data.moderator.name;
+                        historyData.moderator.name;
 
                 }
 
@@ -402,7 +433,7 @@ if (
 
                     moderatorAvatar.textContent =
                         getInitials(
-                            data.moderator.name
+                            historyData.moderator.name
                         );
 
                 }
@@ -410,20 +441,20 @@ if (
 
                 sessionStorage.setItem(
                     "moderatorName",
-                    data.moderator.name
+                    historyData.moderator.name
                 );
 
             }
 
 
             if (
-                data.moderator.organization_id
+                historyData.moderator.organization_id
                 !== undefined
             ) {
 
                 sessionStorage.setItem(
                     "moderatorOrganizationId",
-                    data.moderator.organization_id
+                    historyData.moderator.organization_id
                 );
 
             }
@@ -431,8 +462,16 @@ if (
         }
 
 
+        /* =====================================================
+           6. POPULATE MEETING DROPDOWN
+        ===================================================== */
+
         loadMeetingOptions();
 
+
+        /* =====================================================
+           7. DISPLAY HISTORY
+        ===================================================== */
 
         applyFilters();
 
@@ -508,6 +547,76 @@ if (
 
 
 /* =========================================================
+   FILTER EVENTS
+========================================================= */
+
+if (
+    meetingSelect
+) {
+
+    meetingSelect.addEventListener(
+        "change",
+        function () {
+
+            applyFilters();
+
+        }
+    );
+
+}
+
+
+if (
+    searchInput
+) {
+
+    searchInput.addEventListener(
+        "input",
+        function () {
+
+            applyFilters();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DOWNLOAD EVENT
+========================================================= */
+
+if (
+    downloadAttendanceButton
+) {
+
+    downloadAttendanceButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                filteredHistory.length ===
+                0
+            ) {
+
+                alert(
+                    "There are no attendance records to download."
+                );
+
+                return;
+
+            }
+
+
+            downloadAttendanceCSV();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    LOADING
 ========================================================= */
 
@@ -522,7 +631,7 @@ function showLoading() {
             <tr>
 
                 <td
-                    colspan="7"
+                    colspan="8"
                     style="text-align:center;"
                 >
 
@@ -1110,30 +1219,23 @@ function updateStatistics(
 
 
 /* =========================================================
-   DOWNLOAD ATTENDANCE CSV
+   DOWNLOAD ATTENDANCE WITH DIGITAL SIGNATURE
 ========================================================= */
 
 function downloadAttendanceCSV() {
 
-    const headers = [
+    if (
+        !filteredHistory ||
+        filteredHistory.length === 0
+    ) {
 
-        "Meeting",
+        alert(
+            "There are no attendance records to download."
+        );
 
-        "Date",
+        return;
 
-        "Student Name",
-
-        "Student ID",
-
-        "Unique ID",
-
-        "Status",
-
-        "Time In",
-
-        "Remarks"
-
-    ];
+    }
 
 
     const rows =
@@ -1152,118 +1254,141 @@ function downloadAttendanceCSV() {
                     {};
 
 
-                return [
+                /*
+                 * Digital signature
+                 */
 
-                    meeting.title ||
-                    "Untitled Meeting",
-
-                    formatDate(
-                        meeting.date
-                    ),
-
-                    student.name ||
-                    "Unknown Student",
-
-                    student.student_id ||
-                    "—",
-
-                    student.unique_id ||
-                    "—",
-
-                    item.status ||
-                    "—",
-
-                    formatDateTime(
-                        item.scanned_at ||
-                        item.created_at
-                    ),
-
-                    item.remarks ||
-                    "—"
-
-                ];
-
-            }
-        );
+                const signature =
+                    student.digital_signature ||
+                    student.digitalSignature ||
+                    student.signature ||
+                    "";
 
 
-    const csvData = [
+                let signatureHTML =
 
-        headers,
+                    `
+                        <span class="no-signature">
+                            No signature available
+                        </span>
+                    `;
 
-        ...rows
 
-    ];
-
-
-    const csv =
-        csvData
-            .map(
-                function (
-                    row
+                if (
+                    signature &&
+                    String(
+                        signature
+                    ).trim()
                 ) {
 
-                    return row
-                        .map(
-                            function (
-                                value
-                            ) {
+                    signatureHTML =
 
-                                return `"${String(
-                                    value ??
-                                    ""
-                                )
-                                .replace(
-                                    /"/g,
-                                    '""'
-                                )}"`;
-
-                            }
-                        )
-                        .join(",");
+                        `
+                            <img
+                                src="${escapeAttribute(
+                                    signature
+                                )}"
+                                class="signature"
+                                alt="Digital Signature"
+                            >
+                        `;
 
                 }
-            )
-            .join("\r\n");
 
 
-    /*
-     * UTF-8 BOM makes the CSV display
-     * properly in Microsoft Excel.
-     */
+                return `
 
-    const blob =
-        new Blob(
-            [
-                "\uFEFF",
-                csv
-            ],
-            {
-                type:
-                    "text/csv;charset=utf-8;"
+                    <tr>
+
+                        <td>
+                            ${escapeHtml(
+                                meeting.title ||
+                                "Untitled Meeting"
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                formatDate(
+                                    meeting.date
+                                )
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                student.name ||
+                                "Unknown Student"
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                student.student_id ||
+                                "—"
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                student.unique_id ||
+                                "—"
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                item.status ||
+                                "—"
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                formatDateTime(
+                                    item.scanned_at ||
+                                    item.created_at
+                                )
+                            )}
+                        </td>
+
+
+                        <td class="signature-cell">
+
+                            ${signatureHTML}
+
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(
+                                item.remarks ||
+                                "—"
+                            )}
+                        </td>
+
+                    </tr>
+
+                `;
+
             }
-        );
+        )
+        .join("");
 
 
-    const url =
-        URL.createObjectURL(
-            blob
-        );
+    /* =====================================================
+       REPORT TITLE
+    ===================================================== */
 
+    let reportTitle =
+        "DOMINEXUS Attendance Report";
 
-    const link =
-        document.createElement(
-            "a"
-        );
-
-
-    link.href =
-        url;
-
-
-    /*
-     * Build filename.
-     */
 
     let filename =
         "DOMINEXUS_Attendance";
@@ -1297,11 +1422,20 @@ function downloadAttendanceCSV() {
             selectedMeeting
         ) {
 
+            const title =
+                selectedMeeting.title ||
+                "Meeting";
+
+
+            reportTitle =
+                title +
+                " - Attendance Report";
+
+
             filename +=
                 "_" +
                 sanitizeFilename(
-                    selectedMeeting.title ||
-                    "Meeting"
+                    title
                 );
 
         }
@@ -1315,7 +1449,314 @@ function downloadAttendanceCSV() {
 
 
     filename +=
-        ".csv";
+        ".html";
+
+
+    /* =====================================================
+       HTML REPORT
+    ===================================================== */
+
+    const html = `
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        ${escapeHtml(
+            reportTitle
+        )}
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            margin: 40px;
+
+            color: #222;
+
+            background: #fff;
+
+        }
+
+
+        .header {
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .header h1 {
+
+            margin: 0 0 6px 0;
+
+            font-size: 24px;
+
+        }
+
+
+        .header p {
+
+            margin: 0;
+
+            color: #666;
+
+            font-size: 13px;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 20px;
+
+        }
+
+
+        th {
+
+            background: #f1f1f1;
+
+            font-size: 11px;
+
+            text-align: left;
+
+            padding: 10px;
+
+            border: 1px solid #ccc;
+
+        }
+
+
+        td {
+
+            font-size: 11px;
+
+            padding: 10px;
+
+            border: 1px solid #ccc;
+
+            vertical-align: middle;
+
+        }
+
+
+        .signature-cell {
+
+            width: 150px;
+
+            height: 70px;
+
+            text-align: center;
+
+        }
+
+
+        .signature {
+
+            max-width: 130px;
+
+            max-height: 55px;
+
+            object-fit: contain;
+
+        }
+
+
+        .no-signature {
+
+            color: #888;
+
+            font-style: italic;
+
+            font-size: 10px;
+
+        }
+
+
+        .footer {
+
+            margin-top: 25px;
+
+            font-size: 11px;
+
+            color: #777;
+
+        }
+
+
+        @media print {
+
+            body {
+
+                margin: 15px;
+
+            }
+
+
+            table {
+
+                page-break-inside: auto;
+
+            }
+
+
+            tr {
+
+                page-break-inside: avoid;
+
+                page-break-after: auto;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="header">
+
+        <h1>
+            ${escapeHtml(
+                reportTitle
+            )}
+        </h1>
+
+
+        <p>
+            Generated by DOMINEXUS Moderator Portal
+        </p>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Meeting
+                </th>
+
+                <th>
+                    Date
+                </th>
+
+                <th>
+                    Student Name
+                </th>
+
+                <th>
+                    Student ID
+                </th>
+
+                <th>
+                    Unique ID
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+                <th>
+                    Time In
+                </th>
+
+                <th>
+                    Digital Signature
+                </th>
+
+                <th>
+                    Remarks
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            ${rows}
+
+        </tbody>
+
+    </table>
+
+
+    <div class="footer">
+
+        Total Records:
+        ${filteredHistory.length}
+
+    </div>
+
+
+</body>
+
+</html>
+
+    `;
+
+
+    /* =====================================================
+       DOWNLOAD
+    ===================================================== */
+
+    const blob =
+        new Blob(
+            [
+                html
+            ],
+            {
+                type:
+                    "text/html;charset=utf-8"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
 
 
     link.download =
@@ -1631,73 +2072,6 @@ function formatDateTime(
 
 
 /* =========================================================
-   LOGOUT
-========================================================= */
-
-if (
-    logoutButton
-) {
-
-    logoutButton.addEventListener(
-        "click",
-        function () {
-
-            if (
-                !confirm(
-                    "Are you sure you want to log out?"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            sessionStorage.removeItem(
-                "moderatorLoggedIn"
-            );
-
-
-            sessionStorage.removeItem(
-                "moderatorId"
-            );
-
-
-            sessionStorage.removeItem(
-                "moderatorName"
-            );
-
-
-            sessionStorage.removeItem(
-                "moderatorRole"
-            );
-
-
-            sessionStorage.removeItem(
-                "moderatorStatus"
-            );
-
-
-            sessionStorage.removeItem(
-                "moderatorOrganizationId"
-            );
-
-
-            sessionStorage.removeItem(
-                "moderatorOrganization"
-            );
-
-
-            window.location.href =
-                "moderator-login.html";
-
-        }
-    );
-
-}
-
-
-/* =========================================================
    ESCAPE HTML
 ========================================================= */
 
@@ -1706,8 +2080,7 @@ function escapeHtml(
 ) {
 
     return String(
-        value ??
-        ""
+        value ?? ""
     )
     .replace(
         /&/g,
@@ -1728,6 +2101,41 @@ function escapeHtml(
     .replace(
         /'/g,
         "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML ATTRIBUTE
+========================================================= */
+
+function escapeAttribute(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
     );
 
 }
@@ -1781,3 +2189,10 @@ function getInitials(
     ).toUpperCase();
 
 }
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+loadAttendanceHistory();

@@ -1,6 +1,12 @@
 /* =========================================================
    DOMINEXUS
    MODERATOR - LIVE ATTENDANCE
+   Laravel / MySQL Connected
+========================================================= */
+
+
+/* =========================================================
+   API
 ========================================================= */
 
 const API_BASE =
@@ -12,15 +18,21 @@ const API_BASE =
 ========================================================= */
 
 if (
-    sessionStorage.getItem("moderatorLoggedIn") !== "true"
+    sessionStorage.getItem(
+        "moderatorLoggedIn"
+    ) !== "true"
 ) {
+
     window.location.href =
         "moderator-login.html";
+
 }
 
 
 const moderatorId =
-    sessionStorage.getItem("moderatorId");
+    sessionStorage.getItem(
+        "moderatorId"
+    );
 
 
 if (!moderatorId) {
@@ -31,6 +43,7 @@ if (!moderatorId) {
 
     window.location.href =
         "moderator-login.html";
+
 }
 
 
@@ -39,49 +52,85 @@ if (!moderatorId) {
 ========================================================= */
 
 const meetingSelect =
-    document.getElementById("meetingSelect");
+    document.getElementById(
+        "meetingSelect"
+    );
+
 
 const meetingStatus =
-    document.getElementById("meetingStatus");
+    document.getElementById(
+        "meetingStatus"
+    );
+
 
 const attendanceList =
-    document.getElementById("attendanceList");
+    document.getElementById(
+        "attendanceList"
+    );
+
 
 const presentCount =
-    document.getElementById("presentCount");
+    document.getElementById(
+        "presentCount"
+    );
+
 
 const absentCount =
-    document.getElementById("absentCount");
+    document.getElementById(
+        "absentCount"
+    );
+
 
 const totalCount =
-    document.getElementById("totalCount");
+    document.getElementById(
+        "totalCount"
+    );
+
 
 const attendanceRate =
-    document.getElementById("attendanceRate");
+    document.getElementById(
+        "attendanceRate"
+    );
+
 
 const liveIndicator =
-    document.getElementById("liveIndicator");
+    document.getElementById(
+        "liveIndicator"
+    );
+
 
 const logoutButton =
-    document.getElementById("logoutButton");
-
-const moderatorNameElement =
-    document.getElementById("moderatorName");
-
-const moderatorAvatar =
-    document.getElementById("moderatorAvatar");
+    document.getElementById(
+        "logoutButton"
+    );
 
 
 /* =========================================================
-   MODERATOR INFO
+   MODERATOR INFORMATION
 ========================================================= */
 
 const moderatorName =
-    sessionStorage.getItem("moderatorName") ||
+    sessionStorage.getItem(
+        "moderatorName"
+    ) ||
     "System Moderator";
 
 
-if (moderatorNameElement) {
+const moderatorNameElement =
+    document.getElementById(
+        "moderatorName"
+    );
+
+
+const moderatorAvatar =
+    document.getElementById(
+        "moderatorAvatar"
+    );
+
+
+if (
+    moderatorNameElement
+) {
 
     moderatorNameElement.textContent =
         moderatorName;
@@ -89,7 +138,9 @@ if (moderatorNameElement) {
 }
 
 
-if (moderatorAvatar) {
+if (
+    moderatorAvatar
+) {
 
     moderatorAvatar.textContent =
         getInitials(
@@ -111,7 +162,7 @@ let attendance = [];
 
 
 /* =========================================================
-   START
+   INITIALIZE
 ========================================================= */
 
 loadMeetings();
@@ -131,17 +182,14 @@ async function loadMeetings() {
 
     `;
 
-    try {
 
-        /*
-         * IMPORTANT:
-         * /api/meetings returns the meetings directly.
-         * Do NOT send moderator_id here.
-         */
+    try {
 
         const response =
             await fetch(
-                `${API_BASE}/meetings`,
+                `${API_BASE}/meetings?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
                 {
                     method:
                         "GET",
@@ -160,7 +208,9 @@ async function loadMeetings() {
             await response.json();
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 data.message ||
@@ -169,10 +219,6 @@ async function loadMeetings() {
 
         }
 
-
-        /*
-         * Laravel returns an array.
-         */
 
         meetings =
             Array.isArray(data)
@@ -190,7 +236,7 @@ async function loadMeetings() {
     } catch (error) {
 
         console.error(
-            "LOAD MEETINGS ERROR:",
+            "LIVE ATTENDANCE - MEETING ERROR:",
             error
         );
 
@@ -205,7 +251,6 @@ async function loadMeetings() {
 
 
         meetingStatus.textContent =
-            error.message ||
             "Unable to load meetings.";
 
     }
@@ -229,7 +274,8 @@ function renderMeetings() {
 
 
     if (
-        meetings.length === 0
+        meetings.length ===
+        0
     ) {
 
         meetingSelect.innerHTML = `
@@ -244,9 +290,6 @@ function renderMeetings() {
         meetingStatus.textContent =
             "No meetings available.";
 
-        setMeetingIndicator(
-            null
-        );
 
         return;
 
@@ -308,7 +351,7 @@ function renderMeetings() {
 
 
 /* =========================================================
-   MEETING SELECTION
+   MEETING CHANGE
 ========================================================= */
 
 meetingSelect.addEventListener(
@@ -358,8 +401,12 @@ async function updateAttendance(
             ) {
 
                 return (
-                    String(item.id) ===
-                    String(meetingId)
+                    String(
+                        item.id
+                    ) ===
+                    String(
+                        meetingId
+                    )
                 );
 
             }
@@ -406,10 +453,6 @@ async function updateAttendance(
         `;
 
 
-        /*
-         * Get attendance for selected meeting.
-         */
-
         const response =
             await fetch(
                 `${API_BASE}/attendances?meeting_id=${encodeURIComponent(
@@ -433,7 +476,9 @@ async function updateAttendance(
             await response.json();
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 data.message ||
@@ -453,7 +498,9 @@ async function updateAttendance(
                 );
 
 
-        await loadStudents();
+        await loadStudents(
+            meetingId
+        );
 
 
         calculateAndRender(
@@ -479,6 +526,7 @@ async function updateAttendance(
             <div class="empty-state">
 
                 Unable to load attendance.
+                Make sure the Laravel server is running.
 
             </div>
 
@@ -493,7 +541,15 @@ async function updateAttendance(
    LOAD STUDENTS
 ========================================================= */
 
-async function loadStudents() {
+async function loadStudents(
+    meetingId
+) {
+
+    /*
+     * We use the moderator's student records
+     * so only students from the moderator's
+     * organization are considered.
+     */
 
     try {
 
@@ -520,7 +576,9 @@ async function loadStudents() {
             await response.json();
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 data.message ||
@@ -541,7 +599,7 @@ async function loadStudents() {
     } catch (error) {
 
         console.error(
-            "LOAD STUDENTS ERROR:",
+            "STUDENT LOADING ERROR:",
             error
         );
 
@@ -554,7 +612,7 @@ async function loadStudents() {
 
 
 /* =========================================================
-   CALCULATE AND RENDER
+   CALCULATE + RENDER
 ========================================================= */
 
 function calculateAndRender(
@@ -613,11 +671,17 @@ function calculateAndRender(
         );
 
 
-    const presentTotal =
-        present.length;
+    /*
+     * If the meeting is completed,
+     * the backend should already have
+     * generated absent records.
+     *
+     * If it is still ongoing, students
+     * without an attendance record are
+     * not counted as officially absent yet.
+     */
 
-
-    const absentTotal =
+    const officialAbsent =
         absent.length;
 
 
@@ -625,7 +689,7 @@ function calculateAndRender(
         total > 0
             ? Math.round(
                 (
-                    presentTotal /
+                    present.length /
                     total
                 ) * 100
             )
@@ -633,11 +697,11 @@ function calculateAndRender(
 
 
     presentCount.textContent =
-        presentTotal;
+        present.length;
 
 
     absentCount.textContent =
-        absentTotal;
+        officialAbsent;
 
 
     totalCount.textContent =
@@ -645,7 +709,8 @@ function calculateAndRender(
 
 
     attendanceRate.textContent =
-        rate + "%";
+        rate +
+        "%";
 
 
     renderPresentStudents(
@@ -668,7 +733,8 @@ function renderPresentStudents(
 
 
     if (
-        records.length === 0
+        records.length ===
+        0
     ) {
 
         attendanceList.innerHTML = `
@@ -696,8 +762,12 @@ function renderPresentStudents(
             ) {
 
                 return (
-                    getAttendanceTime(a) -
-                    getAttendanceTime(b)
+                    getAttendanceTime(
+                        a
+                    ) -
+                    getAttendanceTime(
+                        b
+                    )
                 );
 
             }
@@ -728,6 +798,7 @@ function renderPresentStudents(
                     student
                         ? (
                             student.name ||
+                            student.fullName ||
                             "Unknown Student"
                         )
                         : "Unknown Student";
@@ -737,16 +808,19 @@ function renderPresentStudents(
                     student
                         ? (
                             student.student_id ||
+                            student.studentId ||
                             "—"
                         )
                         : (
                             record.student_id ||
+                            record.studentId ||
                             "—"
                         );
 
 
                 const time =
                     record.scanned_at ||
+                    record.timeIn ||
                     null;
 
 
@@ -759,62 +833,43 @@ function renderPresentStudents(
 
                 row.innerHTML = `
 
-                    <div>
+    <div class="student-info">
 
-                        <div class="student-name">
+        <div class="student-name">
+            ${escapeHtml(name)}
+        </div>
 
-                            ${escapeHtml(
-                    name
+        <div class="student-id">
+            Student ID:
+            ${escapeHtml(studentId)}
+        </div>
+
+    </div>
+
+
+    <div class="time-in">
+
+        Time In:
+        ${escapeHtml(
+                    formatDateTime(time)
                 )}
 
-                        </div>
+    </div>
 
-                        <div class="student-id">
 
-                            Student ID:
-                            ${escapeHtml(
-                    studentId
+    <div class="attendance-status">
+
+        <span class="status ${status}">
+
+            ${escapeHtml(
+                    status.toUpperCase()
                 )}
 
-                        </div>
+        </span>
 
-                    </div>
+    </div>
 
-
-                    <div>
-
-                        <div class="time-in">
-
-                            Time In:
-                            ${escapeHtml(
-                    formatDateTime(
-                        time
-                    )
-                )}
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <span
-                            class="status ${status === "late"
-                        ? "late"
-                        : "present"
-                    }"
-                        >
-
-                            ${escapeHtml(
-                        status.toUpperCase()
-                    )}
-
-                        </span>
-
-                    </div>
-
-                `;
+`;
 
 
                 attendanceList.appendChild(
@@ -835,33 +890,71 @@ function findStudent(
     record
 ) {
 
+    const possibleIds = [
+
+        record.user_id,
+
+        record.student_id,
+
+        record.studentId,
+
+        record.unique_id,
+
+        record.uniqueId
+
+    ];
+
+
     return students.find(
         function (
             student
         ) {
 
-            return (
+            return possibleIds.some(
+                function (
+                    value
+                ) {
 
-                String(
-                    student.id ||
-                    ""
-                ) ===
-                String(
-                    record.user_id ||
-                    ""
-                )
+                    if (!value) {
 
-                ||
+                        return false;
 
-                String(
-                    student.student_id ||
-                    ""
-                ).toLowerCase() ===
-                String(
-                    record.student_id ||
-                    ""
-                ).toLowerCase()
+                    }
 
+
+                    return (
+
+                        String(
+                            student.id ||
+                            ""
+                        ) ===
+                        String(
+                            value
+                        )
+
+                        ||
+
+                        String(
+                            student.student_id ||
+                            ""
+                        ).toLowerCase() ===
+                        String(
+                            value
+                        ).toLowerCase()
+
+                        ||
+
+                        String(
+                            student.unique_id ||
+                            ""
+                        ).toLowerCase() ===
+                        String(
+                            value
+                        ).toLowerCase()
+
+                    );
+
+                }
             );
 
         }
@@ -871,7 +964,7 @@ function findStudent(
 
 
 /* =========================================================
-   MEETING INDICATOR
+   MEETING STATUS INDICATOR
 ========================================================= */
 
 function setMeetingIndicator(
@@ -908,6 +1001,7 @@ function setMeetingIndicator(
         liveIndicator.innerHTML = `
 
             <span class="live-dot"></span>
+
             LIVE
 
         `;
@@ -930,6 +1024,7 @@ function setMeetingIndicator(
         liveIndicator.innerHTML = `
 
             <span class="live-dot"></span>
+
             COMPLETED
 
         `;
@@ -952,6 +1047,7 @@ function setMeetingIndicator(
         liveIndicator.innerHTML = `
 
             <span class="live-dot"></span>
+
             CANCELLED
 
         `;
@@ -969,6 +1065,7 @@ function setMeetingIndicator(
     liveIndicator.innerHTML = `
 
         <span class="live-dot"></span>
+
         UPCOMING
 
     `;
@@ -977,7 +1074,7 @@ function setMeetingIndicator(
 
 
 /* =========================================================
-   NORMALIZE STATUS
+   STATUS NORMALIZATION
 ========================================================= */
 
 function normalizeStatus(
@@ -1139,13 +1236,8 @@ function getMeetingDateValue(
 
 
     const date =
-        String(
-            meeting.date ||
-            ""
-        ).substring(
-            0,
-            10
-        );
+        meeting.date ||
+        "";
 
 
     const time =
@@ -1180,7 +1272,9 @@ function getAttendanceTime(
 ) {
 
     const value =
-        record.scanned_at;
+        record.scanned_at ||
+        record.timeIn ||
+        null;
 
 
     if (!value) {
@@ -1219,6 +1313,13 @@ function formatDate(
 
     }
 
+
+    /*
+     * Handles both:
+     *
+     * 2026-08-31
+     * 2026-08-31T00:00:00.000000Z
+     */
 
     const normalized =
         String(
@@ -1286,6 +1387,11 @@ function formatTime(
             value
         );
 
+
+    /*
+     * If backend gives:
+     * 14:53:00
+     */
 
     const parts =
         text.split(":");
@@ -1399,7 +1505,7 @@ function formatDateTime(
 
 
 /* =========================================================
-   CLEAR ATTENDANCE
+   CLEAR
 ========================================================= */
 
 function clearAttendance() {
@@ -1438,7 +1544,9 @@ function clearAttendance() {
    LOGOUT
 ========================================================= */
 
-if (logoutButton) {
+if (
+    logoutButton
+) {
 
     logoutButton.addEventListener(
         "click",
@@ -1455,7 +1563,39 @@ if (logoutButton) {
             }
 
 
-            sessionStorage.clear();
+            sessionStorage.removeItem(
+                "moderatorLoggedIn"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorId"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorName"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorRole"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorStatus"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorOrganizationId"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorOrganization"
+            );
 
 
             window.location.href =
@@ -1481,14 +1621,17 @@ function getInitials(
             ""
         )
             .trim()
-            .split(/\s+/)
+            .split(
+                /\s+/
+            )
             .filter(
                 Boolean
             );
 
 
     if (
-        parts.length === 0
+        parts.length ===
+        0
     ) {
 
         return "M";
@@ -1497,7 +1640,8 @@ function getInitials(
 
 
     if (
-        parts.length === 1
+        parts.length ===
+        1
     ) {
 
         return parts[0]
