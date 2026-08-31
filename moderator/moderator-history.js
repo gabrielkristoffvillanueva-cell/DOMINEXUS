@@ -1,7 +1,17 @@
 /* =========================================================
    DOMINEXUS
-   MODERATOR - ATTENDANCE HISTORY
+   MODERATOR — ATTENDANCE HISTORY
+   Laravel / MySQL Connected
+   Organization-Isolated
 ========================================================= */
+
+
+/* =========================================================
+   API
+========================================================= */
+
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -20,18 +30,22 @@ if (
 }
 
 
-/* =========================================================
-   STORAGE KEYS
-========================================================= */
+const moderatorId =
+    sessionStorage.getItem(
+        "moderatorId"
+    );
 
-const STUDENTS_KEY =
-    "dominexus_students";
 
-const MEETINGS_KEY =
-    "dominexus_meetings";
+if (!moderatorId) {
 
-const ATTENDANCE_KEY =
-    "dominexus_attendance";
+    alert(
+        "Moderator session not found. Please log in again."
+    );
+
+    window.location.href =
+        "moderator-login.html";
+
+}
 
 
 /* =========================================================
@@ -43,40 +57,48 @@ const meetingSelect =
         "meetingSelect"
     );
 
+
 const searchInput =
     document.getElementById(
         "searchInput"
     );
+
 
 const historyTableBody =
     document.getElementById(
         "historyTableBody"
     );
 
+
 const emptyState =
     document.getElementById(
         "emptyState"
     );
+
 
 const recordCount =
     document.getElementById(
         "recordCount"
     );
 
+
 const presentCount =
     document.getElementById(
         "presentCount"
     );
+
 
 const absentCount =
     document.getElementById(
         "absentCount"
     );
 
+
 const attendanceRate =
     document.getElementById(
         "attendanceRate"
     );
+
 
 const logoutButton =
     document.getElementById(
@@ -84,69 +106,464 @@ const logoutButton =
     );
 
 
+const moderatorNameElement =
+    document.getElementById(
+        "moderatorName"
+    );
+
+
+const moderatorAvatar =
+    document.getElementById(
+        "moderatorAvatar"
+    );
+
+
+const downloadAttendanceButton =
+    document.getElementById(
+        "downloadAttendanceButton"
+    );
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+let meetings = [];
+
+let history = [];
+
+let filteredHistory = [];
+
+
 /* =========================================================
    MODERATOR INFORMATION
 ========================================================= */
 
-const moderatorName =
+const savedModeratorName =
     sessionStorage.getItem(
         "moderatorName"
     ) ||
     "System Moderator";
 
 
-document.getElementById(
-    "moderatorName"
-).textContent =
-    moderatorName;
+if (
+    moderatorNameElement
+) {
+
+    moderatorNameElement.textContent =
+        savedModeratorName;
+
+}
 
 
-document.getElementById(
-    "moderatorAvatar"
-).textContent =
-    getInitials(
-        moderatorName
-    );
+if (
+    moderatorAvatar
+) {
+
+    moderatorAvatar.textContent =
+        getInitials(
+            savedModeratorName
+        );
+
+}
 
 
 /* =========================================================
    INITIAL LOAD
 ========================================================= */
 
-loadMeetingOptions();
-
-renderHistory();
+loadAttendanceHistory();
 
 
 /* =========================================================
    FILTER EVENTS
 ========================================================= */
 
-meetingSelect.addEventListener(
-    "change",
-    function () {
+if (
+    meetingSelect
+) {
 
-        renderHistory();
+    meetingSelect.addEventListener(
+        "change",
+        function () {
 
-    }
-);
+            applyFilters();
+
+        }
+    );
+
+}
 
 
-searchInput.addEventListener(
-    "input",
-    function () {
+if (
+    searchInput
+) {
 
-        renderHistory();
+    searchInput.addEventListener(
+        "input",
+        function () {
 
-    }
-);
+            applyFilters();
+
+        }
+    );
+
+}
 
 
 /* =========================================================
-   LOAD MEETINGS
+   DOWNLOAD EVENT
+========================================================= */
+
+if (
+    downloadAttendanceButton
+) {
+
+    downloadAttendanceButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                filteredHistory.length ===
+                0
+            ) {
+
+                alert(
+                    "There are no attendance records to download."
+                );
+
+                return;
+
+            }
+
+
+            downloadAttendanceCSV();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOAD ATTENDANCE HISTORY
+========================================================= */
+
+async function loadAttendanceHistory() {
+
+    showLoading();
+
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/moderator-attendance-history?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        "Accept":
+                            "application/json"
+
+                    }
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "MODERATOR ATTENDANCE HISTORY:",
+            data
+        );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load attendance history."
+            );
+
+        }
+
+
+        meetings =
+            Array.isArray(
+                data.meetings
+            )
+                ? data.meetings
+                : [];
+
+
+        history =
+            Array.isArray(
+                data.history
+            )
+                ? data.history
+                : [];
+ 
+        /* =========================================================
+   BACKEND STATISTICS
+========================================================= */
+
+if (
+    data.statistics
+) {
+
+    if (
+        recordCount
+    ) {
+
+        recordCount.textContent =
+            data.statistics
+                .attendance_records ??
+            0;
+
+    }
+
+
+    if (
+        presentCount
+    ) {
+
+        presentCount.textContent =
+            data.statistics
+                .unique_students_present ??
+            0;
+
+    }
+
+
+    if (
+        absentCount
+    ) {
+
+        absentCount.textContent =
+            data.statistics
+                .absent_records ??
+            0;
+
+    }
+
+
+    if (
+        attendanceRate
+    ) {
+
+        attendanceRate.textContent =
+            (
+                data.statistics
+                    .attendance_rate ??
+                0
+            ) +
+            "%";
+
+    }
+
+}
+
+        /*
+         * Update moderator information
+         */
+
+        if (
+            data.moderator
+        ) {
+
+            if (
+                data.moderator.name
+            ) {
+
+                if (
+                    moderatorNameElement
+                ) {
+
+                    moderatorNameElement.textContent =
+                        data.moderator.name;
+
+                }
+
+
+                if (
+                    moderatorAvatar
+                ) {
+
+                    moderatorAvatar.textContent =
+                        getInitials(
+                            data.moderator.name
+                        );
+
+                }
+
+
+                sessionStorage.setItem(
+                    "moderatorName",
+                    data.moderator.name
+                );
+
+            }
+
+
+            if (
+                data.moderator.organization_id
+                !== undefined
+            ) {
+
+                sessionStorage.setItem(
+                    "moderatorOrganizationId",
+                    data.moderator.organization_id
+                );
+
+            }
+
+        }
+
+
+        loadMeetingOptions();
+
+
+        applyFilters();
+
+
+    } catch (
+        error
+    ) {
+
+        console.error(
+            "ATTENDANCE HISTORY ERROR:",
+            error
+        );
+
+
+        meetings =
+            [];
+
+        history =
+            [];
+
+        filteredHistory =
+            [];
+
+
+        if (
+            meetingSelect
+        ) {
+
+            meetingSelect.innerHTML = `
+
+                <option value="">
+                    All Meetings
+                </option>
+
+            `;
+
+        }
+
+
+        if (
+            historyTableBody
+        ) {
+
+            historyTableBody.innerHTML =
+                "";
+
+        }
+
+
+        if (
+            emptyState
+        ) {
+
+            emptyState.classList.remove(
+                "hidden"
+            );
+
+
+            emptyState.textContent =
+                error.message ||
+                "Unable to load attendance history.";
+
+        }
+
+
+        updateStatistics(
+            []
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function showLoading() {
+
+    if (
+        historyTableBody
+    ) {
+
+        historyTableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    style="text-align:center;"
+                >
+
+                    Loading attendance history...
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+
+    if (
+        emptyState
+    ) {
+
+        emptyState.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD MEETING OPTIONS
 ========================================================= */
 
 function loadMeetingOptions() {
+
+    if (
+        !meetingSelect
+    ) {
+
+        return;
+
+    }
+
 
     meetingSelect.innerHTML = `
 
@@ -157,22 +574,31 @@ function loadMeetingOptions() {
     `;
 
 
-    const meetings =
-        getMeetings();
+    const sortedMeetings =
+        [...meetings]
+        .sort(
+            function (
+                a,
+                b
+            ) {
+
+                return (
+                    getMeetingDateValue(
+                        b
+                    ) -
+                    getMeetingDateValue(
+                        a
+                    )
+                );
+
+            }
+        );
 
 
-    meetings.sort(
-        function (a, b) {
-
-            return getMeetingDateValue(b) -
-                   getMeetingDateValue(a);
-
-        }
-    );
-
-
-    meetings.forEach(
-        function (meeting) {
+    sortedMeetings.forEach(
+        function (
+            meeting
+        ) {
 
             const option =
                 document.createElement(
@@ -203,144 +629,82 @@ function loadMeetingOptions() {
 
 
 /* =========================================================
-   RENDER HISTORY
+   APPLY FILTERS
 ========================================================= */
 
-function renderHistory() {
-
-    const meetings =
-        getMeetings();
-
-    const students =
-        getStudents();
-
-    const attendance =
-        getAttendance();
-
+function applyFilters() {
 
     const selectedMeeting =
-        meetingSelect.value;
+        meetingSelect
+            ? meetingSelect.value
+            : "";
 
 
     const query =
-        searchInput.value
-            .trim()
-            .toLowerCase();
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : "";
 
 
-    const rows =
-        [];
-
-
-    /*
-     * Go through every meeting.
-     */
-
-    meetings.forEach(
-        function (meeting) {
-
-            if (
-                selectedMeeting &&
-                String(
-                    meeting.id
-                ) !==
-                String(
-                    selectedMeeting
-                )
+    filteredHistory =
+        history.filter(
+            function (
+                item
             ) {
 
-                return;
+                /*
+                 * Meeting filter
+                 */
 
-            }
+                if (
+                    selectedMeeting &&
+                    String(
+                        item.meeting?.id
+                    ) !==
+                    String(
+                        selectedMeeting
+                    )
+                ) {
 
+                    return false;
 
-            const meetingRecords =
-                getMeetingRecords(
-                    attendance,
-                    meeting.id
-                );
-
-
-            /*
-             * Create a row for every
-             * attendance record.
-             */
-
-            Object.keys(
-                meetingRecords
-            )
-            .forEach(
-                function (key) {
-
-                    const record =
-                        meetingRecords[key];
+                }
 
 
-                    if (!record) {
+                /*
+                 * Search filter
+                 */
 
-                        return;
-
-                    }
-
+                if (
+                    query
+                ) {
 
                     const student =
-                        findStudentForRecord(
-                            students,
-                            record,
-                            key
-                        );
+                        item.student ||
+                        {};
 
-
-                    const name =
-                        student
-                            ? (
-                                student.fullName ||
-                                student.name ||
-                                "Unknown Student"
-                            )
-                            : (
-                                record.fullName ||
-                                record.name ||
-                                "Unknown Student"
-                            );
-
-
-                    const studentId =
-                        student
-                            ? (
-                                student.studentId ||
-                                "—"
-                            )
-                            : (
-                                record.studentId ||
-                                "—"
-                            );
-
-
-                    const uniqueId =
-                        student
-                            ? (
-                                student.uniqueId ||
-                                record.uniqueId ||
-                                key
-                            )
-                            : (
-                                record.uniqueId ||
-                                key
-                            );
+                    const meeting =
+                        item.meeting ||
+                        {};
 
 
                     const searchText = [
 
-                        name,
+                        student.name,
 
-                        studentId,
+                        student.student_id,
 
-                        uniqueId,
+                        student.unique_id,
+
+                        student.section,
 
                         meeting.title,
 
-                        record.status
+                        meeting.date,
+
+                        item.status
 
                     ]
                     .join(" ")
@@ -348,71 +712,40 @@ function renderHistory() {
 
 
                     if (
-                        query &&
                         !searchText.includes(
                             query
                         )
                     ) {
 
-                        return;
+                        return false;
 
                     }
 
-
-                    rows.push({
-
-                        meeting,
-
-                        record,
-
-                        name,
-
-                        studentId,
-
-                        uniqueId
-
-                    });
-
                 }
-            );
 
-        }
-    );
+
+                return true;
+
+            }
+        );
 
 
     /*
-     * Sort newest meeting first.
+     * Newest first.
      */
 
-    rows.sort(
-        function (a, b) {
-
-            const meetingDifference =
-                getMeetingDateValue(
-                    b.meeting
-                ) -
-                getMeetingDateValue(
-                    a.meeting
-                );
-
-
-            if (
-                meetingDifference !== 0
-            ) {
-
-                return meetingDifference;
-
-            }
-
+    filteredHistory.sort(
+        function (
+            a,
+            b
+        ) {
 
             return (
-                new Date(
-                    b.record.timeIn ||
-                    0
+                getHistoryDateValue(
+                    b
                 ) -
-                new Date(
-                    a.record.timeIn ||
-                    0
+                getHistoryDateValue(
+                    a
                 )
             );
 
@@ -420,56 +753,109 @@ function renderHistory() {
     );
 
 
-    renderRows(
-        rows,
-        students
+    renderHistory(
+        filteredHistory
     );
 
 
     updateStatistics(
-        rows,
-        students
+        filteredHistory
     );
 
 }
 
 
 /* =========================================================
-   RENDER ROWS
+   RENDER HISTORY
 ========================================================= */
 
-function renderRows(
+function renderHistory(
     rows
 ) {
 
-    historyTableBody.innerHTML =
-        "";
-
-
-    recordCount.textContent =
-        rows.length;
-
-
     if (
-        rows.length === 0
+        !historyTableBody
     ) {
-
-        emptyState.classList.remove(
-            "hidden"
-        );
 
         return;
 
     }
 
 
-    emptyState.classList.add(
-        "hidden"
-    );
+    historyTableBody.innerHTML =
+        "";
+
+
+    if (
+        recordCount
+    ) {
+
+        recordCount.textContent =
+            rows.length;
+
+    }
+
+
+    if (
+        rows.length ===
+        0
+    ) {
+
+        if (
+            emptyState
+        ) {
+
+            emptyState.classList.remove(
+                "hidden"
+            );
+
+
+            if (
+                searchInput &&
+                searchInput.value.trim()
+            ) {
+
+                emptyState.textContent =
+                    "No attendance records match your search.";
+
+            } else if (
+                meetingSelect &&
+                meetingSelect.value
+            ) {
+
+                emptyState.textContent =
+                    "No attendance records found for this meeting.";
+
+            } else {
+
+                emptyState.textContent =
+                    "No attendance records found.";
+
+            }
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (
+        emptyState
+    ) {
+
+        emptyState.classList.add(
+            "hidden"
+        );
+
+    }
 
 
     rows.forEach(
-        function (item) {
+        function (
+            item
+        ) {
 
             const row =
                 document.createElement(
@@ -478,16 +864,18 @@ function renderRows(
 
 
             const meeting =
-                item.meeting;
+                item.meeting ||
+                {};
 
 
-            const record =
-                item.record;
+            const student =
+                item.student ||
+                {};
 
 
             const status =
                 String(
-                    record.status ||
+                    item.status ||
                     "Absent"
                 );
 
@@ -506,18 +894,23 @@ function renderRows(
                 <td>
 
                     <div class="meeting-name">
+
                         ${escapeHtml(
                             meeting.title ||
                             "Untitled Meeting"
                         )}
+
                     </div>
 
+
                     <div class="meeting-date">
+
                         ${escapeHtml(
                             formatDate(
                                 meeting.date
                             )
                         )}
+
                     </div>
 
                 </td>
@@ -526,27 +919,36 @@ function renderRows(
                 <td>
 
                     <div class="student-name">
+
                         ${escapeHtml(
-                            item.name
+                            student.name ||
+                            "Unknown Student"
                         )}
+
                     </div>
 
                 </td>
 
 
                 <td>
+
                     ${escapeHtml(
-                        item.studentId
+                        student.student_id ||
+                        "—"
                     )}
+
                 </td>
 
 
                 <td>
 
                     <span class="unique-id">
+
                         ${escapeHtml(
-                            item.uniqueId
+                            student.unique_id ||
+                            "—"
                         )}
+
                     </span>
 
                 </td>
@@ -554,31 +956,42 @@ function renderRows(
 
                 <td>
 
-                    <span class="status ${statusClass}">
+                    <span
+                        class="status ${escapeHtml(
+                            statusClass
+                        )}"
+                    >
+
                         ${escapeHtml(
                             status
                         )}
+
                     </span>
 
                 </td>
 
 
                 <td>
+
                     ${escapeHtml(
                         formatDateTime(
-                            record.timeIn
+                            item.scanned_at ||
+                            item.created_at
                         )
                     )}
+
                 </td>
 
 
                 <td>
 
                     <div class="remarks">
+
                         ${escapeHtml(
-                            record.remarks ||
+                            item.remarks ||
                             "—"
                         )}
+
                     </div>
 
                 </td>
@@ -601,8 +1014,7 @@ function renderRows(
 ========================================================= */
 
 function updateStatistics(
-    rows,
-    students
+    rows
 ) {
 
     let present =
@@ -613,18 +1025,23 @@ function updateStatistics(
 
 
     rows.forEach(
-        function (item) {
+        function (
+            item
+        ) {
 
             const status =
                 String(
-                    item.record.status ||
+                    item.status ||
                     ""
-                ).toLowerCase();
+                )
+                .toLowerCase();
 
 
             if (
                 status ===
-                "present"
+                "present" ||
+                status ===
+                "late"
             ) {
 
                 present++;
@@ -642,114 +1059,50 @@ function updateStatistics(
     );
 
 
-    presentCount.textContent =
-        present;
+    if (
+        presentCount
+    ) {
+
+        presentCount.textContent =
+            present;
+
+    }
 
 
-    absentCount.textContent =
+    if (
+        absentCount
+    ) {
+
+        absentCount.textContent =
+            absent;
+
+    }
+
+
+    const total =
+        present +
         absent;
 
 
-    /*
-     * When a specific meeting is selected,
-     * calculate its attendance rate.
-     *
-     * When all meetings are selected,
-     * calculate the rate based on the
-     * displayed records.
-     */
-
-    let rate =
-        0;
+    const rate =
+        total > 0
+            ? Math.round(
+                (
+                    present /
+                    total
+                ) *
+                100
+            )
+            : 0;
 
 
     if (
-        meetingSelect.value
+        attendanceRate
     ) {
 
-        const total =
-            students.length;
-
-
-        rate =
-            total > 0
-                ? Math.round(
-                    (
-                        present /
-                        total
-                    ) * 100
-                )
-                : 0;
-
-    } else {
-
-        const total =
-            present +
-            absent;
-
-
-        rate =
-            total > 0
-                ? Math.round(
-                    (
-                        present /
-                        total
-                    ) * 100
-                )
-                : 0;
-
-    }
-
-
-    attendanceRate.textContent =
-        rate +
-        "%";
-
-}
-
-
-/* =========================================================
-   GET STUDENTS
-========================================================= */
-
-function getStudents() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                STUDENTS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        return Array.isArray(
-            parsed
-        )
-            ? parsed
-            : [];
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Student data error:",
-            error
-        );
-
-
-        return [];
+        attendanceRate.textContent =
+            rate +
+            "%";
 
     }
 
@@ -757,264 +1110,267 @@ function getStudents() {
 
 
 /* =========================================================
-   GET MEETINGS
+   DOWNLOAD ATTENDANCE CSV
 ========================================================= */
 
-function getMeetings() {
+function downloadAttendanceCSV() {
 
-    try {
+    const headers = [
 
-        const raw =
-            localStorage.getItem(
-                MEETINGS_KEY
-            );
+        "Meeting",
 
+        "Date",
 
-        if (!raw) {
+        "Student Name",
 
-            return [];
+        "Student ID",
 
-        }
+        "Unique ID",
 
+        "Status",
 
-        const parsed =
-            JSON.parse(
-                raw
-            );
+        "Time In",
 
+        "Remarks"
 
-        return Array.isArray(
-            parsed
-        )
-            ? parsed
-            : [];
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Meeting data error:",
-            error
-        );
+    ];
 
 
-        return [];
+    const rows =
+        filteredHistory.map(
+            function (
+                item
+            ) {
 
-    }
-
-}
-
-
-/* =========================================================
-   GET ATTENDANCE
-========================================================= */
-
-function getAttendance() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                ATTENDANCE_KEY
-            );
+                const student =
+                    item.student ||
+                    {};
 
 
-        if (!raw) {
-
-            return {};
-
-        }
+                const meeting =
+                    item.meeting ||
+                    {};
 
 
-        return JSON.parse(
-            raw
-        ) || {};
+                return [
 
-    } catch (error) {
+                    meeting.title ||
+                    "Untitled Meeting",
 
-        console.error(
-            "DOMINEXUS: Attendance data error:",
-            error
-        );
+                    formatDate(
+                        meeting.date
+                    ),
 
+                    student.name ||
+                    "Unknown Student",
 
-        return {};
+                    student.student_id ||
+                    "—",
 
-    }
+                    student.unique_id ||
+                    "—",
 
-}
+                    item.status ||
+                    "—",
 
+                    formatDateTime(
+                        item.scanned_at ||
+                        item.created_at
+                    ),
 
-/* =========================================================
-   GET MEETING RECORDS
-========================================================= */
+                    item.remarks ||
+                    "—"
 
-function getMeetingRecords(
-    attendance,
-    meetingId
-) {
-
-    /*
-     * Primary expected structure:
-     *
-     * attendance[meetingId]
-     */
-
-    if (
-        attendance[
-            meetingId
-        ] &&
-        typeof attendance[
-            meetingId
-        ] === "object"
-    ) {
-
-        return attendance[
-            meetingId
-        ];
-
-    }
-
-
-    /*
-     * Some versions of the system may
-     * store attendance as an array.
-     */
-
-    if (
-        Array.isArray(
-            attendance
-        )
-    ) {
-
-        const records =
-            {};
-
-
-        attendance.forEach(
-            function (record, index) {
-
-                if (
-                    String(
-                        record.meetingId ||
-                        ""
-                    ) ===
-                    String(
-                        meetingId
-                    )
-                ) {
-
-                    const key =
-                        record.uniqueId ||
-                        record.studentId ||
-                        index;
-
-
-                    records[key] =
-                        record;
-
-                }
+                ];
 
             }
         );
 
 
-        return records;
+    const csvData = [
+
+        headers,
+
+        ...rows
+
+    ];
+
+
+    const csv =
+        csvData
+            .map(
+                function (
+                    row
+                ) {
+
+                    return row
+                        .map(
+                            function (
+                                value
+                            ) {
+
+                                return `"${String(
+                                    value ??
+                                    ""
+                                )
+                                .replace(
+                                    /"/g,
+                                    '""'
+                                )}"`;
+
+                            }
+                        )
+                        .join(",");
+
+                }
+            )
+            .join("\r\n");
+
+
+    /*
+     * UTF-8 BOM makes the CSV display
+     * properly in Microsoft Excel.
+     */
+
+    const blob =
+        new Blob(
+            [
+                "\uFEFF",
+                csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    /*
+     * Build filename.
+     */
+
+    let filename =
+        "DOMINEXUS_Attendance";
+
+
+    if (
+        meetingSelect &&
+        meetingSelect.value
+    ) {
+
+        const selectedMeeting =
+            meetings.find(
+                function (
+                    meeting
+                ) {
+
+                    return (
+                        String(
+                            meeting.id
+                        ) ===
+                        String(
+                            meetingSelect.value
+                        )
+                    );
+
+                }
+            );
+
+
+        if (
+            selectedMeeting
+        ) {
+
+            filename +=
+                "_" +
+                sanitizeFilename(
+                    selectedMeeting.title ||
+                    "Meeting"
+                );
+
+        }
+
+    } else {
+
+        filename +=
+            "_All_Meetings";
 
     }
 
 
-    return {};
+    filename +=
+        ".csv";
+
+
+    link.download =
+        filename;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    document.body.removeChild(
+        link
+    );
+
+
+    URL.revokeObjectURL(
+        url
+    );
 
 }
 
 
 /* =========================================================
-   FIND STUDENT
+   SANITIZE FILENAME
 ========================================================= */
 
-function findStudentForRecord(
-    students,
-    record,
-    key
+function sanitizeFilename(
+    value
 ) {
 
-    return students.find(
-        function (student) {
-
-            const studentId =
-                String(
-                    student.studentId ||
-                    ""
-                ).toLowerCase();
-
-
-            const uniqueId =
-                String(
-                    student.uniqueId ||
-                    ""
-                ).toLowerCase();
-
-
-            const recordStudentId =
-                String(
-                    record.studentId ||
-                    ""
-                ).toLowerCase();
-
-
-            const recordUniqueId =
-                String(
-                    record.uniqueId ||
-                    ""
-                ).toLowerCase();
-
-
-            const keyValue =
-                String(
-                    key ||
-                    ""
-                ).toLowerCase();
-
-
-            return (
-
-                (
-                    recordStudentId &&
-                    studentId ===
-                    recordStudentId
-                )
-
-                ||
-
-                (
-                    recordUniqueId &&
-                    uniqueId ===
-                    recordUniqueId
-                )
-
-                ||
-
-                (
-                    keyValue &&
-                    (
-                        uniqueId ===
-                        keyValue ||
-
-                        studentId ===
-                        keyValue
-                    )
-                )
-
-            );
-
-        }
-    ) || null;
+    return String(
+        value
+    )
+    .replace(
+        /[<>:"/\\|?*]+/g,
+        "_"
+    )
+    .replace(
+        /\s+/g,
+        "_"
+    )
+    .substring(
+        0,
+        80
+    );
 
 }
 
 
 /* =========================================================
-   MEETING LABEL
+   BUILD MEETING LABEL
 ========================================================= */
 
 function buildMeetingLabel(
@@ -1045,14 +1401,16 @@ function buildMeetingLabel(
 
 
 /* =========================================================
-   MEETING DATE
+   MEETING DATE VALUE
 ========================================================= */
 
 function getMeetingDateValue(
     meeting
 ) {
 
-    if (!meeting) {
+    if (
+        !meeting
+    ) {
 
         return 0;
 
@@ -1065,8 +1423,8 @@ function getMeetingDateValue(
 
 
     const time =
-        meeting.time ||
-        "00:00";
+        meeting.start_time ||
+        "00:00:00";
 
 
     const value =
@@ -1088,14 +1446,79 @@ function getMeetingDateValue(
 
 
 /* =========================================================
-   DATE
+   HISTORY DATE VALUE
+========================================================= */
+
+function getHistoryDateValue(
+    item
+) {
+
+    if (
+        item.scanned_at
+    ) {
+
+        const scanned =
+            new Date(
+                item.scanned_at
+            )
+            .getTime();
+
+
+        if (
+            !Number.isNaN(
+                scanned
+            )
+        ) {
+
+            return scanned;
+
+        }
+
+    }
+
+
+    if (
+        item.created_at
+    ) {
+
+        const created =
+            new Date(
+                item.created_at
+            )
+            .getTime();
+
+
+        if (
+            !Number.isNaN(
+                created
+            )
+        ) {
+
+            return created;
+
+        }
+
+    }
+
+
+    return getMeetingDateValue(
+        item.meeting
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
 ========================================================= */
 
 function formatDate(
     value
 ) {
 
-    if (!value) {
+    if (
+        !value
+    ) {
 
         return "—";
 
@@ -1104,7 +1527,12 @@ function formatDate(
 
     const date =
         new Date(
-            value +
+            String(
+                value
+            ).substring(
+                0,
+                10
+            ) +
             "T00:00:00"
         );
 
@@ -1115,7 +1543,9 @@ function formatDate(
         )
     ) {
 
-        return value;
+        return String(
+            value
+        );
 
     }
 
@@ -1123,6 +1553,7 @@ function formatDate(
     return date.toLocaleDateString(
         "en-PH",
         {
+
             year:
                 "numeric",
 
@@ -1131,6 +1562,7 @@ function formatDate(
 
             day:
                 "numeric"
+
         }
     );
 
@@ -1138,14 +1570,16 @@ function formatDate(
 
 
 /* =========================================================
-   DATE + TIME
+   FORMAT DATE + TIME
 ========================================================= */
 
 function formatDateTime(
     value
 ) {
 
-    if (!value) {
+    if (
+        !value
+    ) {
 
         return "—";
 
@@ -1164,7 +1598,9 @@ function formatDateTime(
         )
     ) {
 
-        return value;
+        return String(
+            value
+        );
 
     }
 
@@ -1172,6 +1608,7 @@ function formatDateTime(
     return date.toLocaleString(
         "en-PH",
         {
+
             year:
                 "numeric",
 
@@ -1186,6 +1623,7 @@ function formatDateTime(
 
             minute:
                 "2-digit"
+
         }
     );
 
@@ -1196,45 +1634,71 @@ function formatDateTime(
    LOGOUT
 ========================================================= */
 
-logoutButton.addEventListener(
-    "click",
-    function () {
+if (
+    logoutButton
+) {
 
-        if (
-            !confirm(
-                "Are you sure you want to log out?"
-            )
-        ) {
+    logoutButton.addEventListener(
+        "click",
+        function () {
 
-            return;
+            if (
+                !confirm(
+                    "Are you sure you want to log out?"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            sessionStorage.removeItem(
+                "moderatorLoggedIn"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorId"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorName"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorRole"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorStatus"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorOrganizationId"
+            );
+
+
+            sessionStorage.removeItem(
+                "moderatorOrganization"
+            );
+
+
+            window.location.href =
+                "moderator-login.html";
 
         }
+    );
 
-
-        sessionStorage.removeItem(
-            "moderatorLoggedIn"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorId"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorName"
-        );
-
-
-        window.location.href =
-            "moderator-login.html";
-
-    }
-);
+}
 
 
 /* =========================================================
-   HELPERS
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHtml(
@@ -1242,7 +1706,8 @@ function escapeHtml(
 ) {
 
     return String(
-        value ?? ""
+        value ??
+        ""
     )
     .replace(
         /&/g,
@@ -1268,18 +1733,34 @@ function escapeHtml(
 }
 
 
+/* =========================================================
+   GET INITIALS
+========================================================= */
+
 function getInitials(
     name
 ) {
 
+    if (
+        !name
+    ) {
+
+        return "MO";
+
+    }
+
+
     const parts =
-        name
-            .trim()
-            .split(/\s+/);
+        String(
+            name
+        )
+        .trim()
+        .split(/\s+/);
 
 
     if (
-        parts.length === 1
+        parts.length ===
+        1
     ) {
 
         return parts[0]
@@ -1293,10 +1774,10 @@ function getInitials(
 
 
     return (
-        parts[0][0] +
+        parts[0].charAt(0) +
         parts[
             parts.length - 1
-        ][0]
+        ].charAt(0)
     ).toUpperCase();
 
 }

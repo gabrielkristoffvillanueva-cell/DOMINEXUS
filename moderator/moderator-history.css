@@ -768,3 +768,98 @@ td {
     }
 
 }
+
+.download-button {
+    padding: 10px 14px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #7b1113;
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background: #641013;
+}
+
+.download-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   DOWNLOAD ATTENDANCE
+========================================= */
+
+.download-area {
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 12px;
+}
+
+
+.download-button {
+    padding: 10px 16px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #7b1113;
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background .15s ease,
+        transform .15s ease;
+}
+
+
+.download-button:hover {
+    background: #641013;
+}
+
+
+.download-button:active {
+    transform: translateY(1px);
+}
+
+
+.download-button:disabled {
+    opacity: .6;
+
+    cursor: not-allowed;
+}
+
+
+@media (max-width: 700px) {
+
+    .download-area {
+        justify-content: stretch;
+    }
+
+
+    .download-button {
+        width: 100%;
+    }
+
+}
