@@ -1,13 +1,6 @@
 /* =========================================================
    DOMINEXUS
    MODERATOR - LIVE ATTENDANCE
-   Laravel / MySQL Connected
-   Organization-Isolated
-========================================================= */
-
-
-/* =========================================================
-   API
 ========================================================= */
 
 const API_BASE =
@@ -19,21 +12,15 @@ const API_BASE =
 ========================================================= */
 
 if (
-    sessionStorage.getItem(
-        "moderatorLoggedIn"
-    ) !== "true"
+    sessionStorage.getItem("moderatorLoggedIn") !== "true"
 ) {
-
     window.location.href =
         "moderator-login.html";
-
 }
 
 
 const moderatorId =
-    sessionStorage.getItem(
-        "moderatorId"
-    );
+    sessionStorage.getItem("moderatorId");
 
 
 if (!moderatorId) {
@@ -44,7 +31,6 @@ if (!moderatorId) {
 
     window.location.href =
         "moderator-login.html";
-
 }
 
 
@@ -53,90 +39,49 @@ if (!moderatorId) {
 ========================================================= */
 
 const meetingSelect =
-    document.getElementById(
-        "meetingSelect"
-    );
-
+    document.getElementById("meetingSelect");
 
 const meetingStatus =
-    document.getElementById(
-        "meetingStatus"
-    );
-
+    document.getElementById("meetingStatus");
 
 const attendanceList =
-    document.getElementById(
-        "attendanceList"
-    );
-
+    document.getElementById("attendanceList");
 
 const presentCount =
-    document.getElementById(
-        "presentCount"
-    );
-
+    document.getElementById("presentCount");
 
 const absentCount =
-    document.getElementById(
-        "absentCount"
-    );
-
+    document.getElementById("absentCount");
 
 const totalCount =
-    document.getElementById(
-        "totalCount"
-    );
-
+    document.getElementById("totalCount");
 
 const attendanceRate =
-    document.getElementById(
-        "attendanceRate"
-    );
+    document.getElementById("attendanceRate");
 
+const liveIndicator =
+    document.getElementById("liveIndicator");
 
 const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
-
+    document.getElementById("logoutButton");
 
 const moderatorNameElement =
-    document.getElementById(
-        "moderatorName"
-    );
-
+    document.getElementById("moderatorName");
 
 const moderatorAvatar =
-    document.getElementById(
-        "moderatorAvatar"
-    );
+    document.getElementById("moderatorAvatar");
 
 
 /* =========================================================
-   DATA
-========================================================= */
-
-let meetings = [];
-
-let selectedMeeting = null;
-
-let totalStudents = 0;
-
-
-/* =========================================================
-   MODERATOR INFORMATION
+   MODERATOR INFO
 ========================================================= */
 
 const moderatorName =
-    sessionStorage.getItem(
-        "moderatorName"
-    ) ||
-    "Moderator";
+    sessionStorage.getItem("moderatorName") ||
+    "System Moderator";
 
 
-if (
-    moderatorNameElement
-) {
+if (moderatorNameElement) {
 
     moderatorNameElement.textContent =
         moderatorName;
@@ -144,9 +89,7 @@ if (
 }
 
 
-if (
-    moderatorAvatar
-) {
+if (moderatorAvatar) {
 
     moderatorAvatar.textContent =
         getInitials(
@@ -157,106 +100,25 @@ if (
 
 
 /* =========================================================
-   INITIALIZE
+   DATA
 ========================================================= */
 
-initialize();
+let meetings = [];
 
+let students = [];
 
-async function initialize() {
-
-    await loadModeratorData();
-
-    await loadMeetings();
-
-}
+let attendance = [];
 
 
 /* =========================================================
-   LOAD MODERATOR DATA
-   Used to get total registered
-   students in this organization.
+   START
 ========================================================= */
 
-async function loadModeratorData() {
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_BASE}/moderator-dashboard?moderator_id=${encodeURIComponent(
-                    moderatorId
-                )}`,
-                {
-                    method: "GET",
-
-                    headers: {
-                        "Accept":
-                            "application/json"
-                    }
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "LIVE ATTENDANCE MODERATOR DATA:",
-            data
-        );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.message ||
-                "Unable to load moderator information."
-            );
-
-        }
-
-
-        /*
-         * The moderator dashboard already
-         * returns the total students for
-         * this moderator's organization.
-         */
-
-        totalStudents =
-            Number(
-                data.students?.total
-            ) || 0;
-
-
-        totalCount.textContent =
-            totalStudents;
-
-
-    } catch (error) {
-
-        console.error(
-            "MODERATOR DATA ERROR:",
-            error
-        );
-
-
-        totalStudents =
-            0;
-
-
-        totalCount.textContent =
-            "0";
-
-    }
-
-}
+loadMeetings();
 
 
 /* =========================================================
    LOAD MEETINGS
-   ONLY THIS MODERATOR'S ORGANIZATION
 ========================================================= */
 
 async function loadMeetings() {
@@ -269,20 +131,26 @@ async function loadMeetings() {
 
     `;
 
-
     try {
+
+        /*
+         * IMPORTANT:
+         * /api/meetings returns the meetings directly.
+         * Do NOT send moderator_id here.
+         */
 
         const response =
             await fetch(
-                `${API_BASE}/meetings?moderator_id=${encodeURIComponent(
-                    moderatorId
-                )}`,
+                `${API_BASE}/meetings`,
                 {
-                    method: "GET",
+                    method:
+                        "GET",
 
                     headers: {
+
                         "Accept":
                             "application/json"
+
                     }
                 }
             );
@@ -290,12 +158,6 @@ async function loadMeetings() {
 
         const data =
             await response.json();
-
-
-        console.log(
-            "LIVE ATTENDANCE MEETINGS:",
-            data
-        );
 
 
         if (!response.ok) {
@@ -308,6 +170,10 @@ async function loadMeetings() {
         }
 
 
+        /*
+         * Laravel returns an array.
+         */
+
         meetings =
             Array.isArray(data)
                 ? data
@@ -318,13 +184,13 @@ async function loadMeetings() {
                 );
 
 
-        populateMeetingSelect();
+        renderMeetings();
 
 
     } catch (error) {
 
         console.error(
-            "MEETINGS ERROR:",
+            "LOAD MEETINGS ERROR:",
             error
         );
 
@@ -342,163 +208,112 @@ async function loadMeetings() {
             error.message ||
             "Unable to load meetings.";
 
-
-        meetingStatus.classList.add(
-            "warning"
-        );
-
     }
 
 }
 
 
 /* =========================================================
-   POPULATE MEETING SELECT
+   RENDER MEETINGS
 ========================================================= */
 
-function populateMeetingSelect() {
+function renderMeetings() {
 
-    meetingSelect.innerHTML = "";
+    meetingSelect.innerHTML = `
 
+        <option value="">
+            Select a meeting
+        </option>
 
-    const defaultOption =
-        document.createElement(
-            "option"
-        );
-
-
-    defaultOption.value =
-        "";
-
-
-    defaultOption.textContent =
-        "Select a meeting";
-
-
-    meetingSelect.appendChild(
-        defaultOption
-    );
+    `;
 
 
     if (
         meetings.length === 0
     ) {
 
-        const emptyOption =
-            document.createElement(
-                "option"
-            );
+        meetingSelect.innerHTML = `
 
+            <option value="">
+                No meetings available
+            </option>
 
-        emptyOption.value =
-            "";
-
-
-        emptyOption.textContent =
-            "No meetings available";
-
-
-        emptyOption.disabled =
-            true;
-
-
-        meetingSelect.appendChild(
-            emptyOption
-        );
+        `;
 
 
         meetingStatus.textContent =
-            "No meetings found for your organization.";
+            "No meetings available.";
 
-
-        meetingStatus.classList.add(
-            "warning"
+        setMeetingIndicator(
+            null
         );
-
 
         return;
 
     }
 
 
-    meetingStatus.textContent =
-        "Select a meeting to view attendance.";
-
-
-    meetingStatus.classList.remove(
-        "warning"
-    );
-
-
-    /*
-     * Sort newest/latest meeting first.
-     */
-
-    const sortedMeetings =
-        [...meetings]
+    meetings
+        .slice()
         .sort(
-            function(a, b) {
+            function (
+                a,
+                b
+            ) {
 
-                const dateA =
-                    new Date(
-                        `${a.date || ""}T${
-                            a.start_time ||
-                            "00:00"
-                        }`
+                return (
+                    getMeetingDateValue(b) -
+                    getMeetingDateValue(a)
+                );
+
+            }
+        )
+        .forEach(
+            function (
+                meeting
+            ) {
+
+                const option =
+                    document.createElement(
+                        "option"
                     );
 
 
-                const dateB =
-                    new Date(
-                        `${b.date || ""}T${
-                            b.start_time ||
-                            "00:00"
-                        }`
+                option.value =
+                    meeting.id;
+
+
+                option.textContent =
+                    buildMeetingLabel(
+                        meeting
                     );
 
 
-                return dateB - dateA;
+                meetingSelect.appendChild(
+                    option
+                );
 
             }
         );
 
 
-    sortedMeetings.forEach(
-        function(meeting) {
+    meetingStatus.textContent =
+        "Select a meeting to view attendance.";
 
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-
-            option.value =
-                meeting.id;
-
-
-            option.textContent =
-                buildMeetingLabel(
-                    meeting
-                );
-
-
-            meetingSelect.appendChild(
-                option
-            );
-
-        }
+    setMeetingIndicator(
+        null
     );
 
 }
 
 
 /* =========================================================
-   MEETING CHANGE
+   MEETING SELECTION
 ========================================================= */
 
 meetingSelect.addEventListener(
     "change",
-    async function() {
+    async function () {
 
         const meetingId =
             meetingSelect.value;
@@ -506,62 +321,18 @@ meetingSelect.addEventListener(
 
         if (!meetingId) {
 
-            selectedMeeting =
-                null;
-
-
             meetingStatus.textContent =
                 "Select a meeting to view attendance.";
 
+            setMeetingIndicator(
+                null
+            );
 
             clearAttendance();
-
 
             return;
 
         }
-
-
-        selectedMeeting =
-            meetings.find(
-                function(meeting) {
-
-                    return (
-                        String(
-                            meeting.id
-                        ) ===
-                        String(
-                            meetingId
-                        )
-                    );
-
-                }
-            );
-
-
-        if (!selectedMeeting) {
-
-            meetingStatus.textContent =
-                "Meeting could not be found.";
-
-
-            clearAttendance();
-
-
-            return;
-
-        }
-
-
-        meetingStatus.textContent =
-            buildMeetingLabel(
-                selectedMeeting
-            );
-
-
-        meetingStatus.classList.remove(
-            "warning"
-        );
 
 
         await updateAttendance(
@@ -573,34 +344,70 @@ meetingSelect.addEventListener(
 
 
 /* =========================================================
-   LOAD ATTENDANCE FOR SELECTED MEETING
+   UPDATE ATTENDANCE
 ========================================================= */
 
 async function updateAttendance(
     meetingId
 ) {
 
-    /*
-     * Show loading state.
-     */
+    const meeting =
+        meetings.find(
+            function (
+                item
+            ) {
 
-    attendanceList.innerHTML = `
+                return (
+                    String(item.id) ===
+                    String(meetingId)
+                );
 
-        <div class="empty-state">
+            }
+        );
 
-            Loading attendance...
 
-        </div>
+    if (!meeting) {
 
-    `;
+        meetingStatus.textContent =
+            "Meeting could not be found.";
+
+        setMeetingIndicator(
+            null
+        );
+
+        clearAttendance();
+
+        return;
+
+    }
+
+
+    meetingStatus.textContent =
+        buildMeetingStatusText(
+            meeting
+        );
+
+
+    setMeetingIndicator(
+        meeting.status
+    );
 
 
     try {
 
+        attendanceList.innerHTML = `
+
+            <div class="empty-state">
+
+                Loading attendance...
+
+            </div>
+
+        `;
+
+
         /*
-         * AttendanceController supports:
-         *
-         * GET /api/attendances?meeting_id=ID
+         * Get attendance for selected meeting.
          */
 
         const response =
@@ -609,11 +416,14 @@ async function updateAttendance(
                     meetingId
                 )}`,
                 {
-                    method: "GET",
+                    method:
+                        "GET",
 
                     headers: {
+
                         "Accept":
                             "application/json"
+
                     }
                 }
             );
@@ -621,12 +431,6 @@ async function updateAttendance(
 
         const data =
             await response.json();
-
-
-        console.log(
-            "LIVE ATTENDANCE RECORDS:",
-            data
-        );
 
 
         if (!response.ok) {
@@ -639,25 +443,30 @@ async function updateAttendance(
         }
 
 
-        const records =
+        attendance =
             Array.isArray(data)
                 ? data
                 : (
-                    data.attendances ||
+                    data.attendance ||
                     data.data ||
                     []
                 );
 
 
-        processAttendance(
-            records
+        await loadStudents();
+
+
+        calculateAndRender(
+            attendance,
+            students,
+            meeting
         );
 
 
     } catch (error) {
 
         console.error(
-            "ATTENDANCE LOAD ERROR:",
+            "LIVE ATTENDANCE ERROR:",
             error
         );
 
@@ -669,7 +478,7 @@ async function updateAttendance(
 
             <div class="empty-state">
 
-                Unable to load attendance records.
+                Unable to load attendance.
 
             </div>
 
@@ -681,33 +490,100 @@ async function updateAttendance(
 
 
 /* =========================================================
-   PROCESS ATTENDANCE
+   LOAD STUDENTS
 ========================================================= */
 
-function processAttendance(
-    records
+async function loadStudents() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_BASE}/moderator-students?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`,
+                {
+                    method:
+                        "GET",
+
+                    headers: {
+
+                        "Accept":
+                            "application/json"
+
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Unable to load students."
+            );
+
+        }
+
+
+        students =
+            Array.isArray(
+                data.students
+            )
+                ? data.students
+                : [];
+
+
+    } catch (error) {
+
+        console.error(
+            "LOAD STUDENTS ERROR:",
+            error
+        );
+
+
+        students = [];
+
+    }
+
+}
+
+
+/* =========================================================
+   CALCULATE AND RENDER
+========================================================= */
+
+function calculateAndRender(
+    records,
+    studentList,
+    meeting
 ) {
 
-    /*
-     * Present includes:
-     *
-     * present
-     * late
-     *
-     * because both mean the student
-     * actually attended the meeting.
-     */
+    const normalizedRecords =
+        Array.isArray(records)
+            ? records
+            : [];
 
-    const presentRecords =
-        records.filter(
-            function(record) {
+
+    const total =
+        studentList.length;
+
+
+    const present =
+        normalizedRecords.filter(
+            function (
+                record
+            ) {
 
                 const status =
                     String(
                         record.status ||
                         ""
-                    )
-                    .toLowerCase();
+                    ).toLowerCase();
 
 
                 return (
@@ -719,70 +595,49 @@ function processAttendance(
         );
 
 
-    /*
-     * Students explicitly marked absent.
-     */
-
-    const explicitAbsent =
-        records.filter(
-            function(record) {
+    const absent =
+        normalizedRecords.filter(
+            function (
+                record
+            ) {
 
                 return (
                     String(
                         record.status ||
                         ""
-                    )
-                    .toLowerCase() ===
+                    ).toLowerCase() ===
                     "absent"
                 );
 
             }
-        ).length;
-
-
-    /*
-     * Students that have no attendance
-     * record yet are also considered
-     * not present for the current
-     * meeting.
-     *
-     * This keeps the total based on
-     * registered students.
-     */
-
-    const absent =
-        Math.max(
-            totalStudents -
-            presentRecords.length,
-            explicitAbsent
         );
 
 
-    const total =
-        totalStudents;
+    const presentTotal =
+        present.length;
+
+
+    const absentTotal =
+        absent.length;
 
 
     const rate =
         total > 0
             ? Math.round(
                 (
-                    presentRecords.length /
+                    presentTotal /
                     total
                 ) * 100
             )
             : 0;
 
 
-    /*
-     * Update statistics.
-     */
-
     presentCount.textContent =
-        presentRecords.length;
+        presentTotal;
 
 
     absentCount.textContent =
-        absent;
+        absentTotal;
 
 
     totalCount.textContent =
@@ -790,16 +645,11 @@ function processAttendance(
 
 
     attendanceRate.textContent =
-        rate +
-        "%";
+        rate + "%";
 
-
-    /*
-     * Render students.
-     */
 
     renderPresentStudents(
-        presentRecords
+        present
     );
 
 }
@@ -832,179 +682,294 @@ function renderPresentStudents(
 
         `;
 
+        return;
+
+    }
+
+
+    records
+        .slice()
+        .sort(
+            function (
+                a,
+                b
+            ) {
+
+                return (
+                    getAttendanceTime(a) -
+                    getAttendanceTime(b)
+                );
+
+            }
+        )
+        .forEach(
+            function (
+                record
+            ) {
+
+                const student =
+                    record.student ||
+                    findStudent(
+                        record
+                    );
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "attendance-row";
+
+
+                const name =
+                    student
+                        ? (
+                            student.name ||
+                            "Unknown Student"
+                        )
+                        : "Unknown Student";
+
+
+                const studentId =
+                    student
+                        ? (
+                            student.student_id ||
+                            "—"
+                        )
+                        : (
+                            record.student_id ||
+                            "—"
+                        );
+
+
+                const time =
+                    record.scanned_at ||
+                    null;
+
+
+                const status =
+                    String(
+                        record.status ||
+                        "present"
+                    ).toLowerCase();
+
+
+                row.innerHTML = `
+
+                    <div>
+
+                        <div class="student-name">
+
+                            ${escapeHtml(
+                    name
+                )}
+
+                        </div>
+
+                        <div class="student-id">
+
+                            Student ID:
+                            ${escapeHtml(
+                    studentId
+                )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="time-in">
+
+                            Time In:
+                            ${escapeHtml(
+                    formatDateTime(
+                        time
+                    )
+                )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <span
+                            class="status ${status === "late"
+                        ? "late"
+                        : "present"
+                    }"
+                        >
+
+                            ${escapeHtml(
+                        status.toUpperCase()
+                    )}
+
+                        </span>
+
+                    </div>
+
+                `;
+
+
+                attendanceList.appendChild(
+                    row
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FIND STUDENT
+========================================================= */
+
+function findStudent(
+    record
+) {
+
+    return students.find(
+        function (
+            student
+        ) {
+
+            return (
+
+                String(
+                    student.id ||
+                    ""
+                ) ===
+                String(
+                    record.user_id ||
+                    ""
+                )
+
+                ||
+
+                String(
+                    student.student_id ||
+                    ""
+                ).toLowerCase() ===
+                String(
+                    record.student_id ||
+                    ""
+                ).toLowerCase()
+
+            );
+
+        }
+    ) || null;
+
+}
+
+
+/* =========================================================
+   MEETING INDICATOR
+========================================================= */
+
+function setMeetingIndicator(
+    status
+) {
+
+    if (!liveIndicator) {
 
         return;
 
     }
 
 
-    /*
-     * Sort by scanned_at.
-     */
-
-    const sortedRecords =
-        [...records]
-        .sort(
-            function(a, b) {
-
-                const dateA =
-                    new Date(
-                        a.scanned_at ||
-                        0
-                    );
-
-
-                const dateB =
-                    new Date(
-                        b.scanned_at ||
-                        0
-                    );
-
-
-                return dateA - dateB;
-
-            }
+    const normalized =
+        normalizeStatus(
+            status
         );
 
 
-    sortedRecords.forEach(
-        function(record) {
-
-            const student =
-                record.student ||
-                {};
+    liveIndicator.className =
+        "live-indicator";
 
 
-            const name =
-                student.name ||
-                record.student_name ||
-                "Unknown Student";
+    if (
+        normalized ===
+        "ongoing"
+    ) {
+
+        liveIndicator.classList.add(
+            "ongoing"
+        );
 
 
-            const id =
-                student.student_id ||
-                record.student_id ||
-                "—";
+        liveIndicator.innerHTML = `
+
+            <span class="live-dot"></span>
+            LIVE
+
+        `;
+
+        return;
+
+    }
 
 
-            const status =
-                String(
-                    record.status ||
-                    "present"
-                )
-                .toLowerCase();
+    if (
+        normalized ===
+        "completed"
+    ) {
+
+        liveIndicator.classList.add(
+            "completed"
+        );
 
 
-            const timeIn =
-                record.scanned_at
-                    ? formatDateTime(
-                        record.scanned_at
-                    )
-                    : "—";
+        liveIndicator.innerHTML = `
+
+            <span class="live-dot"></span>
+            COMPLETED
+
+        `;
+
+        return;
+
+    }
 
 
-            const row =
-                document.createElement(
-                    "div"
-                );
+    if (
+        normalized ===
+        "cancelled"
+    ) {
+
+        liveIndicator.classList.add(
+            "cancelled"
+        );
 
 
-            row.className =
-                "attendance-row";
+        liveIndicator.innerHTML = `
+
+            <span class="live-dot"></span>
+            CANCELLED
+
+        `;
+
+        return;
+
+    }
 
 
-            row.innerHTML = `
-
-                <div>
-
-                    <div class="student-name">
-
-                        ${escapeHtml(
-                            name
-                        )}
-
-                    </div>
-
-
-                    <div class="student-id">
-
-                        Student ID:
-                        ${escapeHtml(
-                            id
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="time-in">
-
-                    Time In:
-                    ${escapeHtml(
-                        timeIn
-                    )}
-
-                </div>
-
-
-                <div>
-
-                    <span class="present-badge">
-
-                        ${escapeHtml(
-                            status === "late"
-                                ? "LATE"
-                                : "PRESENT"
-                        )}
-
-                    </span>
-
-                </div>
-
-            `;
-
-
-            attendanceList.appendChild(
-                row
-            );
-
-        }
+    liveIndicator.classList.add(
+        "upcoming"
     );
 
-}
 
+    liveIndicator.innerHTML = `
 
-/* =========================================================
-   CLEAR ATTENDANCE
-========================================================= */
-
-function clearAttendance() {
-
-    presentCount.textContent =
-        "0";
-
-
-    absentCount.textContent =
-        "0";
-
-
-    totalCount.textContent =
-        totalStudents;
-
-
-    attendanceRate.textContent =
-        "0%";
-
-
-    attendanceList.innerHTML = `
-
-        <div class="empty-state">
-
-            Select a meeting to view
-            live attendance.
-
-        </div>
+        <span class="live-dot"></span>
+        UPCOMING
 
     `;
 
@@ -1012,159 +977,105 @@ function clearAttendance() {
 
 
 /* =========================================================
-   AUTO REFRESH
-   Makes "LIVE" actually live.
+   NORMALIZE STATUS
 ========================================================= */
 
-let refreshTimer =
-    null;
+function normalizeStatus(
+    status
+) {
 
+    const value =
+        String(
+            status ||
+            ""
+        ).toLowerCase();
 
-function startLiveRefresh() {
-
-    stopLiveRefresh();
-
-
-    refreshTimer =
-        setInterval(
-            async function() {
-
-                const meetingId =
-                    meetingSelect.value;
-
-
-                if (
-                    !meetingId
-                ) {
-
-                    return;
-
-                }
-
-
-                await updateAttendance(
-                    meetingId
-                );
-
-            },
-            5000
-        );
-
-}
-
-
-function stopLiveRefresh() {
 
     if (
-        refreshTimer
+        value === "ongoing" ||
+        value === "active"
     ) {
 
-        clearInterval(
-            refreshTimer
-        );
-
-
-        refreshTimer =
-            null;
+        return "ongoing";
 
     }
+
+
+    if (
+        value === "completed" ||
+        value === "ended"
+    ) {
+
+        return "completed";
+
+    }
+
+
+    if (
+        value === "cancelled"
+    ) {
+
+        return "cancelled";
+
+    }
+
+
+    return "upcoming";
 
 }
 
 
-/*
- * Start live refresh whenever
- * a meeting is selected.
- */
-
-meetingSelect.addEventListener(
-    "change",
-    function() {
-
-        if (
-            meetingSelect.value
-        ) {
-
-            startLiveRefresh();
-
-        } else {
-
-            stopLiveRefresh();
-
-        }
-
-    }
-);
-
-
 /* =========================================================
-   LOGOUT
+   MEETING STATUS TEXT
 ========================================================= */
 
-logoutButton.addEventListener(
-    "click",
-    function() {
+function buildMeetingStatusText(
+    meeting
+) {
 
-        const confirmed =
-            confirm(
-                "Are you sure you want to log out?"
+    let text =
+        meeting.title ||
+        "Untitled Meeting";
+
+
+    if (
+        meeting.date
+    ) {
+
+        text +=
+            " • " +
+            formatDate(
+                meeting.date
             );
 
-
-        if (!confirmed) {
-
-            return;
-
-        }
+    }
 
 
-        stopLiveRefresh();
+    const time =
+        meeting.start_time ||
+        meeting.time;
 
 
-        sessionStorage.removeItem(
-            "moderatorLoggedIn"
-        );
+    if (
+        time
+    ) {
 
-
-        sessionStorage.removeItem(
-            "moderatorId"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorName"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorRole"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorStatus"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorOrganizationId"
-        );
-
-
-        sessionStorage.removeItem(
-            "moderatorOrganization"
-        );
-
-
-        window.location.href =
-            "moderator-login.html";
+        text +=
+            " • " +
+            formatTime(
+                time
+            );
 
     }
-);
+
+
+    return text;
+
+}
 
 
 /* =========================================================
-   HELPERS
+   MEETING LABEL
 ========================================================= */
 
 function buildMeetingLabel(
@@ -1189,14 +1100,19 @@ function buildMeetingLabel(
     }
 
 
+    const time =
+        meeting.start_time ||
+        meeting.time;
+
+
     if (
-        meeting.start_time
+        time
     ) {
 
         label +=
             " • " +
             formatTime(
-                meeting.start_time
+                time
             );
 
     }
@@ -1207,36 +1123,133 @@ function buildMeetingLabel(
 }
 
 
-function formatDate(
-    date
+/* =========================================================
+   MEETING DATE VALUE
+========================================================= */
+
+function getMeetingDateValue(
+    meeting
 ) {
 
-    if (!date) {
+    if (!meeting) {
 
-        return "";
+        return 0;
 
     }
 
 
-    const parsed =
+    const date =
+        String(
+            meeting.date ||
+            ""
+        ).substring(
+            0,
+            10
+        );
+
+
+    const time =
+        meeting.start_time ||
+        meeting.time ||
+        "00:00:00";
+
+
+    const value =
         new Date(
             date +
+            "T" +
+            time
+        ).getTime();
+
+
+    return Number.isNaN(
+        value
+    )
+        ? 0
+        : value;
+
+}
+
+
+/* =========================================================
+   ATTENDANCE TIME
+========================================================= */
+
+function getAttendanceTime(
+    record
+) {
+
+    const value =
+        record.scanned_at;
+
+
+    if (!value) {
+
+        return 0;
+
+    }
+
+
+    const time =
+        new Date(
+            value
+        ).getTime();
+
+
+    return Number.isNaN(
+        time
+    )
+        ? 0
+        : time;
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const normalized =
+        String(
+            value
+        ).substring(
+            0,
+            10
+        );
+
+
+    const date =
+        new Date(
+            normalized +
             "T00:00:00"
         );
 
 
     if (
         Number.isNaN(
-            parsed.getTime()
+            date.getTime()
         )
     ) {
 
-        return date;
+        return String(
+            value
+        );
 
     }
 
 
-    return parsed.toLocaleDateString(
+    return date.toLocaleDateString(
         "en-PH",
         {
             year:
@@ -1253,79 +1266,95 @@ function formatDate(
 }
 
 
+/* =========================================================
+   FORMAT TIME
+========================================================= */
+
 function formatTime(
-    time
+    value
 ) {
 
-    if (!time) {
+    if (!value) {
 
         return "";
 
     }
 
 
-    const parts =
+    const text =
         String(
-            time
-        ).split(":");
-
-
-    if (
-        parts.length < 2
-    ) {
-
-        return time;
-
-    }
-
-
-    let hour =
-        parseInt(
-            parts[0],
-            10
+            value
         );
 
 
-    const minute =
-        parts[1];
+    const parts =
+        text.split(":");
 
 
     if (
-        Number.isNaN(
-            hour
-        )
+        parts.length >= 2
     ) {
 
-        return time;
+        let hour =
+            parseInt(
+                parts[0],
+                10
+            );
+
+
+        const minute =
+            parts[1];
+
+
+        if (
+            !Number.isNaN(
+                hour
+            )
+        ) {
+
+            const period =
+                hour >= 12
+                    ? "PM"
+                    : "AM";
+
+
+            hour =
+                hour % 12 ||
+                12;
+
+
+            return (
+                hour +
+                ":" +
+                minute +
+                " " +
+                period
+            );
+
+        }
 
     }
 
 
-    const period =
-        hour >= 12
-            ? "PM"
-            : "AM";
-
-
-    hour =
-        hour % 12 ||
-        12;
-
-
-    return (
-        hour +
-        ":" +
-        minute +
-        " " +
-        period
-    );
+    return text;
 
 }
 
 
+/* =========================================================
+   FORMAT DATE TIME
+========================================================= */
+
 function formatDateTime(
     value
 ) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
 
     const date =
         new Date(
@@ -1339,7 +1368,9 @@ function formatDateTime(
         )
     ) {
 
-        return value;
+        return String(
+            value
+        );
 
     }
 
@@ -1347,13 +1378,13 @@ function formatDateTime(
     return date.toLocaleString(
         "en-PH",
         {
+            year:
+                "numeric",
+
             month:
                 "short",
 
             day:
-                "numeric",
-
-            year:
                 "numeric",
 
             hour:
@@ -1367,23 +1398,102 @@ function formatDateTime(
 }
 
 
+/* =========================================================
+   CLEAR ATTENDANCE
+========================================================= */
+
+function clearAttendance() {
+
+    presentCount.textContent =
+        "0";
+
+
+    absentCount.textContent =
+        "0";
+
+
+    totalCount.textContent =
+        "0";
+
+
+    attendanceRate.textContent =
+        "0%";
+
+
+    attendanceList.innerHTML = `
+
+        <div class="empty-state">
+
+            Select a meeting to view
+            live attendance.
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+if (logoutButton) {
+
+    logoutButton.addEventListener(
+        "click",
+        function () {
+
+            if (
+                !confirm(
+                    "Are you sure you want to log out?"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            sessionStorage.clear();
+
+
+            window.location.href =
+                "moderator-login.html";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
 function getInitials(
     name
 ) {
 
-    if (!name) {
-
-        return "MO";
-
-    }
-
-
     const parts =
         String(
-            name
+            name ||
+            ""
         )
-        .trim()
-        .split(/\s+/);
+            .trim()
+            .split(/\s+/)
+            .filter(
+                Boolean
+            );
+
+
+    if (
+        parts.length === 0
+    ) {
+
+        return "M";
+
+    }
 
 
     if (
@@ -1401,46 +1511,45 @@ function getInitials(
 
 
     return (
-        parts[0].charAt(0) +
+        parts[0][0] +
         parts[
-            parts.length - 1
-        ].charAt(0)
+        parts.length - 1
+        ][0]
     ).toUpperCase();
 
 }
 
 
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
 function escapeHtml(
     value
 ) {
 
-    const div =
-        document.createElement(
-            "div"
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
         );
-
-
-    div.textContent =
-        String(
-            value ??
-            ""
-        );
-
-
-    return div.innerHTML;
 
 }
-
-
-/* =========================================================
-   PAGE CLEANUP
-========================================================= */
-
-window.addEventListener(
-    "beforeunload",
-    function() {
-
-        stopLiveRefresh();
-
-    }
-);

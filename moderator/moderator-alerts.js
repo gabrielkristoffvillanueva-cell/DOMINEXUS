@@ -1,6 +1,6 @@
 /* =========================================================
    DOMINEXUS
-   MODERATOR - NOTIFICATIONS / ALERTS
+   MODERATOR - NOTIFICATIONS
 ========================================================= */
 
 
@@ -21,17 +21,11 @@ if (
 
 
 /* =========================================================
-   STORAGE
+   API
 ========================================================= */
 
-const STUDENTS_KEY =
-    "dominexus_students";
-
-const MEETINGS_KEY =
-    "dominexus_meetings";
-
-const ATTENDANCE_KEY =
-    "dominexus_attendance";
+const API_BASE =
+    "http://127.0.0.1:8000/api";
 
 
 /* =========================================================
@@ -43,54 +37,45 @@ const typeFilter =
         "typeFilter"
     );
 
-
 const searchInput =
     document.getElementById(
         "searchInput"
     );
-
 
 const alertsContainer =
     document.getElementById(
         "alertsContainer"
     );
 
-
 const emptyState =
     document.getElementById(
         "emptyState"
     );
-
 
 const totalAlerts =
     document.getElementById(
         "totalAlerts"
     );
 
-
 const lowAttendanceAlerts =
     document.getElementById(
         "lowAttendanceAlerts"
     );
-
 
 const duplicateAlerts =
     document.getElementById(
         "duplicateAlerts"
     );
 
-
 const invalidAlerts =
     document.getElementById(
         "invalidAlerts"
     );
 
-
 const displayedAlerts =
     document.getElementById(
         "displayedAlerts"
     );
-
 
 const logoutButton =
     document.getElementById(
@@ -101,6 +86,11 @@ const logoutButton =
 /* =========================================================
    MODERATOR
 ========================================================= */
+
+const moderatorId =
+    sessionStorage.getItem(
+        "moderatorId"
+    );
 
 const moderatorName =
     sessionStorage.getItem(
@@ -124,50 +114,28 @@ document.getElementById(
 
 
 /* =========================================================
-   LOAD DATA
+   DATA
 ========================================================= */
 
-let students =
-    getStudents();
-
-
-let meetings =
-    getMeetings();
-
-
-let attendance =
-    getAttendance();
+let notifications = [];
 
 
 /* =========================================================
-   GENERATE ALERTS
+   INITIALIZE
 ========================================================= */
 
-let alerts =
-    generateAlerts();
-
-
-updateSummary(
-    alerts
-);
-
-
-renderAlerts(
-    alerts
-);
+loadNotifications();
 
 
 /* =========================================================
-   FILTERS
+   FILTER EVENTS
 ========================================================= */
 
 typeFilter.addEventListener(
     "change",
     function () {
 
-        renderAlerts(
-            alerts
-        );
+        renderNotifications();
 
     }
 );
@@ -177,284 +145,352 @@ searchInput.addEventListener(
     "input",
     function () {
 
-        renderAlerts(
-            alerts
-        );
+        renderNotifications();
 
     }
 );
 
 
 /* =========================================================
-   GENERATE ALERTS
+   LOAD NOTIFICATIONS
 ========================================================= */
 
-function generateAlerts() {
+async function loadNotifications() {
 
-    const generated =
-        [];
+    try {
 
+        if (!moderatorId) {
 
-    /*
-     * LOW ATTENDANCE
-     */
-
-    const participation =
-        calculateParticipation();
-
-
-    participation.forEach(
-        function (item) {
-
-            if (
-                item.percentage <
-                50
-            ) {
-
-                generated.push({
-
-                    type:
-                        "low",
-
-                    title:
-                        "Low Attendance",
-
-                    message:
-                        item.name +
-                        " has attended only " +
-                        item.percentage +
-                        "% of recorded meetings.",
-
-                    studentName:
-                        item.name,
-
-                    studentId:
-                        item.studentId,
-
-                    uniqueId:
-                        item.uniqueId,
-
-                    meetingName:
-                        "",
-
-                    meta:
-                        "Attendance monitoring"
-
-                });
-
-            }
-
-        }
-    );
-
-
-    /*
-     * DUPLICATE RECORDS
-     */
-
-    meetings.forEach(
-        function (meeting) {
-
-            const records =
-                getMeetingRecords(
-                    meeting.id
-                );
-
-
-            const seen =
-                {};
-
-
-            const recordList =
-                getRecordList(
-                    records
-                );
-
-
-            recordList.forEach(
-                function (record) {
-
-                    const uniqueId =
-                        String(
-                            record.uniqueId ||
-                            record.studentId ||
-                            ""
-                        ).trim();
-
-
-                    if (!uniqueId) {
-
-                        return;
-
-                    }
-
-
-                    if (
-                        seen[
-                            uniqueId
-                        ]
-                    ) {
-
-                        const student =
-                            findStudent(
-                                uniqueId,
-                                record.studentId
-                            );
-
-
-                        generated.push({
-
-                            type:
-                                "duplicate",
-
-                            title:
-                                "Duplicate Attendance Record",
-
-                            message:
-                                (
-                                    student
-                                        ? (
-                                            student.fullName ||
-                                            student.name
-                                        )
-                                        : uniqueId
-                                ) +
-                                " has more than one attendance record for " +
-                                (
-                                    meeting.title ||
-                                    "this meeting"
-                                ) +
-                                ".",
-
-                            studentName:
-                                student
-                                    ? (
-                                        student.fullName ||
-                                        student.name
-                                    )
-                                    : "Unknown Student",
-
-                            studentId:
-                                student
-                                    ? (
-                                        student.studentId ||
-                                        record.studentId ||
-                                        "—"
-                                    )
-                                    : (
-                                        record.studentId ||
-                                        "—"
-                                    ),
-
-                            uniqueId:
-                                uniqueId,
-
-                            meetingName:
-                                meeting.title ||
-                                "Untitled Meeting",
-
-                            meta:
-                                "Duplicate record detected"
-
-                        });
-
-                    }
-
-
-                    seen[
-                        uniqueId
-                    ] = true;
-
-                }
+            throw new Error(
+                "Moderator ID is missing."
             );
 
         }
+
+
+        showLoading();
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/moderator-notifications?moderator_id=${encodeURIComponent(
+                    moderatorId
+                )}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Failed to load notifications."
+            );
+
+        }
+
+
+        notifications =
+            generateNotifications(
+                data
+            );
+
+
+        updateSummary();
+
+
+        renderNotifications();
+
+
+    } catch (error) {
+
+        console.error(
+            "Notifications error:",
+            error
+        );
+
+
+        notifications = [];
+
+
+        updateSummary();
+
+
+        alertsContainer.innerHTML =
+            "";
+
+
+        emptyState.classList.remove(
+            "hidden"
+        );
+
+
+        emptyState.textContent =
+            error.message ||
+            "Unable to load notifications.";
+
+    }
+
+}
+
+
+/* =========================================================
+   GENERATE NOTIFICATIONS
+========================================================= */
+
+function generateNotifications(
+    data
+) {
+
+    const generated = [];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PENDING OFFICER APPLICATIONS
+    |--------------------------------------------------------------------------
+    */
+
+    const pendingOfficers =
+        Array.isArray(
+            data.pending_officers
+        )
+            ? data.pending_officers
+            : [];
+
+
+    pendingOfficers.forEach(
+        function (officer) {
+
+            generated.push({
+
+                type:
+                    "officer",
+
+                title:
+                    "New Officer Application",
+
+                message:
+                    `${officer.name || "A student"} submitted an officer application that requires your review.`,
+
+                studentName:
+                    officer.name ||
+                    "Unknown Student",
+
+                studentId:
+                    officer.student_id ||
+                    "—",
+
+                meetingName:
+                    "",
+
+                date:
+                    officer.created_at,
+
+                meta:
+                    "Pending officer application"
+
+            });
+
+        }
     );
 
 
     /*
-     * INVALID / UNKNOWN STUDENTS
-     */
+    |--------------------------------------------------------------------------
+    | LOW ATTENDANCE
+    |--------------------------------------------------------------------------
+    */
 
-    meetings.forEach(
+    const lowAttendance =
+        Array.isArray(
+            data.low_attendance
+        )
+            ? data.low_attendance
+            : [];
+
+
+    lowAttendance.forEach(
+        function (item) {
+
+            const student =
+                item.student ||
+                {};
+
+
+            generated.push({
+
+                type:
+                    "low",
+
+                title:
+                    "Low Attendance",
+
+                message:
+                    `${student.name || "Student"} has an attendance rate of ${item.percentage || 0}%.`,
+
+                studentName:
+                    student.name ||
+                    "Unknown Student",
+
+                studentId:
+                    student.student_id ||
+                    "—",
+
+                meetingName:
+                    "",
+
+                date:
+                    null,
+
+                meta:
+                    `${item.attendance || 0} of ${item.total_meetings || 0} meetings attended`
+
+            });
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MEETING UPDATES
+    |--------------------------------------------------------------------------
+    */
+
+    const recentMeetings =
+        Array.isArray(
+            data.recent_meetings
+        )
+            ? data.recent_meetings
+            : [];
+
+
+    recentMeetings.forEach(
         function (meeting) {
 
-            const records =
-                getMeetingRecords(
-                    meeting.id
-                );
+            let title =
+                "Meeting Updated";
 
 
-            const recordList =
-                getRecordList(
-                    records
-                );
+            let message =
+                `${meeting.title || "A meeting"} was recently updated.`;
 
 
-            recordList.forEach(
-                function (record) {
-
-                    const uniqueId =
-                        String(
-                            record.uniqueId ||
-                            ""
-                        ).trim();
+            const status =
+                String(
+                    meeting.status ||
+                    ""
+                ).toLowerCase();
 
 
-                    const studentId =
-                        String(
-                            record.studentId ||
-                            ""
-                        ).trim();
+            if (
+                status ===
+                "cancelled"
+            ) {
+
+                title =
+                    "Meeting Cancelled";
 
 
-                    const student =
-                        findStudent(
-                            uniqueId,
-                            studentId
-                        );
+                message =
+                    `${meeting.title || "A meeting"} has been cancelled.`;
+
+            }
+
+            else if (
+                status ===
+                "completed"
+            ) {
+
+                title =
+                    "Meeting Completed";
 
 
-                    if (
-                        !student
-                    ) {
+                message =
+                    `${meeting.title || "A meeting"} has been completed.`;
 
-                        generated.push({
+            }
 
-                            type:
-                                "invalid",
+            else if (
+                status ===
+                "ongoing"
+            ) {
 
-                            title:
-                                "Unknown Student Record",
+                title =
+                    "Meeting Started";
 
-                            message:
-                                "An attendance record does not match any registered student.",
 
-                            studentName:
-                                record.fullName ||
-                                record.name ||
-                                "Unknown Student",
+                message =
+                    `${meeting.title || "A meeting"} is currently ongoing.`;
 
-                            studentId:
-                                studentId ||
-                                "—",
+            }
 
-                            uniqueId:
-                                uniqueId ||
-                                "—",
+            else {
 
-                            meetingName:
-                                meeting.title ||
-                                "Untitled Meeting",
+                title =
+                    "Meeting Updated";
 
-                            meta:
-                                "Student ID / Unique ID not found"
 
-                        });
+                message =
+                    `${meeting.title || "A meeting"} was recently updated.`;
 
-                    }
+            }
 
-                }
+
+            generated.push({
+
+                type:
+                    "meeting",
+
+                title,
+
+                message,
+
+                studentName:
+                    "",
+
+                studentId:
+                    "",
+
+                meetingName:
+                    meeting.title ||
+                    "Untitled Meeting",
+
+                date:
+                    meeting.updated_at ||
+                    meeting.date,
+
+                meta:
+                    formatMeetingStatus(
+                        meeting.status
+                    )
+
+            });
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SORT NEWEST FIRST
+    |--------------------------------------------------------------------------
+    */
+
+    generated.sort(
+        function (a, b) {
+
+            return (
+                getDateValue(
+                    b.date
+                ) -
+                getDateValue(
+                    a.date
+                )
             );
 
         }
@@ -467,154 +503,86 @@ function generateAlerts() {
 
 
 /* =========================================================
-   PARTICIPATION
+   SUMMARY
 ========================================================= */
 
-function calculateParticipation() {
+function updateSummary() {
 
-    const totalMeetings =
-        meetings.length;
-
-
-    return students.map(
-        function (student) {
-
-            let present =
-                0;
+    const total =
+        notifications.length;
 
 
-            meetings.forEach(
-                function (meeting) {
+    const low =
+        notifications.filter(
+            function (item) {
 
-                    const records =
-                        getMeetingRecords(
-                            meeting.id
-                        );
+                return (
+                    item.type ===
+                    "low"
+                );
 
-
-                    const record =
-                        findAttendanceInMeeting(
-                            student,
-                            records
-                        );
+            }
+        ).length;
 
 
-                    if (
-                        record &&
-                        String(
-                            record.status ||
-                            ""
-                        ).toLowerCase() ===
-                        "present"
-                    ) {
+    const officer =
+        notifications.filter(
+            function (item) {
 
-                        present++;
+                return (
+                    item.type ===
+                    "officer"
+                );
 
-                    }
-
-                }
-            );
+            }
+        ).length;
 
 
-            const percentage =
-                totalMeetings > 0
-                    ? Math.round(
-                        (
-                            present /
-                            totalMeetings
-                        ) * 100
-                    )
-                    : 0;
+    const meeting =
+        notifications.filter(
+            function (item) {
+
+                return (
+                    item.type ===
+                    "meeting"
+                );
+
+            }
+        ).length;
 
 
-            return {
+    totalAlerts.textContent =
+        total;
 
-                name:
-                    student.fullName ||
-                    student.name ||
-                    "Unknown Student",
 
-                studentId:
-                    student.studentId ||
-                    "—",
+    lowAttendanceAlerts.textContent =
+        low;
 
-                uniqueId:
-                    student.uniqueId ||
-                    "—",
 
-                percentage
+    /*
+     * These two elements originally represented
+     * duplicate and invalid records.
+     *
+     * We now use them for:
+     * Officer Applications
+     * Meeting Updates
+     */
 
-            };
+    duplicateAlerts.textContent =
+        officer;
 
-        }
-    );
+
+    invalidAlerts.textContent =
+        meeting;
 
 }
 
 
 /* =========================================================
-   FIND ATTENDANCE
+   RENDER
 ========================================================= */
 
-function findAttendanceInMeeting(
-    student,
-    records
-) {
-
-    const list =
-        getRecordList(
-            records
-        );
-
-
-    return list.find(
-        function (record) {
-
-            return (
-
-                (
-                    student.uniqueId &&
-                    record.uniqueId &&
-                    String(
-                        student.uniqueId
-                    ).toLowerCase() ===
-                    String(
-                        record.uniqueId
-                    ).toLowerCase()
-                )
-
-                ||
-
-                (
-                    student.studentId &&
-                    record.studentId &&
-                    String(
-                        student.studentId
-                    ).toLowerCase() ===
-                    String(
-                        record.studentId
-                    ).toLowerCase()
-                )
-
-            );
-
-        }
-    ) || null;
-
-}
-
-
-/* =========================================================
-   RENDER ALERTS
-========================================================= */
-
-function renderAlerts(
-    allAlerts
-) {
-
-    let filtered =
-        allAlerts;
-
+function renderNotifications() {
 
     const selectedType =
         typeFilter.value;
@@ -626,16 +594,26 @@ function renderAlerts(
             .toLowerCase();
 
 
+    let filtered =
+        notifications;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TYPE FILTER
+    |--------------------------------------------------------------------------
+    */
+
     if (
         selectedType
     ) {
 
         filtered =
             filtered.filter(
-                function (alert) {
+                function (item) {
 
                     return (
-                        alert.type ===
+                        item.type ===
                         selectedType
                     );
 
@@ -645,29 +623,33 @@ function renderAlerts(
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH
+    |--------------------------------------------------------------------------
+    */
+
     if (
         query
     ) {
 
         filtered =
             filtered.filter(
-                function (alert) {
+                function (item) {
 
                     const text = [
 
-                        alert.title,
+                        item.title,
 
-                        alert.message,
+                        item.message,
 
-                        alert.studentName,
+                        item.studentName,
 
-                        alert.studentId,
+                        item.studentId,
 
-                        alert.uniqueId,
+                        item.meetingName,
 
-                        alert.meetingName,
-
-                        alert.meta
+                        item.meta
 
                     ]
                     .join(" ")
@@ -712,7 +694,7 @@ function renderAlerts(
 
 
     filtered.forEach(
-        function (alert) {
+        function (item) {
 
             const element =
                 document.createElement(
@@ -722,51 +704,71 @@ function renderAlerts(
 
             element.className =
                 "alert " +
-                alert.type;
+                item.type;
 
 
             element.innerHTML = `
 
                 <div class="alert-icon">
-                    ${getAlertIcon(
-                        alert.type
+
+                    ${getNotificationIcon(
+                        item.type
                     )}
+
                 </div>
 
 
                 <div class="alert-content">
 
                     <div class="alert-title">
+
                         ${escapeHtml(
-                            alert.title
+                            item.title
                         )}
+
                     </div>
 
 
                     <div class="alert-message">
+
                         ${escapeHtml(
-                            alert.message
+                            item.message
                         )}
+
                     </div>
 
 
                     <div class="alert-meta">
 
                         <span class="alert-type">
-                            ${getAlertLabel(
-                                alert.type
+
+                            ${getNotificationLabel(
+                                item.type
                             )}
+
                         </span>
 
                         ${escapeHtml(
-                            alert.meta
+                            item.meta ||
+                            ""
                         )}
 
                         ${
-                            alert.meetingName
+                            item.meetingName
                                 ? " • " +
                                   escapeHtml(
-                                      alert.meetingName
+                                      item.meetingName
+                                  )
+                                : ""
+                        }
+
+                        ${
+                            item.date
+                                ? " • " +
+                                  escapeHtml(
+                                      formatDateTime(
+                                          item.date
+                                      )
                                   )
                                 : ""
                         }
@@ -789,235 +791,51 @@ function renderAlerts(
 
 
 /* =========================================================
-   SUMMARY
+   LOADING
 ========================================================= */
 
-function updateSummary(
-    alerts
-) {
+function showLoading() {
 
-    const low =
-        alerts.filter(
-            function (alert) {
+    alertsContainer.innerHTML = `
 
-                return (
-                    alert.type ===
-                    "low"
-                );
+        <div
+            style="
+                text-align:center;
+                padding:30px;
+                color:#888;
+                font-size:12px;
+            "
+        >
+            Loading notifications...
+        </div>
 
-            }
-        ).length;
-
-
-    const duplicate =
-        alerts.filter(
-            function (alert) {
-
-                return (
-                    alert.type ===
-                    "duplicate"
-                );
-
-            }
-        ).length;
+    `;
 
 
-    const invalid =
-        alerts.filter(
-            function (alert) {
-
-                return (
-                    alert.type ===
-                    "invalid"
-                );
-
-            }
-        ).length;
-
-
-    totalAlerts.textContent =
-        alerts.length;
-
-
-    lowAttendanceAlerts.textContent =
-        low;
-
-
-    duplicateAlerts.textContent =
-        duplicate;
-
-
-    invalidAlerts.textContent =
-        invalid;
+    emptyState.classList.add(
+        "hidden"
+    );
 
 }
 
 
 /* =========================================================
-   GET MEETING RECORDS
+   ICON
 ========================================================= */
 
-function getMeetingRecords(
-    meetingId
-) {
-
-    if (
-        attendance &&
-        attendance[
-            meetingId
-        ] &&
-        typeof attendance[
-            meetingId
-        ] === "object"
-    ) {
-
-        return attendance[
-            meetingId
-        ];
-
-    }
-
-
-    if (
-        Array.isArray(
-            attendance
-        )
-    ) {
-
-        return attendance.filter(
-            function (record) {
-
-                return (
-                    String(
-                        record.meetingId ||
-                        ""
-                    ) ===
-                    String(
-                        meetingId
-                    )
-                );
-
-            }
-        );
-
-    }
-
-
-    return {};
-
-}
-
-
-/* =========================================================
-   RECORD LIST
-========================================================= */
-
-function getRecordList(
-    records
-) {
-
-    if (
-        Array.isArray(
-            records
-        )
-    ) {
-
-        return records;
-
-    }
-
-
-    if (
-        records &&
-        typeof records === "object"
-    ) {
-
-        return Object.keys(
-            records
-        ).map(
-            function (key) {
-
-                return records[key];
-
-            }
-        )
-        .filter(
-            function (record) {
-
-                return !!record;
-
-            }
-        );
-
-    }
-
-
-    return [];
-
-}
-
-
-/* =========================================================
-   FIND STUDENT
-========================================================= */
-
-function findStudent(
-    uniqueId,
-    studentId
-) {
-
-    return students.find(
-        function (student) {
-
-            const studentUniqueId =
-                String(
-                    student.uniqueId ||
-                    ""
-                ).toLowerCase();
-
-
-            const studentStudentId =
-                String(
-                    student.studentId ||
-                    ""
-                ).toLowerCase();
-
-
-            return (
-
-                (
-                    uniqueId &&
-                    studentUniqueId ===
-                    String(
-                        uniqueId
-                    ).toLowerCase()
-                )
-
-                ||
-
-                (
-                    studentId &&
-                    studentStudentId ===
-                    String(
-                        studentId
-                    ).toLowerCase()
-                )
-
-            );
-
-        }
-    ) || null;
-
-}
-
-
-/* =========================================================
-   ICONS
-========================================================= */
-
-function getAlertIcon(
+function getNotificationIcon(
     type
 ) {
+
+    if (
+        type ===
+        "officer"
+    ) {
+
+        return "♙";
+
+    }
+
 
     if (
         type ===
@@ -1031,10 +849,10 @@ function getAlertIcon(
 
     if (
         type ===
-        "duplicate"
+        "meeting"
     ) {
 
-        return "↻";
+        return "◫";
 
     }
 
@@ -1048,9 +866,19 @@ function getAlertIcon(
    LABEL
 ========================================================= */
 
-function getAlertLabel(
+function getNotificationLabel(
     type
 ) {
+
+    if (
+        type ===
+        "officer"
+    ) {
+
+        return "OFFICER APPLICATION";
+
+    }
+
 
     if (
         type ===
@@ -1064,151 +892,224 @@ function getAlertLabel(
 
     if (
         type ===
-        "duplicate"
+        "meeting"
     ) {
 
-        return "DUPLICATE";
+        return "MEETING UPDATE";
 
     }
 
 
-    return "INVALID";
+    return "NOTIFICATION";
 
 }
 
 
 /* =========================================================
-   GET STUDENTS
+   MEETING STATUS
 ========================================================= */
 
-function getStudents() {
+function formatMeetingStatus(
+    status
+) {
 
-    try {
-
-        const raw =
-            localStorage.getItem(
-                STUDENTS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
+    const value =
+        String(
+            status ||
+            ""
+        ).toLowerCase();
 
 
-        const parsed =
-            JSON.parse(
-                raw
-            );
+    if (
+        value ===
+        "completed"
+    ) {
+
+        return "Meeting completed";
+
+    }
 
 
-        return Array.isArray(
-            parsed
+    if (
+        value ===
+        "ongoing"
+    ) {
+
+        return "Meeting ongoing";
+
+    }
+
+
+    if (
+        value ===
+        "cancelled"
+    ) {
+
+        return "Meeting cancelled";
+
+    }
+
+
+    return "Meeting updated";
+
+}
+
+
+/* =========================================================
+   DATE VALUE
+========================================================= */
+
+function getDateValue(
+    value
+) {
+
+    if (!value) {
+
+        return 0;
+
+    }
+
+
+    const timestamp =
+        new Date(
+            value
+        ).getTime();
+
+
+    return Number.isNaN(
+        timestamp
+    )
+        ? 0
+        : timestamp;
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDateTime(
+    value
+) {
+
+    if (!value) {
+
+        return "";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
         )
-            ? parsed
-            : [];
+    ) {
 
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Student data error:",
-            error
-        );
-
-
-        return [];
+        return "";
 
     }
+
+
+    return date.toLocaleString(
+        "en-PH",
+        {
+            year:
+                "numeric",
+
+            month:
+                "short",
+
+            day:
+                "numeric",
+
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit"
+        }
+    );
 
 }
 
 
 /* =========================================================
-   GET MEETINGS
+   INITIALS
 ========================================================= */
 
-function getMeetings() {
+function getInitials(
+    name
+) {
 
-    try {
-
-        const raw =
-            localStorage.getItem(
-                MEETINGS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
+    const parts =
+        name
+            .trim()
+            .split(/\s+/);
 
 
-        const parsed =
-            JSON.parse(
-                raw
-            );
+    if (
+        parts.length ===
+        1
+    ) {
 
-
-        return Array.isArray(
-            parsed
-        )
-            ? parsed
-            : [];
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Meeting data error:",
-            error
-        );
-
-
-        return [];
+        return parts[0]
+            .substring(
+                0,
+                2
+            )
+            .toUpperCase();
 
     }
+
+
+    return (
+        parts[0][0] +
+        parts[
+            parts.length - 1
+        ][0]
+    ).toUpperCase();
 
 }
 
 
 /* =========================================================
-   GET ATTENDANCE
+   ESCAPE HTML
 ========================================================= */
 
-function getAttendance() {
+function escapeHtml(
+    value
+) {
 
-    try {
-
-        const raw =
-            localStorage.getItem(
-                ATTENDANCE_KEY
-            );
-
-
-        if (!raw) {
-
-            return {};
-
-        }
-
-
-        return JSON.parse(
-            raw
-        ) || {};
-
-    } catch (error) {
-
-        console.error(
-            "DOMINEXUS: Attendance data error:",
-            error
-        );
-
-
-        return {};
-
-    }
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
 
@@ -1252,73 +1153,3 @@ logoutButton.addEventListener(
 
     }
 );
-
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-function getInitials(
-    name
-) {
-
-    const parts =
-        name
-            .trim()
-            .split(/\s+/);
-
-
-    if (
-        parts.length ===
-        1
-    ) {
-
-        return parts[0]
-            .substring(
-                0,
-                2
-            )
-            .toUpperCase();
-
-    }
-
-
-    return (
-        parts[0][0] +
-        parts[
-            parts.length - 1
-        ][0]
-    ).toUpperCase();
-
-}

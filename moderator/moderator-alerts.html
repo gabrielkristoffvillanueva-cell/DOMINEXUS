@@ -4,17 +4,11 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Notifications & Alerts | DOMINEXUS</title>
 
-    <link
-        rel="stylesheet"
-        href="moderator-alerts.css"
-    >
+    <link rel="stylesheet" href="moderator-alerts.css">
 </head>
 
 <body>
@@ -42,74 +36,44 @@
                 MODERATOR
             </div>
 
-            <a
-                href="moderator-dashboard.html"
-                class="nav-item"
-            >
+            <a href="moderator-dashboard.html" class="nav-item">
                 <span class="nav-icon">▦</span>
                 Dashboard
             </a>
 
-            <a
-                href="moderator-meetings.html"
-                class="nav-item"
-            >
+            <a href="moderator-meetings.html" class="nav-item">
                 <span class="nav-icon">◫</span>
                 Meeting Management
             </a>
 
-            <a
-                href="moderator-scanner.html"
-                class="nav-item"
-            >
+            <a href="moderator-scanner.html" class="nav-item">
                 <span class="nav-icon">▣</span>
                 QR Scanner
             </a>
 
-            <a
-                href="moderator-live-attendance.html"
-                class="nav-item"
-            >
+            <a href="moderator-live-attendance.html" class="nav-item">
                 <span class="nav-icon">●</span>
                 Live Attendance
             </a>
 
-            <a
-                href="moderator-students.html"
-                class="nav-item"
-            >
+            <a href="moderator-students.html" class="nav-item">
                 <span class="nav-icon">♙</span>
                 Student Records
             </a>
 
-            <a
-                href="moderator-history.html"
-                class="nav-item"
-            >
+            <a href="moderator-history.html" class="nav-item">
                 <span class="nav-icon">▤</span>
                 Attendance History
             </a>
 
-            <a
-                href="moderator-participation.html"
-                class="nav-item"
-            >
-                <span class="nav-icon">◔</span>
-                Participation
-            </a>
 
-            <a
-                href="moderator-alerts.html"
-                class="nav-item active"
-            >
+
+            <a href="moderator-alerts.html" class="nav-item active">
                 <span class="nav-icon">!</span>
                 Notifications
             </a>
 
-            <a
-                href="moderator-reports.html"
-                class="nav-item"
-            >
+            <a href="moderator-reports.html" class="nav-item">
                 <span class="nav-icon">▥</span>
                 Reports
             </a>
@@ -117,11 +81,7 @@
         </nav>
 
 
-        <button
-            type="button"
-            class="logout-button"
-            id="logoutButton"
-        >
+        <button type="button" class="logout-button" id="logoutButton">
             Log Out
         </button>
 
@@ -139,19 +99,13 @@
 
             <div class="profile">
 
-                <div
-                    class="avatar"
-                    id="moderatorAvatar"
-                >
+                <div class="avatar" id="moderatorAvatar">
                     M
                 </div>
 
                 <div>
 
-                    <div
-                        class="profile-name"
-                        id="moderatorName"
-                    >
+                    <div class="profile-name" id="moderatorName">
                         System Moderator
                     </div>
 
@@ -189,7 +143,7 @@
                 <div class="stat-card">
 
                     <span>
-                        TOTAL ALERTS
+                        TOTAL NOTIFICATIONS
                     </span>
 
                     <strong id="totalAlerts">
@@ -202,7 +156,7 @@
                 <div class="stat-card">
 
                     <span>
-                        LOW ATTENDANCE
+                        PENDING OFFICER APPLICATIONS
                     </span>
 
                     <strong id="lowAttendanceAlerts">
@@ -215,7 +169,7 @@
                 <div class="stat-card">
 
                     <span>
-                        DUPLICATE RECORDS
+                        LOW ATTENDANCE
                     </span>
 
                     <strong id="duplicateAlerts">
@@ -228,7 +182,7 @@
                 <div class="stat-card">
 
                     <span>
-                        INVALID RECORDS
+                        MEETING UPDATES
                     </span>
 
                     <strong id="invalidAlerts">
@@ -253,19 +207,19 @@
                     <select id="typeFilter">
 
                         <option value="">
-                            All Alerts
+                            All Notifications
+                        </option>
+
+                        <option value="officer">
+                            Officer Applications
                         </option>
 
                         <option value="low">
                             Low Attendance
                         </option>
 
-                        <option value="duplicate">
-                            Duplicate Record
-                        </option>
-
-                        <option value="invalid">
-                            Invalid Record
+                        <option value="meeting">
+                            Meeting Updates
                         </option>
 
                     </select>
@@ -279,12 +233,8 @@
                         SEARCH
                     </label>
 
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Search student, ID, or meeting..."
-                        autocomplete="off"
-                    >
+                    <input type="text" id="searchInput" placeholder="Search student, ID, or meeting..."
+                        autocomplete="off">
 
                 </div>
 
@@ -324,16 +274,10 @@
                 </div>
 
 
-                <div
-                    id="alertsContainer"
-                    class="alerts-container"
-                ></div>
+                <div id="alertsContainer" class="alerts-container"></div>
 
 
-                <div
-                    id="emptyState"
-                    class="empty-state hidden"
-                >
+                <div id="emptyState" class="empty-state hidden">
                     No alerts detected.
                 </div>
 
