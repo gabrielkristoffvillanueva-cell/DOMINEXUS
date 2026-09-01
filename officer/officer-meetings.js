@@ -793,8 +793,10 @@ if (meetingForm) {
                 !time
             ) {
 
-                alert(
-                    "Please complete the required meeting fields."
+                showDominexusPopup(
+                    "Incomplete Form",
+                    "Please complete the required meeting fields.",
+                    "error"
                 );
 
                 return;

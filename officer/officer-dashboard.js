@@ -1087,67 +1087,56 @@ if (logoutButton) {
         "click",
         function () {
 
-            const confirmLogout =
-                confirm(
-                    "Are you sure you want to log out?"
-                );
+            showDominexusPopup(
+                "Log Out",
+                "Are you sure you want to log out?",
+                "warning",
+
+                function () {
+
+                    sessionStorage.removeItem(
+                        "officerLoggedIn"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerId"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerName"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerRole"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerStatus"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerOrganizationId"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerOrganization"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerClubRole"
+                    );
 
 
-            if (!confirmLogout) {
+                    window.location.href =
+                        "officer-login.html";
 
-                return;
-
-            }
-
-
-            sessionStorage.removeItem(
-                "officerLoggedIn"
+                }
             );
-
-
-            sessionStorage.removeItem(
-                "officerId"
-            );
-
-
-            sessionStorage.removeItem(
-                "officerName"
-            );
-
-
-            sessionStorage.removeItem(
-                "officerRole"
-            );
-
-
-            sessionStorage.removeItem(
-                "officerStatus"
-            );
-
-
-            sessionStorage.removeItem(
-                "officerOrganizationId"
-            );
-
-
-            sessionStorage.removeItem(
-                "officerOrganization"
-            );
-
-
-            sessionStorage.removeItem(
-                "officerClubRole"
-            );
-
-
-            window.location.href =
-                "officer-login.html";
 
         }
     );
 
 }
-
 
 /* =========================================
    MOBILE MENU

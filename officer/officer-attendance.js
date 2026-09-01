@@ -172,6 +172,14 @@ let currentScannedStudent =
 let processingScan =
     false;
 
+/*
+ * Organization members.
+ *
+ * This is loaded from Laravel and is used
+ * for the Total Members statistic.
+ */
+let members = [];
+
 
 /* =========================================================
    DISPLAY OFFICER
@@ -197,6 +205,115 @@ if (topAvatar) {
         getInitials(
             officerName
         );
+
+}
+
+
+/* =========================================================
+   LOAD ORGANIZATION MEMBERS
+========================================================= */
+
+async function loadMembers() {
+
+    try {
+
+        if (!officerId) {
+
+            throw new Error(
+                "Officer ID is missing."
+            );
+
+        }
+
+
+        const response =
+            await fetch(
+                `${API_BASE}/officer-members?officer_id=${encodeURIComponent(
+                    officerId
+                )}`,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (error) {
+
+            console.warn(
+                "Members response was not JSON."
+            );
+
+        }
+
+
+        console.log(
+            "DOMINEXUS officer members:",
+            data
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                `Unable to load members (${response.status})`
+            );
+
+        }
+
+
+        members =
+            Array.isArray(
+                data.members
+            )
+                ? data.members
+                : Array.isArray(
+                    data.data
+                )
+                    ? data.data
+                    : [];
+
+
+        if (totalMembers) {
+
+            totalMembers.textContent =
+                members.length;
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Member loading error:",
+            error
+        );
+
+
+        members = [];
+
+
+        if (totalMembers) {
+
+            totalMembers.textContent =
+                "0";
+
+        }
+
+    }
 
 }
 
@@ -231,8 +348,6 @@ async function loadMeetings() {
 
 
         /*
-         * IMPORTANT:
-         *
          * Include officer_id so Laravel
          * only returns meetings belonging
          * to this officer's organization.
@@ -1196,8 +1311,6 @@ async function loadAttendance(
     try {
 
         /*
-         * IMPORTANT:
-         *
          * officer_id is included so the
          * backend verifies that this meeting
          * belongs to the officer's organization.
@@ -1424,9 +1537,10 @@ function updateStatistics(
             : [];
 
 
-    const total =
-        records.length;
-
+    /*
+     * Attendance records are only used
+     * to calculate Present and Rate.
+     */
 
     const present =
         records.filter(
@@ -1444,6 +1558,16 @@ function updateStatistics(
         ).length;
 
 
+    /*
+     * Total Members comes from the
+     * organization's registered members,
+     * NOT from attendance records.
+     */
+
+    const total =
+        members.length;
+
+
     const rate =
         total > 0
             ? Math.round(
@@ -1455,16 +1579,10 @@ function updateStatistics(
             : 0;
 
 
-    /*
-     * Total members for this meeting
-     * is not returned by the attendance
-     * endpoint yet.
-     */
-
     if (totalMembers) {
 
         totalMembers.textContent =
-            "—";
+            total;
 
     }
 
@@ -1509,10 +1627,15 @@ function clearAttendanceTable() {
     }
 
 
+    /*
+     * Keep Total Members visible even when
+     * no meeting is selected.
+     */
+
     if (totalMembers) {
 
         totalMembers.textContent =
-            "—";
+            members.length;
 
     }
 
@@ -2032,6 +2155,178 @@ function closeSidebar() {
 
 
 /* =========================================================
+   CUSTOM POPUP
+========================================================= */
+
+const dominexusPopupOverlay =
+    document.getElementById(
+        "dominexusPopupOverlay"
+    );
+
+const dominexusPopup =
+    document.getElementById(
+        "dominexusPopup"
+    );
+
+const dominexusPopupIcon =
+    document.getElementById(
+        "dominexusPopupIcon"
+    );
+
+const dominexusPopupTitle =
+    document.getElementById(
+        "dominexusPopupTitle"
+    );
+
+const dominexusPopupMessage =
+    document.getElementById(
+        "dominexusPopupMessage"
+    );
+
+const dominexusPopupCancel =
+    document.getElementById(
+        "dominexusPopupCancel"
+    );
+
+const dominexusPopupConfirm =
+    document.getElementById(
+        "dominexusPopupConfirm"
+    );
+
+
+function showDominexusPopup(
+    title,
+    message,
+    type = "info",
+    onConfirm = null
+) {
+
+    if (!dominexusPopupOverlay) {
+
+        return;
+
+    }
+
+
+    dominexusPopup.className =
+        "dominexus-popup " +
+        type;
+
+
+    if (dominexusPopupIcon) {
+
+        if (type === "success") {
+
+            dominexusPopupIcon.textContent =
+                "✓";
+
+        } else if (type === "error") {
+
+            dominexusPopupIcon.textContent =
+                "!";
+
+        } else if (type === "warning") {
+
+            dominexusPopupIcon.textContent =
+                "?";
+
+        } else {
+
+            dominexusPopupIcon.textContent =
+                "i";
+
+        }
+
+    }
+
+
+    if (dominexusPopupTitle) {
+
+        dominexusPopupTitle.textContent =
+            title;
+
+    }
+
+
+    if (dominexusPopupMessage) {
+
+        dominexusPopupMessage.textContent =
+            message;
+
+    }
+
+
+    dominexusPopupOverlay.classList.add(
+        "show"
+    );
+
+
+    /*
+     * Confirmation popup
+     */
+
+    if (dominexusPopupCancel) {
+
+        dominexusPopupCancel.style.display =
+            onConfirm
+                ? "inline-flex"
+                : "none";
+
+    }
+
+
+    if (dominexusPopupConfirm) {
+
+        dominexusPopupConfirm.textContent =
+            onConfirm
+                ? "Confirm"
+                : "OK";
+
+    }
+
+
+    dominexusPopupConfirm.onclick =
+        function() {
+
+            closeDominexusPopup();
+
+            if (onConfirm) {
+
+                onConfirm();
+
+            }
+
+        };
+
+
+    if (dominexusPopupCancel) {
+
+        dominexusPopupCancel.onclick =
+            function() {
+
+                closeDominexusPopup();
+
+            };
+
+    }
+
+}
+
+
+function closeDominexusPopup() {
+
+    if (dominexusPopupOverlay) {
+
+        dominexusPopupOverlay.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    LOGOUT
 ========================================================= */
 
@@ -2041,43 +2336,40 @@ if (logoutButton) {
         "click",
         function() {
 
-            if (
-                !confirm(
-                    "Are you sure you want to log out?"
-                )
-            ) {
+            showDominexusPopup(
+                "Log Out",
+                "Are you sure you want to log out?",
+                "warning",
 
-                return;
+                function() {
 
-            }
+                    sessionStorage.removeItem(
+                        "officerLoggedIn"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerId"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerName"
+                    );
+
+                    sessionStorage.removeItem(
+                        "officerOrganization"
+                    );
 
 
-            sessionStorage.removeItem(
-                "officerLoggedIn"
+                    window.location.href =
+                        "officer-login.html";
+
+                }
             );
-
-            sessionStorage.removeItem(
-                "officerId"
-            );
-
-            sessionStorage.removeItem(
-                "officerName"
-            );
-
-            sessionStorage.removeItem(
-                "officerOrganization"
-            );
-
-
-            window.location.href =
-                "officer-login.html";
 
         }
     );
 
 }
-
-
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -2242,4 +2534,5 @@ window.addEventListener(
    INITIALIZE
 ========================================================= */
 
+loadMembers();
 loadMeetings();

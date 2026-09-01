@@ -1,0 +1,286 @@
+/* =========================================================
+   DOMINEXUS OFFICER CUSTOM POPUP
+========================================================= */
+
+.dominexus-popup-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    backdrop-filter: blur(4px);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+}
+
+
+.dominexus-popup-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.dominexus-popup {
+    width: 100%;
+    max-width: 390px;
+
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    padding: 28px;
+
+    text-align: center;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.18);
+
+    transform:
+        translateY(15px)
+        scale(0.96);
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+.dominexus-popup-overlay.show
+.dominexus-popup {
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* =========================================================
+   ICON
+========================================================= */
+
+.dominexus-popup-icon {
+    width: 58px;
+    height: 58px;
+
+    margin:
+        0 auto 16px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 24px;
+    font-weight: 700;
+
+    background: #eef5ff;
+    color: #356ae6;
+}
+
+
+.dominexus-popup.success
+.dominexus-popup-icon {
+    background: #eaf7ee;
+    color: #198754;
+}
+
+
+.dominexus-popup.error
+.dominexus-popup-icon {
+    background: #fff0f0;
+    color: #dc3545;
+}
+
+
+.dominexus-popup.warning
+.dominexus-popup-icon {
+    background: #fff8e1;
+    color: #b8860b;
+}
+
+
+.dominexus-popup.info
+.dominexus-popup-icon {
+    background: #eef5ff;
+    color: #356ae6;
+}
+
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+.dominexus-popup-title {
+    margin-bottom: 8px;
+
+    color: #333333;
+
+    font-size: 19px;
+    font-weight: 700;
+}
+
+
+.dominexus-popup-message {
+    margin-bottom: 22px;
+
+    color: #777777;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.dominexus-popup-actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    width: 100%;
+}
+
+
+.dominexus-popup-button {
+    box-sizing: border-box;
+
+    width: 132px;
+    height: 50px;
+
+    padding: 0 18px;
+
+    border: none;
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: inherit;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.15s ease,
+        opacity 0.2s ease;
+}
+
+
+.dominexus-popup-button:active {
+    transform: scale(0.97);
+}
+
+
+/* CANCEL */
+
+.dominexus-popup-button.cancel {
+    background: #eeeeee;
+    color: #555555;
+}
+
+
+.dominexus-popup-button.cancel:hover {
+    background: #e2e2e2;
+    color: #333333;
+}
+
+
+/* CONFIRM */
+
+.dominexus-popup-button.primary {
+    background: #a90000;
+    color: #ffffff;
+}
+
+
+.dominexus-popup-button.primary:hover {
+    background: #8f0000;
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+.dominexus-popup-input {
+    box-sizing: border-box;
+
+    width: 100%;
+    height: 42px;
+
+    padding: 0 12px;
+
+    margin-bottom: 18px;
+
+    border:
+        1px solid #dddddd;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    font-family: inherit;
+    font-size: 13px;
+
+    color: #333333;
+
+    background: #ffffff;
+}
+
+
+.dominexus-popup-input:focus {
+    border-color: #8b0000;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(139, 0, 0, 0.08);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 450px) {
+
+    .dominexus-popup {
+        max-width: 340px;
+        padding: 23px 20px;
+    }
+
+
+    .dominexus-popup-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+
+    .dominexus-popup-button {
+        width: 100%;
+    }
+
+}
