@@ -828,4 +828,42 @@
 
 </body>
 
+<script>
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker
+                    .register(
+                        "./service-worker.js"
+                    )
+                    .then(
+                        function (registration) {
+
+                            console.log(
+                                "DOMINEXUS offline system registered:",
+                                registration.scope
+                            );
+
+                        }
+                    )
+                    .catch(
+                        function (error) {
+
+                            console.error(
+                                "DOMINEXUS offline system failed:",
+                                error
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+    }
+</script>
+
 </html>

@@ -1,0 +1,11 @@
+{
+    "name": "DOMINEXUS",
+    "short_name": "DOMINEXUS",
+    "description": "DOMINEXUS Student Organization Management System",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#8b0000",
+    "orientation": "portrait-primary",
+    "icons": []
+}
